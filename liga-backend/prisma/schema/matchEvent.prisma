@@ -1,0 +1,26 @@
+model MatchEvent {
+  id              String    @id @default(uuid())
+  matchId         String
+  playerId        String
+  teamId          String
+  type            EventType
+  minute          Int?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  relatedPlayerId String?
+  match           Match     @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player          Player    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  team            Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([matchId])
+  @@index([playerId])
+  @@index([teamId])
+}
+
+enum EventType {
+  YELLOW_CARD
+  RED_CARD
+  GOAL
+  ASSIST
+  SUBSTITUTION
+}

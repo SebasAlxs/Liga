@@ -1,0 +1,17 @@
+model Referee {
+  id        String   @id @default(uuid())
+  name      String
+  license   String?
+  phone     String?
+  email     String?
+  photo     String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations as various roles in matches
+  primaryMatches   Match[] @relation("PrimaryReferee")
+  assistant1Matches Match[] @relation("Assistant1")
+  assistant2Matches Match[] @relation("Assistant2")
+  fourthMatches    Match[] @relation("FourthReferee")
+}

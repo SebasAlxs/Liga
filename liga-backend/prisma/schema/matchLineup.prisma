@@ -1,0 +1,24 @@
+model MatchLineup {
+  id        String       @id @default(uuid())
+  matchId   String
+  playerId  String
+  teamId    String
+  status    LineupStatus @default(SUBSTITUTE)
+  checkedIn Boolean      @default(false)
+  number    Int?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  match     Match        @relation(fields: [matchId], references: [id])
+  player    Player       @relation(fields: [playerId], references: [id])
+  team      Team         @relation(fields: [teamId], references: [id])
+
+  @@unique([matchId, playerId])
+  @@index([matchId])
+  @@index([playerId])
+  @@index([teamId])
+}
+
+enum LineupStatus {
+  STARTER
+  SUBSTITUTE
+}

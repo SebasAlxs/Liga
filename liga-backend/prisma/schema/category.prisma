@@ -1,0 +1,12 @@
+model Category {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  maxAge    Int?
+  minAge    Int?
+  matches   Match[]
+  teams     Team[]
+
+  @@index([name])
+}
