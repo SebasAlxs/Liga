@@ -1,0 +1,12 @@
+model Headquarters {
+  id          String       @id @default(uuid())
+  name        String
+  city        String?
+  address     String?
+  active      Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  tournaments Tournament[]
+
+  @@index([name])
+}

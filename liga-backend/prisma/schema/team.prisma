@@ -1,0 +1,28 @@
+model Team {
+  id               String        @id @default(uuid())
+  name             String
+  logo             String        @default("")
+  foundedYear      Int
+  championshipsWon Int?
+  categoryId       String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  goalDifference   Int           @default(0)
+  goalsAgainst     Int           @default(0)
+  goalsFor         Int           @default(0)
+  matchesDrawn     Int           @default(0)
+  matchesLost      Int           @default(0)
+  matchesPlayed    Int           @default(0)
+  matchesWon       Int           @default(0)
+  points           Int           @default(0)
+  tournamentId     String?
+  awayMatches      Match[]       @relation("AwayMatches")
+  homeMatches      Match[]       @relation("HomeMatches")
+  events           MatchEvent[]
+  lineup           MatchLineup[]
+  players          Player[]
+  category         Category?     @relation(fields: [categoryId], references: [id])
+  tournament       Tournament?   @relation(fields: [tournamentId], references: [id])
+
+  @@index([name])
+}

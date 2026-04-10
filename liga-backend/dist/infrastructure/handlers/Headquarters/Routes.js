@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const CreateHeadquarters_1 = require("./src/CRUD/CreateHeadquarters");
+const GetHeadquarters_1 = require("./src/CRUD/GetHeadquarters");
+const UpdateHeadquarters_1 = require("./src/CRUD/UpdateHeadquarters");
+const DeleteHeadquarters_1 = require("./src/CRUD/DeleteHeadquarters");
+const router = (0, express_1.Router)();
+router.post("/", CreateHeadquarters_1.handler);
+router.get("/", GetHeadquarters_1.handler);
+router.put("/:id", UpdateHeadquarters_1.handler);
+router.delete("/:id", DeleteHeadquarters_1.handler);
+exports.default = router;

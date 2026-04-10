@@ -1,0 +1,33 @@
+// Quasar SCSS (& Sass) Variables
+// --------------------------------------------------
+
+// Brand Colors - Obsidian & Emerald Premium
+$primary   : #020617; // Obsidian (Deep Slate)
+$secondary : #475569; // Slate 600
+$accent    : #10b981; // Emerald 500
+
+$dark      : #0f172a;
+$dark-page : #020617;
+
+$positive  : #10b981;
+$negative  : #f43f5e; // Rose 500
+$info      : #0ea5e9; // Sky 500
+$warning   : #f59e0b; // Amber 500
+
+// Design System Tokens
+$bg-main   : #020617;
+$bg-card   : #0f172a;
+$text-main : #f8fafc;
+$text-sub  : #94a3b8;
+$glass-bg  : rgba(15, 23, 42, 0.7);
+$shadow-glow: 0 0 20px rgba(16, 185, 129, 0.2);
+
+// Backward compatibility with previous mobile naming if needed
+$mb-bg: $bg-main;
+$mb-card: $bg-card;
+$mb-accent: #34d399; // Lighter emerald for mobile contrast
+$mb-text: $text-main;
+$mb-subtext: $text-sub;
+$mb-glass: $glass-bg;
+$mb-shadow: $shadow-glow;
+
