@@ -185,8 +185,6 @@
           />
         </div>
       </div>
-        </div>
-      </div>
 
         <div class="col-12" v-if="filteredTeams.length === 0">
           <div class="text-center text-grey-6 q-pa-xl text-h6">

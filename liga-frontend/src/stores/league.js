@@ -17,7 +17,35 @@ export const useLeagueStore = defineStore('league', {
 
     getters: {
         currentTournament: (state) => state.tournaments.find(t => t.id === state.activeTournamentId),
-        currentCategory: (state) => state.categories.find(c => c.id === state.activeCategoryId)
+        currentCategory: (state) => state.categories.find(c => c.id === state.activeCategoryId),
+        
+        // Dashboard Stats
+        dashboardStats: (state) => {
+            const teamStore = useTeamStore()
+            const matchStore = useMatchStore()
+            const playerStore = usePlayerStore()
+            return {
+                teamsCount: teamStore.teams.length,
+                matchesCount: matchStore.matches.length,
+                playersCount: playerStore.players.length,
+                totalGoles: matchStore.matches.reduce((acc, m) => acc + (m.homeScore || 0) + (m.awayScore || 0), 0)
+            }
+        },
+
+        goalsChartData: (state) => {
+            // Mock data or summary for the chart
+            return [10, 25, 45, 30, 60, 55, 80]
+        },
+
+        filteredStandings: (state) => {
+            const matchStore = useMatchStore()
+            return matchStore.standings || []
+        },
+
+        topScorers: (state) => {
+            const matchStore = useMatchStore()
+            return matchStore.topScorers || []
+        }
     },
 
     actions: {
