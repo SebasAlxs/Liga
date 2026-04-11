@@ -1,11 +1,13 @@
 import crypto from "crypto";
 import { EventType } from "@prisma/client";
+import { LineupStatus } from "../../../domain/entities/MatchLineup";
 import { MatchEvent } from "../../../domain/entities/MatchEvent";
 import { Suspension } from "../../../domain/entities/Suspension";
 import { MatchEventRepository } from "../../../domain/repositories/MatchEventRepository";
 import { SuspensionRepository } from "../../../domain/repositories/SuspensionRepository";
 import { TournamentRepository } from "../../../domain/repositories/TournamentRepository";
 import { MatchRepository } from "../../../domain/repositories/MatchRepository";
+import { MatchLineupRepository } from "../../../domain/repositories/MatchLineupRepository";
 import { RecalculateTeamStatsUseCase } from "../Stats/RecalculateTeamStatsUseCase";
 
 // Dto
@@ -25,6 +27,7 @@ export class AddMatchEventUseCase {
         private suspensionRepository: SuspensionRepository,
         private tournamentRepository: TournamentRepository,
         private matchRepository: MatchRepository,
+        private lineupRepository: MatchLineupRepository,
         private teamStatsUseCase: RecalculateTeamStatsUseCase
     ) { }
 
@@ -48,6 +51,22 @@ export class AddMatchEventUseCase {
         );
 
         const createdEvent = await this.eventRepository.create(event);
+
+        // --- Lógica Especial de Sustitución ---
+        if (request.type === "SUBSTITUTION" && request.relatedPlayerId) {
+            // PlayerId sale, RelatedPlayerId entra
+            const outLineup = await this.lineupRepository.findByMatchAndPlayer(request.matchId, request.playerId);
+            const inLineup = await this.lineupRepository.findByMatchAndPlayer(request.matchId, request.relatedPlayerId);
+
+            if (outLineup) {
+                outLineup.status = LineupStatus.SUBSTITUTE;
+                await this.lineupRepository.update(outLineup);
+            }
+            if (inLineup) {
+                inLineup.status = LineupStatus.STARTER;
+                await this.lineupRepository.update(inLineup);
+            }
+        }
 
         // Lógica Automática de Sanciones
         if (request.type === "RED_CARD") {

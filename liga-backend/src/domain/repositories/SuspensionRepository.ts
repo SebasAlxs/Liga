@@ -6,5 +6,7 @@ export interface SuspensionRepository {
     findByPlayerInTournament(playerId: string, tournamentId: string): Promise<Suspension[]>;
     updateStatus(id: string, status: SuspensionStatus): Promise<Suspension>;
     delete(id: string): Promise<void>;
+    findAll(): Promise<Suspension[]>;
     deleteByMatch(matchId: string, playerId: string): Promise<void>;
 }
+

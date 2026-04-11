@@ -33,10 +33,8 @@ export class PrismaMatchLineupRepository implements MatchLineupRepository {
     }
 
     async findByMatchAndPlayer(matchId: string, playerId: string): Promise<MatchLineup | null> {
-        const item = await this.prisma.matchLineup.findUnique({
-            where: {
-                matchId_playerId: { matchId, playerId }
-            }
+        const item = await this.prisma.matchLineup.findFirst({
+            where: { matchId, playerId }
         });
         return item ? this.mapToEntity(item) : null;
     }

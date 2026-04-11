@@ -5,6 +5,7 @@ import { PrismaSuspensionRepository } from "../../../../db/prisma/repositories/P
 import { PrismaTournamentRepository } from "../../../../db/prisma/repositories/PrismaTournamentRepository";
 import { PrismaMatchRepository } from "../../../../db/prisma/repositories/PrismaMatchRepository";
 import { PrismaTeamRepository } from "../../../../db/prisma/repositories/PrismaTeamRepository";
+import { PrismaMatchLineupRepository } from "../../../../db/prisma/repositories/PrismaMatchLineupRepository";
 import { RecalculateTeamStatsUseCase } from "../../../../../application/use-cases/Stats/RecalculateTeamStatsUseCase";
 import { successResponse, errorResponse } from "../../../../libs/api-gateway";
 
@@ -15,8 +16,16 @@ export const handler = async (req: Request, res: Response) => {
         const tournamentRepo = new PrismaTournamentRepository();
         const matchRepo = new PrismaMatchRepository();
         const teamRepo = new PrismaTeamRepository();
+        const lineupRepo = new PrismaMatchLineupRepository();
         const statsUseCase = new RecalculateTeamStatsUseCase(teamRepo, matchRepo);
-        const useCase = new AddMatchEventUseCase(eventRepo, suspensionRepo, tournamentRepo, matchRepo, statsUseCase);
+        const useCase = new AddMatchEventUseCase(
+            eventRepo,
+            suspensionRepo,
+            tournamentRepo,
+            matchRepo,
+            lineupRepo,
+            statsUseCase
+        );
 
         // Validate request body basic fields
         if (!req.body.matchId || !req.body.playerId || !req.body.teamId || !req.body.type || !req.body.tournamentId) {

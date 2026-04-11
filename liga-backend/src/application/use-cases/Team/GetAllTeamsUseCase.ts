@@ -8,7 +8,7 @@ export class GetAllTeamsUseCase {
         const teams = await this.teamRepository.findAll();
         return teams.map(
             (t) => ({
-                _id: t.id,
+                id: t.id,
                 name: t.name,
                 logo: t.logo,
                 foundedYear: t.foundedYear,

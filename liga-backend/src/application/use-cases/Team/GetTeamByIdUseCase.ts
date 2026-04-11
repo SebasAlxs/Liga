@@ -8,7 +8,7 @@ export class GetTeamByIdUseCase {
         const team = await this.teamRepository.findById(id);
         if (!team) return null;
         return {
-            _id: team.id,
+            id: team.id,
             name: team.name,
             logo: team.logo,
             foundedYear: team.foundedYear,

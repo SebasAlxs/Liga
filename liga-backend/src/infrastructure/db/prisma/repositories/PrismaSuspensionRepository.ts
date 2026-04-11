@@ -42,6 +42,14 @@ export class PrismaSuspensionRepository implements SuspensionRepository {
     async delete(id: string): Promise<void> {
         await this.prisma.suspension.delete({ where: { id } });
     }
+    
+    async findAll(): Promise<Suspension[]> {
+        const suspensions = await this.prisma.suspension.findMany({
+            orderBy: { createdAt: 'desc' },
+        });
+
+        return suspensions.map(s => new Suspension(s.id, s.playerId, s.tournamentId, s.reason, s.matchesSuspended, s.status, s.matchId ?? undefined, s.createdAt, s.updatedAt));
+    }
 
     async deleteByMatch(matchId: string, playerId: string): Promise<void> {
         await this.prisma.suspension.deleteMany({

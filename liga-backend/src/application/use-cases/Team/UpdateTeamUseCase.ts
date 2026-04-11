@@ -20,7 +20,7 @@ export class UpdateTeamUseCase {
         const updated = await this.teamRepository.update(existingTeam);
 
         return {
-            _id: updated.id,
+            id: updated.id,
             name: updated.name,
             logo: updated.logo,
             foundedYear: updated.foundedYear,

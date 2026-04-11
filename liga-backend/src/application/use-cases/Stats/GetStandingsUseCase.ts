@@ -8,7 +8,7 @@ export class GetStandingsUseCase {
         const teams = await this.teamRepository.getStandings(tournamentId);
 
         return teams.map((team) => ({
-            _id: team.id,
+            id: team.id,
             name: team.name,
             logo: team.logo,
             foundedYear: team.foundedYear,

@@ -17,7 +17,7 @@ export interface UpdateTeamRequest {
 }
 
 export interface TeamResponse {
-    _id: string;
+    id: string;
     name: string;
     logo: string;
     foundedYear: number;

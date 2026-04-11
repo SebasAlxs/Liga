@@ -20,7 +20,7 @@ export class CreateTeamUseCase {
         const created = await this.teamRepository.create(team);
 
         return {
-            _id: created.id,
+            id: created.id,
             name: created.name,
             logo: created.logo,
             foundedYear: created.foundedYear,
