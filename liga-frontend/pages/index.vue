@@ -71,12 +71,14 @@
                     </div>
                   </div>
                   
-                  <div class="mt-4 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] inline-flex items-center gap-2"
-                       :class="featuredMatch.status === 'IN_PROGRESS' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-white/5 text-obsidian-400 border border-white/10'">
-                    <span v-if="featuredMatch.status === 'IN_PROGRESS'" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    {{ statusText(featuredMatch.status) }}
+                  <div v-if="featuredMatch.status === 'IN_PROGRESS'" class="mt-6">
+                    <NuxtLink :to="`/matches/${featuredMatch.id}`" 
+                      class="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-emerald-500 text-obsidian-950 font-black uppercase tracking-widest text-[10px] sm:text-xs transition-all hover:scale-105 active:scale-95 shadow-xl shadow-emerald-500/30 group/btn">
+                      <Icon name="lucide:play-circle" class="w-4 h-4 group-hover/btn:animate-pulse" />
+                      Seguir en Vivo
+                    </NuxtLink>
                   </div>
-                  <div class="text-xs text-obsidian-500 mt-2 font-bold">{{ formatDateShort(featuredMatch.matchDate) }}</div>
+                  <div v-else class="text-xs text-obsidian-500 mt-2 font-bold">{{ formatDateShort(featuredMatch.matchDate) }}</div>
                 </div>
 
                 <!-- Away Team -->

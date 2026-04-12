@@ -14,6 +14,11 @@ type HydrationStrategies = {
 type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {}, {}, { hydrated: () => void }> & T
 
 interface _GlobalComponents {
+  EventIndicators: typeof import("../../components/EventIndicators.vue")['default']
+  MatchScoreboard: typeof import("../../components/MatchScoreboard.vue")['default']
+  MatchTimeline: typeof import("../../components/MatchTimeline.vue")['default']
+  PlayerToken: typeof import("../../components/PlayerToken.vue")['default']
+  SoccerField: typeof import("../../components/SoccerField.vue")['default']
   LayoutMobileNav: typeof import("../../components/layout/MobileNav.vue")['default']
   NuxtWelcome: typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue")['default']
   NuxtLayout: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout")['default']
@@ -39,6 +44,11 @@ interface _GlobalComponents {
   Html: typeof import("../../node_modules/nuxt/dist/head/runtime/components")['Html']
   Body: typeof import("../../node_modules/nuxt/dist/head/runtime/components")['Body']
   NuxtIsland: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-island")['default']
+  LazyEventIndicators: LazyComponent<typeof import("../../components/EventIndicators.vue")['default']>
+  LazyMatchScoreboard: LazyComponent<typeof import("../../components/MatchScoreboard.vue")['default']>
+  LazyMatchTimeline: LazyComponent<typeof import("../../components/MatchTimeline.vue")['default']>
+  LazyPlayerToken: LazyComponent<typeof import("../../components/PlayerToken.vue")['default']>
+  LazySoccerField: LazyComponent<typeof import("../../components/SoccerField.vue")['default']>
   LazyLayoutMobileNav: LazyComponent<typeof import("../../components/layout/MobileNav.vue")['default']>
   LazyNuxtWelcome: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
   LazyNuxtLayout: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout")['default']>

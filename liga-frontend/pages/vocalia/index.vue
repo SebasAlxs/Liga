@@ -297,13 +297,11 @@
         <!-- Field -->
         <div class="lg:col-span-3">
           <SoccerField
-            :homeStarters="v.homeStarters.value"
-            :awayStarters="v.awayStarters.value"
-            :homeTeam="homeTeam"
-            :awayTeam="awayTeam"
+            :home-starters="v.homeStarters.value"
+            :away-starters="v.awayStarters.value"
             :interactive="auth.isLoggedIn.value"
-            :statsMap="playerStatsMap"
-            @makeSubstitute="(lid) => v.setLineupStatus(lid, 'SUBSTITUTE')"
+            :stats-map="playerStatsMap"
+            @make-substitute="(lid) => v.setLineupStatus(lid.id, 'SUBSTITUTE')"
           />
         </div>
 
@@ -375,26 +373,11 @@
       </div>
 
       <!-- Scoreboard -->
-      <div class="glass rounded-[2rem] border border-white/8 mb-6 overflow-hidden shadow-2xl relative">
-        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-500 to-emerald-500/0"></div>
-        <div class="p-4 sm:p-5 flex items-center justify-between gap-2 sm:gap-4 relative">
-          <TeamScoreBlock :team="homeTeam" :logo="homeTeam?.logo" :isMobile="isMobile" align="right" />
-          
-          <div class="flex-shrink-0 text-center px-2">
-            <div class="flex items-center gap-2 sm:gap-3">
-              <span class="text-3xl sm:text-5xl font-black text-white font-mono tabular-nums tracking-tighter">{{ v.activeMatch.value.homeScore ?? 0 }}</span>
-              <span class="text-xl sm:text-3xl text-obsidian-600 font-black">:</span>
-              <span class="text-3xl sm:text-5xl font-black text-white font-mono tabular-nums tracking-tighter">{{ v.activeMatch.value.awayScore ?? 0 }}</span>
-            </div>
-            <div class="flex items-center justify-center gap-2 mt-2 bg-obsidian-950/50 rounded-full px-3 py-1 border border-emerald-500/20">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span class="text-xs sm:text-sm font-black text-emerald-400 tabular-nums font-mono">{{ v.matchMinuteFormatted.value }}</span>
-            </div>
-          </div>
-
-          <TeamScoreBlock :team="awayTeam" :logo="awayTeam?.logo" :isMobile="isMobile" align="left" />
-        </div>
-      </div>
+      <MatchScoreboard 
+        class="mb-6"
+        :match="v.activeMatch.value" 
+        :minute-formatted="v.matchMinuteFormatted.value" 
+      />
 
       <!-- Match Controller Actions -->
       <div v-if="auth.isLoggedIn.value && v.activeMatch.value?.status !== 'FINISHED'" class="flex flex-wrap items-center justify-center gap-3 mb-6">
@@ -421,15 +404,13 @@
         <div class="xl:col-span-2 space-y-6">
           <div :class="{ 'perspective-field px-4 pb-8': isMobile }">
             <SoccerField
-              :homeStarters="v.homeActiveLineup.value"
-              :awayStarters="v.awayActiveLineup.value"
-              :homeTeam="homeTeam"
-              :awayTeam="awayTeam"
-              :activePlayerId="activePlayer?.id"
-               :isMobile="isMobile"
+              :home-starters="v.homeActiveLineup.value"
+              :away-starters="v.awayActiveLineup.value"
+              :active-player-id="activePlayer?.id"
+              :is-mobile="isMobile"
               :clickable="auth.isLoggedIn.value"
-              :statsMap="playerStatsMap"
-              @playerClick="onPlayerClick"
+              :stats-map="playerStatsMap"
+              @player-click="onPlayerClick"
             />
           </div>
 
@@ -442,12 +423,12 @@
                 Suplentes — {{ homeTeam?.name }}
               </p>
               <div :class="isMobile ? 'flex overflow-x-auto gap-3 no-scrollbar pb-2 mx-[-4px] px-1' : 'flex flex-wrap gap-2'">
-                <MiniPlayerToken
+                <PlayerToken
                   v-for="s in v.homeSubstitutes.value" :key="s.id"
-                  :item="s"
-                  :isMobile="isMobile"
-                  :isActive="activePlayer?.lineupId === s.id"
-                  :statsMap="playerStatsMap"
+                  :player="s.player"
+                  :size="'sm'"
+                  :is-active="activePlayer?.lineupId === s.id"
+                  :stats="playerStatsMap[s.playerId]"
                   @click="onPlayerClick(s)"
                 />
               </div>
@@ -459,12 +440,12 @@
                 Suplentes — {{ awayTeam?.name }}
               </p>
               <div :class="isMobile ? 'flex overflow-x-auto gap-3 no-scrollbar pb-2 mx-[-4px] px-1' : 'flex flex-wrap gap-2'">
-                <MiniPlayerToken
+                <PlayerToken
                   v-for="s in v.awaySubstitutes.value" :key="s.id"
-                  :item="s"
-                  :isMobile="isMobile"
-                  :isActive="activePlayer?.lineupId === s.id"
-                  :statsMap="playerStatsMap"
+                  :player="s.player"
+                  :size="'sm'"
+                  :is-active="activePlayer?.lineupId === s.id"
+                  :stats="playerStatsMap[s.playerId]"
                   @click="onPlayerClick(s)"
                 />
               </div>
@@ -1045,345 +1026,6 @@ async function submitEvent() {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// INLINE CHILD COMPONENTS
-// ─────────────────────────────────────────────────────────────
-
-// EventIndicators (New)
-const EventIndicators = defineComponent({
-  name: 'EventIndicators',
-  props: { stats: Object },
-  setup(props) {
-    return () => {
-      if (!props.stats) return null
-      const { GOAL, YELLOW_CARD, RED_CARD } = props.stats
-      const indicators = []
-      
-      if (GOAL > 0) {
-        const balls = Math.min(GOAL, 3)
-        for (let i = 0; i < balls; i++) {
-          indicators.push(h('span', { class: 'text-[10px]' }, '⚽'))
-        }
-        if (GOAL > 3) {
-          indicators.push(h('span', { class: 'text-[10px] font-black text-emerald-400 ml-0.5' }, `+${GOAL - 3}`))
-        }
-      }
-      
-      for (let i = 0; i < YELLOW_CARD; i++) {
-        indicators.push(h('span', { class: 'text-[10px]' }, '🟨'))
-      }
-      for (let i = 0; i < RED_CARD; i++) {
-        indicators.push(h('span', { class: 'text-[10px]' }, '🟥'))
-      }
-      
-      if (indicators.length === 0) return null
-      return h('div', { class: 'flex items-center gap-1 mt-0.5' }, indicators)
-    }
-  }
-})
-
-// TeamCheckinPanel
-const TeamCheckinPanel = defineComponent({
-  name: 'TeamCheckinPanel',
-  props: { team: Object, teamId: String, teamPlayers: Array, lineup: Array, suspendedIds: Array, loading: Boolean, statsMap: Object },
-  emits: ['add', 'remove', 'toggleCheckin'],
-  setup(props, { emit }) {
-    const addingId = ref(null)
-    const inLineupIds = computed(() => (props.lineup || []).map(l => l.playerId))
-    function lineupFor(pid) { return (props.lineup || []).find(l => l.playerId === pid) }
-    function isSuspended(pid) { return (props.suspendedIds || []).includes(pid) }
-
-    async function add(pid) {
-      addingId.value = pid
-      try { await emit('add', pid) } finally { addingId.value = null }
-    }
-
-    return () => h('div', { class: 'glass rounded-3xl border border-white/5 overflow-hidden' }, [
-      // Header
-      h('div', { class: 'px-5 py-4 border-b border-white/5 flex items-center gap-3' }, [
-        props.team?.logo ? h('img', { src: props.team.logo, class: 'w-8 h-8 rounded-lg object-cover border border-white/10' }) : null,
-        h('div', {}, [
-          h('p', { class: 'font-bold text-white' }, props.team?.name ?? '—'),
-          h('p', { class: 'text-xs text-obsidian-500' }, `${(props.lineup || []).filter(l => l.checkedIn).length} confirmados`),
-        ]),
-      ]),
-      // Player list
-      h('div', { class: 'p-4 space-y-2 max-h-[480px] overflow-y-auto' }, [
-        ...(props.teamPlayers || []).map(p => {
-          const lu = lineupFor(p.id)
-          const suspended = isSuspended(p.id)
-          const stats = props.statsMap?.[p.id]
-          
-          return h('div', {
-            key: p.id,
-            class: `flex items-center gap-3 p-3 rounded-xl border transition-all ${lu?.checkedIn ? 'bg-emerald-500/5 border-emerald-500/20' : suspended ? 'bg-rose-500/5 border-rose-500/15 opacity-60' : 'border-white/5 hover:border-white/10'}`,
-          }, [
-            // Photo
-            h('div', { class: 'w-10 h-10 rounded-xl overflow-hidden bg-obsidian-800 border border-white/10 flex-shrink-0 flex items-center justify-center relative' }, [
-              p.photo
-                ? h('img', { src: p.photo.startsWith('data:') ? p.photo : `data:image/jpeg;base64,${p.photo}`, class: 'w-full h-full object-cover' })
-                : h(resolveComponent('Icon'), { name: 'lucide:user', class: 'w-5 h-5 text-obsidian-600' }),
-              // Quick status badge
-              lu?.checkedIn ? h('div', { class: 'absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-obsidian-900 flex items-center justify-center' }, h(resolveComponent('Icon'), { name: 'lucide:check', class: 'w-2 h-2 text-white' })) : null
-            ]),
-            // Info
-            h('div', { class: 'flex-1 min-w-0' }, [
-              h('p', { class: 'font-bold text-white text-sm truncate' }, `${p.firstName} ${p.lastName}`),
-              stats 
-                ? h(EventIndicators, { stats })
-                : h('p', { class: 'text-xs text-obsidian-500' }, suspended ? '🚫 Suspendido' : lu ? (lu.checkedIn ? '✅ Confirmado' : '⏳ Sin confirmar') : 'No en nómina'),
-            ]),
-            // Actions
-            !lu
-              ? h('button', {
-                  onClick: () => !suspended && add(p.id),
-                  disabled: suspended || addingId.value === p.id,
-                  class: `px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${suspended ? 'opacity-30 cursor-not-allowed border-white/5 text-obsidian-600' : 'border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10'}`,
-                }, '+Agregar')
-              : h('div', { class: 'flex gap-1.5' }, [
-                  h('button', {
-                    onClick: () => emit('toggleCheckin', lu.id, lu.checkedIn),
-                    class: `px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${lu.checkedIn ? 'border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10' : 'border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10'}`,
-                  }, lu.checkedIn ? 'Negar' : 'Permitir entrada'),
-                  h('button', {
-                    onClick: () => emit('remove', lu.id),
-                    class: 'p-1.5 rounded-lg border border-rose-500/20 text-rose-400/60 hover:text-rose-400 hover:bg-rose-500/10 transition-all',
-                  }, h(resolveComponent('Icon'), { name: 'lucide:x', class: 'w-3 h-3' })),
-                ]),
-          ])
-        }),
-        (props.teamPlayers || []).length === 0
-          ? h('p', { class: 'text-center text-sm text-obsidian-600 py-4' }, 'Sin jugadores en este equipo')
-          : null,
-      ]),
-    ])
-  }
-})
-
-// BenchPanel
-const BenchPanel = defineComponent({
-  name: 'BenchPanel',
-  props: { title: String, items: Array, team: Object, side: String },
-  emits: ['makeStarter'],
-  setup(props, { emit }) {
-    return () => h('div', { class: 'glass rounded-2xl border border-white/5 p-4' }, [
-      h('p', { class: 'text-xs font-bold text-obsidian-500 mb-3 uppercase tracking-widest' }, props.title),
-      h('p', { class: 'text-xs text-white font-semibold mb-3 truncate' }, props.team?.name),
-      h('div', { class: 'space-y-2 max-h-[500px] overflow-y-auto' }, [
-        ...(props.items || []).map(item =>
-          h('div', {
-            key: item.playerId,
-            class: `flex items-center gap-2 p-2 rounded-xl bg-white/2 border ${item.isVerified ? 'border-white/5' : 'border-yellow-500/10'} hover:border-white/10 transition-all`,
-          }, [
-            h('div', { class: 'w-8 h-8 rounded-lg overflow-hidden bg-obsidian-800 border border-white/10 flex-shrink-0 flex items-center justify-center relative' }, [
-              item.player?.photo
-                ? h('img', { src: item.player.photo.startsWith('data:') ? item.player.photo : `data:image/jpeg;base64,${item.player.photo}`, class: 'w-full h-full object-cover' })
-                : h(resolveComponent('Icon'), { name: 'lucide:user', class: 'w-4 h-4 text-obsidian-600' }),
-              !item.isVerified ? h('div', { class: 'absolute -bottom-1 -right-1 w-3 h-3 bg-yellow-500 rounded-full border-2 border-obsidian-900' }) : null
-            ]),
-            h('div', { class: 'flex-1 min-w-0' }, [
-              h('p', { class: `text-xs font-bold ${item.isVerified ? 'text-white' : 'text-obsidian-400'} truncate` }, item.player ? `${item.player.firstName} ${item.player.lastName}` : '—'),
-              !item.isVerified ? h('p', { class: 'text-[9px] text-yellow-500/70 font-bold uppercase' }, '⏳ Verificar') : null
-            ]),
-            h('button', {
-              onClick: () => emit('makeStarter', item),
-              class: `p-1.5 rounded-lg border transition-all ${item.isVerified ? 'border-purple-500/20 text-purple-400/60 hover:text-purple-400 hover:bg-purple-500/10' : 'border-yellow-500/20 text-yellow-400/60 hover:text-yellow-400 hover:bg-yellow-500/10'}`,
-              title: item.isVerified ? 'Hacer titular' : 'Verificar y poner',
-            }, h(resolveComponent('Icon'), { name: item.isVerified ? 'lucide:arrow-right-circle' : 'lucide:user-check', class: 'w-3.5 h-3.5' })),
-          ])
-        ),
-        !(props.items || []).length ? h('p', { class: 'text-center text-xs text-obsidian-600 py-4' }, 'Sin suplentes') : null,
-      ]),
-    ])
-  }
-})
-
-// SoccerField
-const SoccerField = defineComponent({
-  name: 'SoccerField',
-  props: {
-    homeStarters: Array, awayStarters: Array,
-    homeTeam: Object, awayTeam: Object,
-    interactive: Boolean, clickable: Boolean,
-    activePlayerId: String, isMobile: Boolean,
-    statsMap: Object
-  },
-  emits: ['makeSubstitute', 'playerClick'],
-  setup(props, { emit }) {
-    function positions(count, yPct) {
-      const xs = []
-      for (let i = 0; i < count; i++) xs.push(((i + 1) / (count + 1)) * 100)
-      return xs.map((x, i) => ({ x, y: yPct }))
-    }
-
-    function distributeTeam(starters, isHome) {
-      if (!starters?.length) return []
-      const zones = isHome
-        ? [{ y: 88, label: 'GK' }, { y: 70, label: 'DEF' }, { y: 52, label: 'MID' }, { y: 34, label: 'FWD' }]
-        : [{ y: 12, label: 'GK' }, { y: 30, label: 'DEF' }, { y: 48, label: 'MID' }, { y: 66, label: 'FWD' }]
-
-      const gk = starters.slice(0, 1)
-      const rest = starters.slice(1)
-      const def = rest.slice(0, Math.ceil(rest.length * 0.4))
-      const mid = rest.slice(def.length, def.length + Math.ceil(rest.length * 0.35))
-      const fwd = rest.slice(def.length + mid.length)
-
-      const rows = [gk, def, mid, fwd]
-      const result = []
-      rows.forEach((group, ri) => {
-        const y = zones[ri].y
-        group.forEach((item, i) => {
-          const x = ((i + 1) / (group.length + 1)) * 100
-          result.push({ ...item, fieldX: x, fieldY: y })
-        })
-      })
-      return result
-    }
-
-    return () => {
-      const homePositioned = distributeTeam(props.homeStarters, true)
-      const awayPositioned = distributeTeam(props.awayStarters, false)
-      const allPositioned = [...homePositioned, ...awayPositioned]
-      const tokenSize = props.isMobile ? '3.2rem' : '2.5rem'
-
-      return h('div', { 
-        class: 'relative w-full rounded-[2rem] overflow-hidden border border-white/5 shadow-2xl', 
-        style: `aspect-ratio: ${props.isMobile ? '4/5' : '2/3'}; background: #081208` 
-      }, [
-        // Field background
-        h('div', {
-          class: 'absolute inset-0',
-          style: `
-            background: linear-gradient(180deg, #1a4a0e 0%, #1d5410 25%, #1a4a0e 50%, #1d5410 75%, #1a4a0e 100%);
-            border-radius: 1rem;
-          `
-        }),
-        // Field markings
-        h('div', { style: 'position:absolute;inset:0;pointer-events:none' }, [
-          // Outer border
-          h('div', { style: 'position:absolute;top:4%;left:6%;right:6%;bottom:4%;border:2px solid rgba(255,255,255,0.25);border-radius:4px' }),
-          // Center line
-          h('div', { style: 'position:absolute;top:50%;left:6%;right:6%;height:2px;background:rgba(255,255,255,0.2);transform:translateY(-50%)' }),
-          // Center circle
-          h('div', { style: 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:18%;padding-top:12%;border:2px solid rgba(255,255,255,0.2);border-radius:50%' }),
-          // Center dot
-          h('div', { style: 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:6px;height:6px;background:rgba(255,255,255,0.4);border-radius:50%' }),
-          // Home penalty area
-          h('div', { style: 'position:absolute;bottom:4%;left:25%;right:25%;height:18%;border:2px solid rgba(255,255,255,0.2);border-top-left-radius:2px;border-top-right-radius:2px;border-bottom:none' }),
-          // Away penalty area
-          h('div', { style: 'position:absolute;top:4%;left:25%;right:25%;height:18%;border:2px solid rgba(255,255,255,0.2);border-bottom-left-radius:2px;border-bottom-right-radius:2px;border-top:none' }),
-          // Home goal
-          h('div', { style: 'position:absolute;bottom:3.5%;left:39%;right:39%;height:3%;border:2px solid rgba(255,255,255,0.3);border-bottom:none;border-radius:2px 2px 0 0;background:rgba(255,255,255,0.05)' }),
-          // Away goal
-          h('div', { style: 'position:absolute;top:3.5%;left:39%;right:39%;height:3%;border:2px solid rgba(255,255,255,0.3);border-top:none;border-radius:0 0 2px 2px;background:rgba(255,255,255,0.05)' }),
-        ]),
-        // Players
-        ...allPositioned.map(item => {
-          const isHome = props.homeStarters?.some(h => h.id === item.id)
-          const isActive = props.activePlayerId === item.id || props.activePlayerId === item.playerId
-          return h('div', {
-            key: item.id,
-            onClick: () => props.clickable ? emit('playerClick', item) : props.interactive ? emit('makeSubstitute', item.id) : null,
-            class: `player-token ${props.clickable || props.interactive ? 'cursor-pointer' : ''}`,
-            style: `position:absolute;left:${item.fieldX}%;top:${item.fieldY}%;transform:translate(-50%,-50%);z-index:10`,
-            title: props.interactive ? 'Click para hacer suplente' : '',
-          }, [
-            h('div', {
-              style: `
-                width: ${tokenSize}; height: ${tokenSize};
-                border-radius: 50%;
-                border: 2px solid ${isActive ? '#10b981' : isHome ? 'rgba(16,185,129,0.5)' : 'rgba(59,130,246,0.5)'};
-                overflow: hidden;
-                background: ${isHome ? 'rgba(16,185,129,0.1)' : 'rgba(59,130,246,0.1)'};
-                box-shadow: 0 0 ${isActive ? '15px #10b981' : '8px rgba(0,0,0,0.6)'};
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                display: flex; align-items: center; justify-content: center;
-                backdrop-filter: blur(4px);
-              `
-            }, [
-              item.player?.photo
-                ? h('img', { src: item.player.photo.startsWith('data:') ? item.player.photo : `data:image/jpeg;base64,${item.player.photo}`, style: 'width:100%;height:100%;object-fit:cover' })
-                : h('span', { style: `font-size:${props.isMobile ? '0.8rem' : '0.6rem'};font-weight:900;color:${isHome ? '#34d399' : '#60a5fa'}` },
-                    item.player ? `${item.player.firstName?.[0] ?? ''}${item.player.lastName?.[0] ?? ''}` : '?')
-            ]),
-            // Name label
-            h('div', {
-              style: `
-                position:absolute; top:100%; left:50%; transform:translateX(-50%);
-                margin-top:2px;
-                display: flex; flex-direction: column; align-items: center;
-              `
-            }, [
-              h('div', {
-                style: `
-                  white-space:nowrap;
-                  font-size:0.55rem; font-weight:800;
-                  color:white; text-shadow:0 1px 3px rgba(0,0,0,0.9);
-                  background:rgba(0,0,0,0.6); border-radius:4px; padding:1px 4px;
-                `
-              }, item.player ? item.player.firstName || '' : ''),
-              // Event indicators on field
-              props.statsMap?.[item.playerId] 
-                ? h(EventIndicators, { stats: props.statsMap[item.playerId] })
-                : null
-            ]),
-          ])
-        }),
-      ])
-    }
-  }
-})
-
-// MiniPlayerToken
-const MiniPlayerToken = defineComponent({
-  name: 'MiniPlayerToken',
-  props: { item: Object, isActive: Boolean, statsMap: Object },
-  emits: ['click'],
-  setup(props, { emit }) {
-    return () => h('button', {
-      onClick: () => emit('click', props.item),
-      class: `flex flex-col items-center gap-1 p-1.5 rounded-lg border transition-all cursor-pointer ${props.isActive ? 'border-emerald-500/50 bg-emerald-500/10' : 'border-white/5 hover:border-white/15'}`,
-      style: 'min-width: 52px',
-    }, [
-      h('div', { style: 'width:2rem;height:2rem;border-radius:50%;overflow:hidden;border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;background:rgba(10,14,20,0.6)' },
-        props.item.player?.photo
-          ? [h('img', { src: props.item.player.photo.startsWith('data:') ? props.item.player.photo : `data:image/jpeg;base64,${props.item.player.photo}`, style: 'width:100%;height:100%;object-fit:cover' })]
-          : [h('span', { style: 'font-size:0.55rem;font-weight:900;color:rgba(148,163,184,0.7)' },
-              props.item.player ? `${props.item.player.firstName?.[0] ?? ''}${props.item.player.lastName?.[0] ?? ''}` : '?')]
-      ),
-      h('span', { style: 'font-size:0.55rem;font-weight:700;color:rgba(148,163,184,0.7);white-space:nowrap;max-width:52px;overflow:hidden;text-overflow:ellipsis' },
-        props.item.player?.firstName ?? ''),
-      props.statsMap?.[props.item.playerId] 
-        ? h(EventIndicators, { stats: props.statsMap[props.item.playerId] })
-        : null
-    ])
-  }
-})
-
-// TeamScoreBlock
-const TeamScoreBlock = defineComponent({
-  name: 'TeamScoreBlock',
-  props: { team: Object, logo: String, align: String, isMobile: Boolean },
-  setup(props) {
-    return () => h('div', {
-      class: 'flex-1 flex items-center gap-2 sm:gap-3 min-w-0',
-      style: props.align === 'right' ? 'justify-content:flex-end;text-align:right;flex-direction:row-reverse' : '',
-    }, [
-      h('div', { 
-        class: `rounded-2xl overflow-hidden border border-white/10 flex-shrink-0 flex items-center justify-center bg-obsidian-900/80 shadow-inner group transition-transform active:scale-90`,
-        style: `width:${props.isMobile ? '2.5rem' : '3.5rem'};height:${props.isMobile ? '2.5rem' : '3.5rem'}`
-      },
-        props.logo
-          ? [h('img', { src: props.logo, style: 'width:100%;height:100%;object-fit:cover' })]
-          : [h(resolveComponent('Icon'), { name: 'lucide:shield', class: `${props.isMobile ? 'w-5 h-5' : 'w-7 h-7'} text-obsidian-700` })]
-      ),
-      h('div', { class: 'min-w-0 flex-1' }, [
-        h('p', { class: `font-black text-white ${props.isMobile ? 'text-[10px]' : 'text-base'} uppercase tracking-tight truncate` }, props.team?.name ?? '—'),
-        props.isMobile ? null : h('p', { class: 'text-[9px] text-obsidian-500 font-bold uppercase tracking-widest' }, 'Equipo')
-      ]),
-    ])
-  }
-})
 </script>
 
 <style scoped>
