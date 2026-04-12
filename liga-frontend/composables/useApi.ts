@@ -28,9 +28,18 @@ export const useApi = <T>(url: string, options: UseFetchOptions<T> = {}) => {
 // Base URL hardcodeada para evitar problemas de contexto fuera de setup.
 export const $api = (url: string, options: any = {}) => {
   const token = import.meta.client ? localStorage.getItem('auth_token') : null
+  
+  let baseURL = '/_backend'
+  try {
+    baseURL = useRuntimeConfig().public.apiBase as string
+  } catch(e) {
+    if (import.meta.client && typeof window !== 'undefined' && (window as any).__NUXT__) {
+      baseURL = (window as any).__NUXT__.config.public.apiBase || '/_backend'
+    }
+  }
 
   return $fetch(url, {
-    baseURL: '/_backend',
+    baseURL,
     ...options,
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
