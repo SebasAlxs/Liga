@@ -113,7 +113,7 @@
             <thead>
               <tr class="border-b border-white/5 bg-white/[0.01]">
                 <th class="sticky-col px-4 py-4 text-left text-[10px] font-black text-obsidian-500 uppercase tracking-[0.15em] w-12">#</th>
-                <th class="sticky-col left-12 px-4 py-4 text-left text-[10px] font-black text-obsidian-500 uppercase tracking-[0.15em] min-w-[160px]">Equipo</th>
+                <th class="sticky-col left-12 px-4 py-4 text-left text-[10px] font-black text-obsidian-500 uppercase tracking-[0.15em] min-w-[120px] sm:min-w-[160px]">Equipo</th>
                 <th class="px-6 py-4 text-center text-[10px] font-black text-obsidian-500 uppercase tracking-[0.15em]">PJ</th>
                 <th class="px-6 py-4 text-center text-[10px] font-black text-obsidian-500 uppercase tracking-[0.15em]">G</th>
                 <th class="px-6 py-4 text-center text-[10px] font-black text-obsidian-500 uppercase tracking-[0.15em]">E</th>
@@ -145,26 +145,29 @@
                 <!-- Team -->
                 <td class="sticky-col left-12 px-4 py-4">
                   <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl overflow-hidden bg-obsidian-800 border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl overflow-hidden bg-obsidian-800 border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                       <img v-if="team.logo" :src="team.logo" class="w-full h-full object-cover" />
                       <Icon v-else name="lucide:shield" class="w-5 h-5 text-obsidian-600" />
                     </div>
-                    <span :class="['font-black text-sm uppercase tracking-tight truncate', index === 0 ? 'text-amber-400' : 'text-white']">{{ team.name }}</span>
+                    <span :class="[
+                      'font-black text-[11px] sm:text-sm uppercase tracking-tight truncate max-w-[100px] sm:max-w-[180px]', 
+                      index === 0 ? 'text-amber-400' : 'text-white'
+                    ]">{{ team.name }}</span>
                   </div>
                 </td>
 
                 <!-- Stats -->
-                <td class="px-6 py-4 text-center text-sm text-obsidian-400 font-mono">{{ team.matchesPlayed ?? 0 }}</td>
-                <td class="px-6 py-4 text-center text-sm font-mono text-emerald-500/80 font-bold">{{ team.matchesWon ?? 0 }}</td>
-                <td class="px-6 py-4 text-center text-sm text-obsidian-400 font-mono">{{ team.matchesDrawn ?? 0 }}</td>
-                <td class="px-6 py-4 text-center text-sm font-mono text-rose-500/80">{{ team.matchesLost ?? 0 }}</td>
-                <td class="px-6 py-4 text-center text-sm text-obsidian-500 font-mono hidden md:table-cell">{{ team.goalsFor ?? 0 }}</td>
-                <td class="px-6 py-4 text-center text-sm text-obsidian-500 font-mono hidden md:table-cell">{{ team.goalsAgainst ?? 0 }}</td>
-                <td class="px-6 py-4 text-center text-sm font-mono font-bold hidden sm:table-cell" :class="(team.goalDifference ?? 0) > 0 ? 'text-emerald-500' : (team.goalDifference ?? 0) < 0 ? 'text-rose-500' : 'text-obsidian-500'">
+                <td class="px-2 sm:px-6 py-4 text-center text-sm text-obsidian-400 font-mono">{{ team.matchesPlayed ?? 0 }}</td>
+                <td class="px-2 sm:px-6 py-4 text-center text-sm font-mono text-emerald-500/80 font-bold">{{ team.matchesWon ?? 0 }}</td>
+                <td class="px-2 sm:px-6 py-4 text-center text-sm text-obsidian-400 font-mono">{{ team.matchesDrawn ?? 0 }}</td>
+                <td class="px-2 sm:px-6 py-4 text-center text-sm font-mono text-rose-500/80">{{ team.matchesLost ?? 0 }}</td>
+                <td class="px-2 sm:px-6 py-4 text-center text-sm text-obsidian-500 font-mono hidden md:table-cell">{{ team.goalsFor ?? 0 }}</td>
+                <td class="px-2 sm:px-6 py-4 text-center text-sm text-obsidian-500 font-mono hidden md:table-cell">{{ team.goalsAgainst ?? 0 }}</td>
+                <td class="px-2 sm:px-6 py-4 text-center text-sm font-mono font-bold hidden sm:table-cell" :class="(team.goalDifference ?? 0) > 0 ? 'text-emerald-500' : (team.goalDifference ?? 0) < 0 ? 'text-rose-500' : 'text-obsidian-500'">
                   {{ (team.goalDifference ?? 0) > 0 ? '+' : '' }}{{ team.goalDifference ?? 0 }}
                 </td>
-                <td class="px-8 py-4 text-center">
-                  <span :class="['text-xl font-black font-mono', index === 0 ? 'text-amber-400 text-glow' : 'text-white']">{{ team.points ?? 0 }}</span>
+                <td class="px-4 sm:px-8 py-4 text-center">
+                  <span :class="['text-base sm:text-xl font-black font-mono', index === 0 ? 'text-amber-400 text-glow' : 'text-white']">{{ team.points ?? 0 }}</span>
                 </td>
               </tr>
             </tbody>
