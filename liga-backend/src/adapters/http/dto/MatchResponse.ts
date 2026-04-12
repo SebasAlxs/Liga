@@ -24,6 +24,9 @@ export interface UpdateMatchRequest {
     tournamentId?: string;
     categoryId?: string;
     status?: MatchStatus;
+    firstHalfStartedAt?: string | null;
+    firstHalfEndedAt?: string | null;
+    secondHalfStartedAt?: string | null;
     refereeId?: string | null;
     assistant1Id?: string | null;
     assistant2Id?: string | null;
@@ -42,6 +45,9 @@ export interface MatchResponse {
     status: MatchStatus;
     createdAt: string;
     updatedAt: string;
+    firstHalfStartedAt?: string | null;
+    firstHalfEndedAt?: string | null;
+    secondHalfStartedAt?: string | null;
     refereeId?: string | null;
     assistant1Id?: string | null;
     assistant2Id?: string | null;

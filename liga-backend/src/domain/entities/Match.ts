@@ -23,7 +23,10 @@ export class Match {
         public primaryReferee?: any,
         public assistant1?: any,
         public assistant2?: any,
-        public fourthReferee?: any
+        public fourthReferee?: any,
+        public firstHalfStartedAt?: Date | null,
+        public firstHalfEndedAt?: Date | null,
+        public secondHalfStartedAt?: Date | null
     ) {
         this.validate();
     }

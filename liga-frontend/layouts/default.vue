@@ -163,6 +163,9 @@ const handleLogout = () => {
           </div>
           
           <div class="flex items-center gap-4 sm:gap-6">
+            <button v-if="isMobile" @click="handleLogout" class="relative p-2 rounded-xl hover:bg-rose-500/10 transition-colors text-slate-400 hover:text-rose-400">
+               <Icon name="lucide:log-out" class="text-xl" />
+            </button>
             <button class="relative p-2 rounded-xl hover:bg-white/5 transition-colors">
               <Icon name="lucide:bell" class="text-xl text-slate-400" />
               <span class="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]"></span>

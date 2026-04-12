@@ -111,20 +111,30 @@ export interface NuxtCustomSchema {
    collections?: string[] | null,
 
    /**
+    * Custom Icon Collections
+    * 
+    * 
+    * @studioIcon material-symbols:format-list-bulleted
+   */
+   customCollections?: string[] | null,
+
+   /**
     * Icon Provider
     * 
     * Provider to use for fetching icons
     * 
     * - `server` - Fetch icons with a server handler
     * - `iconify` - Fetch icons with Iconify API, purely client-side
+    * - `none` - Do not fetch icons (use client bundle only)
     * 
-    * @default "server"
+    * `server` by default; `iconify` when `ssr: false`
     * 
-    * @enum server,iconify
+    * 
+    * @enum server,iconify,none
     * 
     * @studioIcon material-symbols:cloud
    */
-   provider?: string,
+   provider?: "server" | "iconify" | undefined,
 
    /**
     * Iconify API Endpoint URL
@@ -144,9 +154,43 @@ export interface NuxtCustomSchema {
     * 
     * @default true
     * 
+    * @enum true,false,server-only,client-only
+    * 
     * @studioIcon material-symbols:public
    */
-   fallbackToApi?: boolean,
+   fallbackToApi?: boolean | "server-only" | "client-only",
+
+   /**
+    * Local API Endpoint Path
+    * 
+    * Define a custom path for the local API endpoint.
+    * 
+    * @default "/api/_nuxt_icon"
+    * 
+    * @studioIcon material-symbols:api
+   */
+   localApiEndpoint?: string,
+
+   /**
+    * Fetch Timeout
+    * 
+    * Set the timeout for fetching icons.
+    * 
+    * @default 1500
+    * 
+    * @studioIcon material-symbols:timer
+   */
+   fetchTimeout?: number,
+
+   /**
+    * Customize callback
+    * 
+    * Customize icon content (replace stroke-width, colors, etc...).
+    * 
+    * 
+    * @studioIcon material-symbols:edit
+   */
+   customize?: IconifyIconCustomizeCallback,
   },
  },
 }

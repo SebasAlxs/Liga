@@ -23,6 +23,10 @@ export class UpdateMatchUseCase {
         if (request.categoryId) existingMatch.categoryId = request.categoryId;
         if (request.status) existingMatch.status = request.status;
         
+        if (request.firstHalfStartedAt !== undefined) existingMatch.firstHalfStartedAt = request.firstHalfStartedAt ? new Date(request.firstHalfStartedAt) : null;
+        if (request.firstHalfEndedAt !== undefined) existingMatch.firstHalfEndedAt = request.firstHalfEndedAt ? new Date(request.firstHalfEndedAt) : null;
+        if (request.secondHalfStartedAt !== undefined) existingMatch.secondHalfStartedAt = request.secondHalfStartedAt ? new Date(request.secondHalfStartedAt) : null;
+        
         // Referee updates
         if (request.refereeId !== undefined) existingMatch.refereeId = request.refereeId;
         if (request.assistant1Id !== undefined) existingMatch.assistant1Id = request.assistant1Id;
@@ -46,6 +50,9 @@ export class UpdateMatchUseCase {
             tournamentId: updated.tournamentId,
             categoryId: updated.categoryId,
             status: updated.status,
+            firstHalfStartedAt: updated.firstHalfStartedAt?.toISOString() || null,
+            firstHalfEndedAt: updated.firstHalfEndedAt?.toISOString() || null,
+            secondHalfStartedAt: updated.secondHalfStartedAt?.toISOString() || null,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             refereeId: updated.refereeId,

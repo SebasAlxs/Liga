@@ -8,7 +8,14 @@ export const useAuthStore = defineStore('auth', () => {
     sameSite: 'lax'
   })
 
-  const user = ref<any>(null)
+  // Usamos también cookie para el user, para que el SSR sepa el rol y no haya errores de hidratación
+  const userCookie = useCookie<any>('auth_user', {
+    default: () => null,
+    maxAge: 60 * 60 * 24,
+    sameSite: 'lax'
+  })
+
+  const user = ref<any>(userCookie.value)
   const loading = ref(false)
 
   const token = computed(() => tokenCookie.value)
@@ -16,15 +23,17 @@ export const useAuthStore = defineStore('auth', () => {
   const isAdmin = computed(() => user.value?.role === 'SUPERADMIN')
   const isVocal = computed(() => user.value?.role === 'VOCAL')
 
-  // Hidratar desde localStorage en el cliente
+  // En el cliente, sincronizar si hay un cambio o si existe en localStorage
   if (import.meta.client) {
-    // Migrar token de localStorage a cookie si aún no está en cookie
     const savedToken = localStorage.getItem('auth_token')
-    if (savedToken && !tokenCookie.value) {
-      tokenCookie.value = savedToken
-    }
+    if (savedToken && !tokenCookie.value) tokenCookie.value = savedToken
+
     const savedUser = localStorage.getItem('auth_user')
-    if (savedUser) user.value = JSON.parse(savedUser)
+    if (savedUser && !userCookie.value) {
+      const parsed = JSON.parse(savedUser)
+      userCookie.value = parsed
+      user.value = parsed
+    }
   }
 
   async function login(credentials: { email: string; password: string }) {
@@ -40,6 +49,7 @@ export const useAuthStore = defineStore('auth', () => {
 
       // Guardar token en cookie (SSR) y localStorage (fallback para $api client-side)
       tokenCookie.value = result.token
+      userCookie.value = result.user
       user.value = result.user
 
       if (import.meta.client) {
@@ -58,6 +68,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   function logout() {
     tokenCookie.value = null
+    userCookie.value = null
     user.value = null
     if (import.meta.client) {
       localStorage.removeItem('auth_token')

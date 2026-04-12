@@ -126,7 +126,7 @@
               <label class="text-[9px] font-black text-obsidian-500 uppercase tracking-widest px-1">Árbitro Central</label>
               <select
                 :value="v.activeMatch.value?.refereeId"
-                @change="e => v.saveArbitration({ refereeId: e.target.value })"
+                @change="e => v.saveArbitration({ refereeId: (e.target.value && e.target.value !== 'null') ? e.target.value : null })"
                 class="field-input text-xs"
               >
                 <option :value="null">Seleccionar Árbitro</option>
@@ -137,7 +137,7 @@
               <label class="text-[9px] font-black text-obsidian-500 uppercase tracking-widest px-1">Asistente 1</label>
               <select
                 :value="v.activeMatch.value?.assistant1Id"
-                @change="e => v.saveArbitration({ assistant1Id: e.target.value })"
+                @change="e => v.saveArbitration({ assistant1Id: (e.target.value && e.target.value !== 'null') ? e.target.value : null })"
                 class="field-input text-xs"
               >
                 <option :value="null">Sin asignar</option>
@@ -148,7 +148,7 @@
               <label class="text-[9px] font-black text-obsidian-500 uppercase tracking-widest px-1">Asistente 2</label>
               <select
                 :value="v.activeMatch.value?.assistant2Id"
-                @change="e => v.saveArbitration({ assistant2Id: e.target.value })"
+                @change="e => v.saveArbitration({ assistant2Id: (e.target.value && e.target.value !== 'null') ? e.target.value : null })"
                 class="field-input text-xs"
               >
                 <option :value="null">Sin asignar</option>
@@ -339,7 +339,7 @@
               <select
                 :disabled="!auth.isAdmin.value"
                 :value="v.activeMatch.value?.refereeId"
-                @change="e => v.saveArbitration({ refereeId: e.target.value })"
+                @change="e => v.saveArbitration({ refereeId: (e.target.value && e.target.value !== 'null') ? e.target.value : null })"
                 class="field-input text-xs disabled:opacity-50"
               >
                 <option :value="null">Seleccionar Árbitro</option>
@@ -351,7 +351,7 @@
               <select
                 :disabled="!auth.isAdmin.value"
                 :value="v.activeMatch.value?.assistant1Id"
-                @change="e => v.saveArbitration({ assistant1Id: e.target.value })"
+                @change="e => v.saveArbitration({ assistant1Id: (e.target.value && e.target.value !== 'null') ? e.target.value : null })"
                 class="field-input text-xs disabled:opacity-50"
               >
                 <option :value="null">Sin asignar</option>
@@ -363,7 +363,7 @@
               <select
                 :disabled="!auth.isAdmin.value"
                 :value="v.activeMatch.value?.assistant2Id"
-                @change="e => v.saveArbitration({ assistant2Id: e.target.value })"
+                @change="e => v.saveArbitration({ assistant2Id: (e.target.value && e.target.value !== 'null') ? e.target.value : null })"
                 class="field-input text-xs disabled:opacity-50"
               >
                 <option :value="null">Sin asignar</option>
@@ -386,9 +386,9 @@
               <span class="text-xl sm:text-3xl text-obsidian-600 font-black">:</span>
               <span class="text-3xl sm:text-5xl font-black text-white font-mono tabular-nums tracking-tighter">{{ v.activeMatch.value.awayScore ?? 0 }}</span>
             </div>
-            <div class="flex items-center justify-center gap-1.5 mt-1 sm:mt-2">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span class="text-[8px] sm:text-xs font-black text-emerald-400 uppercase tracking-[0.2em] animate-pulse">LIVE</span>
+            <div class="flex items-center justify-center gap-2 mt-2 bg-obsidian-950/50 rounded-full px-3 py-1 border border-emerald-500/20">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span class="text-xs sm:text-sm font-black text-emerald-400 tabular-nums font-mono">{{ v.matchMinuteFormatted.value }}</span>
             </div>
           </div>
 
@@ -396,15 +396,21 @@
         </div>
       </div>
 
-      <!-- Floating Finish Button (Mobile) -->
-      <button v-if="isMobile" @click="doFinishMatch" 
-        class="fixed bottom-24 right-6 z-[45] w-14 h-14 rounded-full bg-rose-500 text-obsidian-950 shadow-2xl shadow-rose-500/40 flex items-center justify-center active:scale-95 transition-all">
-        <Icon name="lucide:flag-off" class="w-6 h-6" />
-      </button>
+      <!-- Match Controller Actions -->
+      <div v-if="auth.isLoggedIn.value && v.activeMatch.value?.status !== 'FINISHED'" class="flex flex-wrap items-center justify-center gap-3 mb-6">
+        <button v-if="!v.activeMatch.value?.firstHalfEndedAt" @click="doEndFirstHalf"
+          class="flex items-center gap-2 px-6 py-2.5 rounded-xl border border-yellow-500/30 text-yellow-500 text-xs font-black hover:bg-yellow-500/10 transition-all uppercase tracking-widest bg-yellow-500/5">
+          <Icon name="lucide:pause" class="w-4 h-4" /> Medio Tiempo
+        </button>
+        
+        <button v-if="v.activeMatch.value?.firstHalfEndedAt && !v.activeMatch.value?.secondHalfStartedAt" @click="doStartSecondHalf"
+          class="flex items-center gap-2 px-6 py-2.5 rounded-xl border border-blue-500/30 text-blue-400 text-xs font-black hover:bg-blue-500/10 transition-all uppercase tracking-widest bg-blue-500/5">
+          <Icon name="lucide:play" class="w-4 h-4" /> Iniciar 2do Tiempo
+        </button>
 
-      <div v-if="!isMobile && auth.isLoggedIn.value" class="absolute top-6 right-6 z-[45]">
-        <button @click="doFinishMatch" class="flex-shrink-0 px-4 py-2 rounded-xl border border-rose-500/30 text-rose-400 text-xs font-black hover:bg-rose-500/10 transition-all uppercase tracking-widest bg-rose-500/5">
-          <Icon name="lucide:flag-off" class="w-4 h-4 inline mr-1" />Finalizar
+        <button v-if="v.activeMatch.value?.secondHalfStartedAt" @click="doFinishMatch"
+          class="flex items-center gap-2 px-6 py-2.5 rounded-xl border border-rose-500/30 text-rose-400 text-xs font-black hover:bg-rose-500/10 transition-all uppercase tracking-widest bg-rose-500/5">
+          <Icon name="lucide:flag-off" class="w-4 h-4" /> Finalizar Partido
         </button>
       </div>
 
@@ -976,6 +982,16 @@ async function doStartMatch() {
   catch (err) { console.error(err) }
 }
 
+async function doEndFirstHalf() {
+  if (!confirm('¿Pausar e ir a Descanso?')) return
+  await v.endFirstHalf()
+}
+
+async function doStartSecondHalf() {
+  if (!confirm('¿Iniciar el 2do Tiempo?')) return
+  await v.startSecondHalf()
+}
+
 async function doFinishMatch() {
   if (!confirm('¿Finalizar el partido?')) return
   await v.finishMatch()
@@ -983,7 +999,7 @@ async function doFinishMatch() {
 
 function onPlayerClick(lineupItem) {
   activePlayer.value = activePlayer.value?.lineupId === lineupItem.id ? null : { ...lineupItem.player, lineupId: lineupItem.id, teamId: lineupItem.teamId, player: lineupItem.player }
-  eventForm.value = { type: 'GOAL', minute: null, relatedPlayerId: '' }
+  eventForm.value = { type: 'GOAL', minute: v.matchMinute.value > 0 ? v.matchMinute.value : null, relatedPlayerId: '' }
 }
 
 function notify(msg, type = 'success') {

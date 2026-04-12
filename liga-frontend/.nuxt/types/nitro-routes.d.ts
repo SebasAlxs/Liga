@@ -10,7 +10,7 @@ declare module "nitropack/types" {
       'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/#internal/nuxt/island-renderer').default>>>>
     }
     '/api/_nuxt_icon/:collection': {
-      'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../node_modules/nuxt-icon/dist/runtime/server/api').default>>>>
+      'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../node_modules/@nuxt/icon/dist/runtime/server/api').default>>>>
     }
   }
 }

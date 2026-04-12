@@ -57,7 +57,7 @@
                 <span :class="`status-badge ${item.active ? 'badge-active' : 'badge-inactive'}`">
                   {{ item.active ? 'Activo' : 'Inactivo' }}
                 </span>
-                <div v-if="authStore.isAdmin" class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div v-if="authStore.isAdmin" class="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                   <button @click="openEditModal('tournament', item)" class="action-btn hover:text-emerald-400 hover:bg-emerald-500/10" title="Editar">
                     <Icon name="lucide:edit-2" class="w-3.5 h-3.5" />
                   </button>
@@ -107,7 +107,7 @@
                   <template v-else>Sin restricción de edad</template>
                 </p>
               </div>
-              <div v-if="authStore.isAdmin" class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+              <div v-if="authStore.isAdmin" class="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex-shrink-0">
                 <button @click="openEditModal('category', item)" class="action-btn hover:text-emerald-400 hover:bg-emerald-500/10" title="Editar">
                   <Icon name="lucide:edit-2" class="w-3.5 h-3.5" />
                 </button>
@@ -157,7 +157,7 @@
                 <span :class="`status-badge ${item.active ? 'badge-active' : 'badge-inactive'}`">
                   {{ item.active ? 'Activa' : 'Inactiva' }}
                 </span>
-                <div v-if="authStore.isAdmin" class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div v-if="authStore.isAdmin" class="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                   <button @click="openEditModal('headquarters', item)" class="action-btn hover:text-emerald-400 hover:bg-emerald-500/10" title="Editar">
                     <Icon name="lucide:edit-2" class="w-3.5 h-3.5" />
                   </button>
@@ -208,7 +208,7 @@
                 <p class="font-semibold text-white text-sm truncate">{{ item.name }}</p>
                 <p class="text-xs text-obsidian-500 truncate">{{ [item.license, item.phone].filter(Boolean).join(' · ') || 'Sin datos' }}</p>
               </div>
-              <div v-if="authStore.isAdmin" class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+              <div v-if="authStore.isAdmin" class="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex-shrink-0">
                 <button @click="openEditModal('referee', item)" class="action-btn hover:text-emerald-400 hover:bg-emerald-500/10" title="Editar">
                   <Icon name="lucide:edit-2" class="w-3.5 h-3.5" />
                 </button>

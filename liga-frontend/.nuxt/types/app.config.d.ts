@@ -10,6 +10,7 @@ declare const inlineConfig = {
     "class": "",
     "aliases": {},
     "iconifyApiEndpoint": "https://api.iconify.design",
+    "localApiEndpoint": "/api/_nuxt_icon",
     "fallbackToApi": true,
     "cssSelectorPrefix": "i-",
     "cssWherePseudo": true,
@@ -32,6 +33,7 @@ declare const inlineConfig = {
       "bxs",
       "bytesize",
       "carbon",
+      "catppuccin",
       "cbi",
       "charm",
       "ci",
@@ -99,6 +101,7 @@ declare const inlineConfig = {
       "heroicons",
       "heroicons-outline",
       "heroicons-solid",
+      "hugeicons",
       "humbleicons",
       "ic",
       "icomoon-free",
@@ -119,6 +122,7 @@ declare const inlineConfig = {
       "logos",
       "ls",
       "lucide",
+      "lucide-lab",
       "mage",
       "majesticons",
       "maki",
@@ -157,6 +161,7 @@ declare const inlineConfig = {
       "radix-icons",
       "raphael",
       "ri",
+      "rivet-icons",
       "si-glyph",
       "simple-icons",
       "simple-line-icons",
@@ -185,12 +190,14 @@ declare const inlineConfig = {
       "vs",
       "vscode-icons",
       "websymbol",
+      "weui",
       "whh",
       "wi",
       "wpf",
       "zmdi",
       "zondicons"
-    ]
+    ],
+    "fetchTimeout": 1500
   }
 }
 type ResolvedAppConfig = Defu<typeof inlineConfig, []>

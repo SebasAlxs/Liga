@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_={url:import.meta.url,env:process.env};import { tmpdir } from 'node:os';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, getResponseStatusText } from 'file:///Users/alexis/Documents/Magdata/Liga/liga-frontend/node_modules/h3/dist/index.mjs';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, getResponseStatus, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getRouterParam, getResponseStatusText } from 'file:///Users/alexis/Documents/Magdata/Liga/liga-frontend/node_modules/h3/dist/index.mjs';
 import { Server } from 'node:http';
 import { resolve, dirname, join } from 'node:path';
 import nodeCrypto from 'node:crypto';
@@ -14,7 +14,7 @@ import { createFetch, Headers as Headers$1 } from 'file:///Users/alexis/Document
 import { fetchNodeRequestHandler, callNodeRequestHandler } from 'file:///Users/alexis/Documents/Magdata/Liga/liga-frontend/node_modules/node-mock-http/dist/index.mjs';
 import { createStorage, prefixStorage } from 'file:///Users/alexis/Documents/Magdata/Liga/liga-frontend/node_modules/unstorage/dist/index.mjs';
 import unstorage_47drivers_47fs from 'file:///Users/alexis/Documents/Magdata/Liga/liga-frontend/node_modules/unstorage/drivers/fs.mjs';
-import { digest } from 'file:///Users/alexis/Documents/Magdata/Liga/liga-frontend/node_modules/ohash/dist/index.mjs';
+import { digest, hash as hash$1 } from 'file:///Users/alexis/Documents/Magdata/Liga/liga-frontend/node_modules/ohash/dist/index.mjs';
 import { klona } from 'file:///Users/alexis/Documents/Magdata/Liga/liga-frontend/node_modules/klona/dist/index.mjs';
 import defu, { defuFn } from 'file:///Users/alexis/Documents/Magdata/Liga/liga-frontend/node_modules/defu/dist/defu.mjs';
 import { snakeCase } from 'file:///Users/alexis/Documents/Magdata/Liga/liga-frontend/node_modules/scule/dist/index.mjs';
@@ -32,11 +32,10 @@ import { isVNode, isRef, toValue } from 'file:///Users/alexis/Documents/Magdata/
 import _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw from 'file:///Users/alexis/Documents/Magdata/Liga/liga-frontend/node_modules/@nuxt/vite-builder/dist/fix-stacktrace.mjs';
 import { promises } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname as dirname$1, resolve as resolve$1 } from 'file:///Users/alexis/Documents/Magdata/Liga/liga-frontend/node_modules/pathe/dist/index.mjs';
+import { dirname as dirname$1, resolve as resolve$1, basename } from 'file:///Users/alexis/Documents/Magdata/Liga/liga-frontend/node_modules/pathe/dist/index.mjs';
 import { createHead as createHead$1, propsToString, renderSSRHead } from 'file:///Users/alexis/Documents/Magdata/Liga/liga-frontend/node_modules/unhead/dist/server.mjs';
 import { DeprecationsPlugin, PromisesPlugin, TemplateParamsPlugin, AliasSortingPlugin } from 'file:///Users/alexis/Documents/Magdata/Liga/liga-frontend/node_modules/unhead/dist/plugins.mjs';
 import { walkResolver } from 'file:///Users/alexis/Documents/Magdata/Liga/liga-frontend/node_modules/unhead/dist/utils.mjs';
-import { basename } from 'file:///Users/alexis/Documents/Magdata/Liga/liga-frontend/node_modules/nuxt-icon/node_modules/pathe/dist/index.mjs';
 import { getIcons } from 'file:///Users/alexis/Documents/Magdata/Liga/liga-frontend/node_modules/@iconify/utils/lib/index.mjs';
 import { collections } from 'file:///Users/alexis/Documents/Magdata/Liga/liga-frontend/.nuxt/nuxt-icon-server-bundle.mjs';
 
@@ -587,6 +586,7 @@ const inlineAppConfig = {
     "class": "",
     "aliases": {},
     "iconifyApiEndpoint": "https://api.iconify.design",
+    "localApiEndpoint": "/api/_nuxt_icon",
     "fallbackToApi": true,
     "cssSelectorPrefix": "i-",
     "cssWherePseudo": true,
@@ -609,6 +609,7 @@ const inlineAppConfig = {
       "bxs",
       "bytesize",
       "carbon",
+      "catppuccin",
       "cbi",
       "charm",
       "ci",
@@ -676,6 +677,7 @@ const inlineAppConfig = {
       "heroicons",
       "heroicons-outline",
       "heroicons-solid",
+      "hugeicons",
       "humbleicons",
       "ic",
       "icomoon-free",
@@ -696,6 +698,7 @@ const inlineAppConfig = {
       "logos",
       "ls",
       "lucide",
+      "lucide-lab",
       "mage",
       "majesticons",
       "maki",
@@ -734,6 +737,7 @@ const inlineAppConfig = {
       "radix-icons",
       "raphael",
       "ri",
+      "rivet-icons",
       "si-glyph",
       "simple-icons",
       "simple-line-icons",
@@ -762,12 +766,14 @@ const inlineAppConfig = {
       "vs",
       "vscode-icons",
       "websymbol",
+      "weui",
       "whh",
       "wi",
       "wpf",
       "zmdi",
       "zondicons"
-    ]
+    ],
+    "fetchTimeout": 1500
   }
 };
 
@@ -2802,18 +2808,93 @@ async function getIslandContext(event) {
 	};
 }
 
+function defineRenderHandler(render) {
+  const runtimeConfig = useRuntimeConfig();
+  return eventHandler(async (event) => {
+    const nitroApp = useNitroApp();
+    const ctx = { event, render, response: void 0 };
+    await nitroApp.hooks.callHook("render:before", ctx);
+    if (!ctx.response) {
+      if (event.path === `${runtimeConfig.app.baseURL}favicon.ico`) {
+        setResponseHeader(event, "Content-Type", "image/x-icon");
+        return send(
+          event,
+          "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+        );
+      }
+      ctx.response = await ctx.render(event);
+      if (!ctx.response) {
+        const _currentStatus = getResponseStatus(event);
+        setResponseStatus(event, _currentStatus === 200 ? 500 : _currentStatus);
+        return send(
+          event,
+          "No response returned from render handler: " + event.path
+        );
+      }
+    }
+    await nitroApp.hooks.callHook("render:response", ctx.response, ctx);
+    if (ctx.response.headers) {
+      setResponseHeaders(event, ctx.response.headers);
+    }
+    if (ctx.response.statusCode || ctx.response.statusMessage) {
+      setResponseStatus(
+        event,
+        ctx.response.statusCode,
+        ctx.response.statusMessage
+      );
+    }
+    return ctx.response.body;
+  });
+}
+
+const scheduledTasks = false;
+
+const tasks = {
+  
+};
+
+const __runningTasks__ = {};
+async function runTask(name, {
+  payload = {},
+  context = {}
+} = {}) {
+  if (__runningTasks__[name]) {
+    return __runningTasks__[name];
+  }
+  if (!(name in tasks)) {
+    throw createError({
+      message: `Task \`${name}\` is not available!`,
+      statusCode: 404
+    });
+  }
+  if (!tasks[name].resolve) {
+    throw createError({
+      message: `Task \`${name}\` is not implemented!`,
+      statusCode: 501
+    });
+  }
+  const handler = await tasks[name].resolve();
+  const taskEvent = { name, payload, context };
+  __runningTasks__[name] = handler.run(taskEvent);
+  try {
+    const res = await __runningTasks__[name];
+    return res;
+  } finally {
+    delete __runningTasks__[name];
+  }
+}
+
 const warnOnceSet = /* @__PURE__ */ new Set();
 const DEFAULT_ENDPOINT = "https://api.iconify.design";
-const _YBgBIa = defineCachedEventHandler(async (ctx) => {
-  const url = ctx.node.req.url;
+const _A70NOo = defineCachedEventHandler(async (event) => {
+  const url = getRequestURL(event);
   if (!url)
-    return;
+    return createError({ status: 400, message: "Invalid icon request" });
   const options = useAppConfig().icon;
-  const collectionName = ctx.context.params?.collection?.replace(/\.json$/, "");
+  const collectionName = event.context.params?.collection?.replace(/\.json$/, "");
   const collection = collectionName ? await collections[collectionName]?.() : null;
   const apiEndPoint = options.iconifyApiEndpoint || DEFAULT_ENDPOINT;
-  const apiUrl = new URL(basename(url), apiEndPoint);
-  const icons = apiUrl.searchParams.get("icons")?.split(",");
+  const icons = url.searchParams.get("icons")?.split(",");
   if (collection) {
     if (icons?.length) {
       const data = getIcons(
@@ -2832,11 +2913,35 @@ const _YBgBIa = defineCachedEventHandler(async (ctx) => {
       warnOnceSet.add(collectionName);
     }
   }
-  if (options.fallbackToApi) {
+  if (options.fallbackToApi === true || options.fallbackToApi === "server-only") {
+    const apiUrl = new URL("./" + basename(url.pathname) + url.search, apiEndPoint);
     consola$1.debug(`[Icon] fetching ${(icons || []).map((i) => "`" + collectionName + ":" + i + "`").join(",")} from iconify api`);
-    const data = await $fetch(apiUrl.href);
-    return data;
+    if (apiUrl.host !== new URL(apiEndPoint).host) {
+      return createError({ status: 400, message: "Invalid icon request" });
+    }
+    try {
+      const data = await $fetch(apiUrl.href);
+      return data;
+    } catch (e) {
+      consola$1.error(e);
+      if (e.status === 404)
+        return createError({ status: 404 });
+      else
+        return createError({ status: 500, message: "Failed to fetch fallback icon" });
+    }
   }
+  return createError({ status: 404 });
+}, {
+  group: "nuxt",
+  name: "icon",
+  getKey(event) {
+    const collection = event.context.params?.collection?.replace(/\.json$/, "") || "unknown";
+    const icons = String(getQuery$1(event).icons || "");
+    return `${collection}_${icons.split(",")[0]}_${icons.length}_${hash$1(icons)}`;
+  },
+  swr: true,
+  maxAge: 60 * 60 * 24 * 7
+  // 1 week
 });
 
 const _lazy_OI2di4 = () => Promise.resolve().then(function () { return renderer; });
@@ -2845,7 +2950,7 @@ const handlers = [
   { route: '', handler: _SzXqcP, lazy: false, middleware: true, method: undefined },
   { route: '/__nuxt_error', handler: _lazy_OI2di4, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_island/**', handler: handler$1, lazy: false, middleware: false, method: undefined },
-  { route: '/api/_nuxt_icon/:collection', handler: _YBgBIa, lazy: false, middleware: false, method: undefined },
+  { route: '/api/_nuxt_icon/:collection', handler: _A70NOo, lazy: false, middleware: false, method: undefined },
   { route: '/**', handler: _lazy_OI2di4, lazy: true, middleware: false, method: undefined }
 ];
 
@@ -2989,82 +3094,6 @@ function useNitroApp() {
   return nitroApp$1;
 }
 runNitroPlugins(nitroApp$1);
-
-function defineRenderHandler(render) {
-  const runtimeConfig = useRuntimeConfig();
-  return eventHandler(async (event) => {
-    const nitroApp = useNitroApp();
-    const ctx = { event, render, response: void 0 };
-    await nitroApp.hooks.callHook("render:before", ctx);
-    if (!ctx.response) {
-      if (event.path === `${runtimeConfig.app.baseURL}favicon.ico`) {
-        setResponseHeader(event, "Content-Type", "image/x-icon");
-        return send(
-          event,
-          "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-        );
-      }
-      ctx.response = await ctx.render(event);
-      if (!ctx.response) {
-        const _currentStatus = getResponseStatus(event);
-        setResponseStatus(event, _currentStatus === 200 ? 500 : _currentStatus);
-        return send(
-          event,
-          "No response returned from render handler: " + event.path
-        );
-      }
-    }
-    await nitroApp.hooks.callHook("render:response", ctx.response, ctx);
-    if (ctx.response.headers) {
-      setResponseHeaders(event, ctx.response.headers);
-    }
-    if (ctx.response.statusCode || ctx.response.statusMessage) {
-      setResponseStatus(
-        event,
-        ctx.response.statusCode,
-        ctx.response.statusMessage
-      );
-    }
-    return ctx.response.body;
-  });
-}
-
-const scheduledTasks = false;
-
-const tasks = {
-  
-};
-
-const __runningTasks__ = {};
-async function runTask(name, {
-  payload = {},
-  context = {}
-} = {}) {
-  if (__runningTasks__[name]) {
-    return __runningTasks__[name];
-  }
-  if (!(name in tasks)) {
-    throw createError({
-      message: `Task \`${name}\` is not available!`,
-      statusCode: 404
-    });
-  }
-  if (!tasks[name].resolve) {
-    throw createError({
-      message: `Task \`${name}\` is not implemented!`,
-      statusCode: 501
-    });
-  }
-  const handler = await tasks[name].resolve();
-  const taskEvent = { name, payload, context };
-  __runningTasks__[name] = handler.run(taskEvent);
-  try {
-    const res = await __runningTasks__[name];
-    return res;
-  } finally {
-    delete __runningTasks__[name];
-  }
-}
 
 if (!globalThis.crypto) {
   globalThis.crypto = nodeCrypto.webcrypto;

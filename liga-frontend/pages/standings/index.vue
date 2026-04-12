@@ -275,4 +275,17 @@ async function loadStandings() {
   background: linear-gradient(to top, rgba(251, 146, 60, 0.06), transparent);
   margin-top: auto;
 }
+
+/* Sticky Columns for Responsive Table */
+.sticky-col {
+  position: sticky !important;
+  background-color: #0c1117 !important;
+  z-index: 10;
+}
+.sticky-col.left-12 {
+  left: 3rem !important;
+}
+th.sticky-col, td.sticky-col {
+  left: 0;
+}
 </style>

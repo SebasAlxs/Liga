@@ -24,6 +24,72 @@ export function useVocalia() {
     }
   })
 
+  // ── Timer State ────────────────────────────────────────
+  const matchMinute = ref(0)
+  const matchMinuteFormatted = ref("00:00")
+  let timerInterval: any = null
+
+  function updateTimer() {
+    const m = activeMatch.value
+    if (!m) {
+      matchMinute.value = 0
+      matchMinuteFormatted.value = "00:00"
+      return
+    }
+
+    if (m.status === 'FINISHED') {
+      matchMinuteFormatted.value = "Finalizado"
+      return
+    }
+
+    if (m.firstHalfStartedAt && !m.firstHalfEndedAt) {
+      // 1er Tiempo en curso
+      const diffMs = new Date().getTime() - new Date(m.firstHalfStartedAt).getTime()
+      let diffSecs = Math.floor(diffMs / 1000)
+      if (diffSecs < 0) diffSecs = 0
+      
+      const mins = Math.floor(diffSecs / 60)
+      const secs = diffSecs % 60
+      matchMinute.value = mins === 0 ? 1 : mins + 1 // Para el backend 1, 2, etc.
+
+      if (mins >= 45) {
+        matchMinuteFormatted.value = `45'+ ${mins - 45}`
+      } else {
+        matchMinuteFormatted.value = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+      }
+    } else if (m.firstHalfEndedAt && !m.secondHalfStartedAt) {
+      // Medio Tiempo
+      matchMinute.value = 45
+      matchMinuteFormatted.value = "MD"
+    } else if (m.secondHalfStartedAt) {
+      // 2do Tiempo en curso
+      const diffMs = new Date().getTime() - new Date(m.secondHalfStartedAt).getTime()
+      let diffSecs = Math.floor(diffMs / 1000)
+      if (diffSecs < 0) diffSecs = 0
+
+      const mins = 45 + Math.floor(diffSecs / 60)
+      const secs = diffSecs % 60
+      matchMinute.value = mins + 1
+
+      if (mins >= 90) {
+        matchMinuteFormatted.value = `90'+ ${mins - 90}`
+      } else {
+        matchMinuteFormatted.value = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+      }
+    } else {
+       matchMinute.value = 0
+       matchMinuteFormatted.value = "00:00"
+    }
+  }
+
+  onMounted(() => {
+    timerInterval = setInterval(updateTimer, 1000)
+  })
+
+  onUnmounted(() => {
+    if (timerInterval) clearInterval(timerInterval)
+  })
+
   const events = ref<any[]>([])
   const suspensions = ref<any[]>([])
   const referees = ref<any[]>([])
@@ -282,15 +348,35 @@ export function useVocalia() {
   }
 
   async function startMatch() {
-    await $api(`/matches/${selectedMatchId.value}`, { method: 'PUT', body: { status: 'IN_PROGRESS' } })
+    if (!selectedMatchId.value) return
+    const now = new Date().toISOString()
+    await $api(`/matches/${selectedMatchId.value}`, { method: 'PUT', body: { status: 'IN_PROGRESS', firstHalfStartedAt: now } })
     await refreshMatches()
     phase.value = 'live'
     await loadEvents()
+    updateTimer()
+  }
+
+  async function endFirstHalf() {
+    if (!selectedMatchId.value) return
+    const now = new Date().toISOString()
+    await $api(`/matches/${selectedMatchId.value}`, { method: 'PUT', body: { firstHalfEndedAt: now } })
+    await refreshMatches()
+    updateTimer()
+  }
+
+  async function startSecondHalf() {
+    if (!selectedMatchId.value) return
+    const now = new Date().toISOString()
+    await $api(`/matches/${selectedMatchId.value}`, { method: 'PUT', body: { secondHalfStartedAt: now } })
+    await refreshMatches()
+    updateTimer()
   }
 
   async function finishMatch() {
     await $api(`/matches/${selectedMatchId.value}`, { method: 'PUT', body: { status: 'FINISHED' } })
     await refreshMatches()
+    updateTimer()
   }
 
   // ── Events ─────────────────────────────────────────────
@@ -323,9 +409,10 @@ export function useVocalia() {
     homeLineup, awayLineup, homeStarters, homeActiveLineup, awayActiveLineup, homeSubstitutes, awayStarters, awaySubstitutes,
     suspendedPlayerIds, checkedInPlayers,
     homeReady, awayReady, matchCanStart, MIN_PLAYERS, MAX_PLAYERS,
+    matchMinute, matchMinuteFormatted,
     loadMatches, loadLineup, loadEvents, loadSuspensions, loadReferees, selectMatch,
     addToLineup, removeFromLineup, toggleCheckIn, setLineupStatus,
-    saveArbitration, startMatch, finishMatch, addEvent, deleteEvent,
+    saveArbitration, startMatch, endFirstHalf, startSecondHalf, finishMatch, addEvent, deleteEvent,
     lineupForPlayer,
   }
 }

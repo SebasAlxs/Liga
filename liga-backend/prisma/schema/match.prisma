@@ -4,12 +4,15 @@ model Match {
   awayTeamId   String
   homeScore    Int?          @default(0)
   awayScore    Int?          @default(0)
-  matchDate    DateTime
-  status       MatchStatus   @default(SCHEDULED)
-  tournamentId String
-  categoryId   String
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  matchDate           DateTime
+  status              MatchStatus   @default(SCHEDULED)
+  firstHalfStartedAt  DateTime?
+  firstHalfEndedAt    DateTime?
+  secondHalfStartedAt DateTime?
+  tournamentId        String
+  categoryId          String
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
   awayTeam     Team          @relation("AwayMatches", fields: [awayTeamId], references: [id])
   category     Category      @relation(fields: [categoryId], references: [id])
   homeTeam     Team          @relation("HomeMatches", fields: [homeTeamId], references: [id])

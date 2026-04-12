@@ -18,6 +18,9 @@ export class PrismaMatchRepository implements MatchRepository {
                 tournamentId: match.tournamentId,
                 categoryId: match.categoryId,
                 status: match.status as PrismaMatchStatus,
+                firstHalfStartedAt: match.firstHalfStartedAt,
+                firstHalfEndedAt: match.firstHalfEndedAt,
+                secondHalfStartedAt: match.secondHalfStartedAt,
                 refereeId: match.refereeId,
                 assistant1Id: match.assistant1Id,
                 assistant2Id: match.assistant2Id,
@@ -48,7 +51,10 @@ export class PrismaMatchRepository implements MatchRepository {
             created.primaryReferee || undefined,
             created.assistant1 || undefined,
             created.assistant2 || undefined,
-            created.fourthReferee || undefined
+            created.fourthReferee || undefined,
+            created.firstHalfStartedAt,
+            created.firstHalfEndedAt,
+            created.secondHalfStartedAt
         );
     }
 
@@ -80,7 +86,10 @@ export class PrismaMatchRepository implements MatchRepository {
             match.primaryReferee,
             match.assistant1,
             match.assistant2,
-            match.fourthReferee
+            match.fourthReferee,
+            match.firstHalfStartedAt,
+            match.firstHalfEndedAt,
+            match.secondHalfStartedAt
         );
     }
 
@@ -111,7 +120,10 @@ export class PrismaMatchRepository implements MatchRepository {
                 m.primaryReferee,
                 m.assistant1,
                 m.assistant2,
-                m.fourthReferee
+                m.fourthReferee,
+                m.firstHalfStartedAt,
+                m.firstHalfEndedAt,
+                m.secondHalfStartedAt
             )
         );
     }
@@ -128,6 +140,9 @@ export class PrismaMatchRepository implements MatchRepository {
                 tournamentId: match.tournamentId,
                 categoryId: match.categoryId,
                 status: match.status as PrismaMatchStatus,
+                firstHalfStartedAt: match.firstHalfStartedAt,
+                firstHalfEndedAt: match.firstHalfEndedAt,
+                secondHalfStartedAt: match.secondHalfStartedAt,
                 refereeId: match.refereeId,
                 assistant1Id: match.assistant1Id,
                 assistant2Id: match.assistant2Id,
@@ -157,7 +172,10 @@ export class PrismaMatchRepository implements MatchRepository {
             updated.primaryReferee || undefined,
             updated.assistant1 || undefined,
             updated.assistant2 || undefined,
-            updated.fourthReferee || undefined
+            updated.fourthReferee || undefined,
+            updated.firstHalfStartedAt,
+            updated.firstHalfEndedAt,
+            updated.secondHalfStartedAt
         );
     }
 
