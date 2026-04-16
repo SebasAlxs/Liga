@@ -118,7 +118,56 @@
           </div>
 
           <div v-else class="overflow-x-auto">
-             <!-- Future table implementation -->
+            <table class="w-full text-left">
+              <thead>
+                <tr class="border-b border-white/5">
+                  <th class="pb-4 text-xs font-bold text-obsidian-500 uppercase tracking-widest pl-4">Dorsal</th>
+                  <th class="pb-4 text-xs font-bold text-obsidian-500 uppercase tracking-widest">Jugador</th>
+                  <th class="pb-4 text-xs font-bold text-obsidian-500 uppercase tracking-widest hidden md:table-cell">Cédula</th>
+                  <th class="pb-4 text-xs font-bold text-obsidian-500 uppercase tracking-widest text-center">Local</th>
+                  <th v-if="authStore.isAdmin" class="pb-4 text-xs font-bold text-obsidian-500 uppercase tracking-widest text-right pr-4">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/5">
+                <tr v-for="player in players" :key="player.id" class="group/row hover:bg-white/2 transition-colors">
+                  <td class="py-4 pl-4">
+                    <div class="w-10 h-10 rounded-xl bg-obsidian-800 flex items-center justify-center font-bold text-emerald-500 border border-white/5">
+                      {{ player.number }}
+                    </div>
+                  </td>
+                  <td class="py-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-full bg-obsidian-800 overflow-hidden border border-white/10 flex items-center justify-center">
+                        <img v-if="player.picture" :src="player.picture" class="w-full h-full object-cover" />
+                        <Icon v-else name="lucide:user" class="w-5 h-5 text-obsidian-600" />
+                      </div>
+                      <div>
+                        <p class="font-bold text-white group-hover/row:text-emerald-400 transition-colors">{{ player.firstName }} {{ player.lastName }}</p>
+                        <p class="text-xs text-obsidian-500 font-medium">Ficha activa</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-4 hidden md:table-cell">
+                    <span class="font-mono text-sm text-obsidian-400">{{ player.dni || '---' }}</span>
+                  </td>
+                  <td class="py-4 text-center">
+                    <span :class="`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter ${player.isLocal ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`">
+                      {{ player.isLocal ? 'Local' : 'Visitante' }}
+                    </span>
+                  </td>
+                  <td v-if="authStore.isAdmin" class="py-4 text-right pr-4">
+                    <div class="flex items-center justify-end gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity">
+                      <button class="p-2 hover:bg-emerald-500/20 rounded-lg text-obsidian-400 hover:text-emerald-400">
+                        <Icon name="lucide:edit-2" class="w-4 h-4" />
+                      </button>
+                      <button class="p-2 hover:bg-rose-500/20 rounded-lg text-obsidian-400 hover:text-rose-400">
+                        <Icon name="lucide:trash-2" class="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -130,18 +179,22 @@
 const authStore = useAuthStore()
 const route = useRoute()
 const teamStore = useTeamStore()
+const playerStore = usePlayerStore()
 
 const team = ref(null)
-const players = ref([])
+const players = computed(() => playerStore.players)
 const loading = ref(true)
-const loadingPlayers = ref(false)
+const loadingPlayers = computed(() => playerStore.loading)
 
 onMounted(async () => {
   loading.value = true
-  team.value = await teamStore.fetchTeamById(route.params.id)
+  const res = await teamStore.fetchTeamById(route.params.id)
+  team.value = res
   loading.value = false
   
-  // Logic to fetch players can be added here once playerStore is ready
+  if (team.value) {
+    await playerStore.fetchPlayersByTeam(route.params.id)
+  }
 })
 </script>
 

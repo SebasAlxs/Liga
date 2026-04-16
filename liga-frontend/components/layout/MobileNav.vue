@@ -32,7 +32,7 @@
 const navItems = [
   { label: 'Inicio', icon: 'lucide:layout-dashboard', link: '/' },
   { label: 'Partidos', icon: 'lucide:calendar-check', link: '/matches' },
-  { label: 'Vocalía', icon: 'lucide:clipboard-list', link: '/vocalia' },
+  { label: 'Equipos', icon: 'lucide:users-2', link: '/teams' },
   { label: 'Stats', icon: 'lucide:bar-chart-3', link: '/standings' },
   { label: 'Ajustes', icon: 'lucide:settings-2', link: '/settings' },
 ]

@@ -134,6 +134,7 @@ const handleLogout = () => {
           <nav class="hidden md:flex items-center gap-8">
             <NuxtLink to="/" class="text-sm font-bold text-slate-300 hover:text-emerald-400 transition-colors uppercase tracking-widest">Inicio</NuxtLink>
             <NuxtLink to="/matches" class="text-sm font-bold text-slate-300 hover:text-emerald-400 transition-colors uppercase tracking-widest">Partidos</NuxtLink>
+            <NuxtLink to="/teams" class="text-sm font-bold text-slate-300 hover:text-emerald-400 transition-colors uppercase tracking-widest">Equipos</NuxtLink>
             <NuxtLink to="/standings" class="text-sm font-bold text-slate-300 hover:text-emerald-400 transition-colors uppercase tracking-widest">Posiciones</NuxtLink>
           </nav>
 
