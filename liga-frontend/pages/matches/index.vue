@@ -9,11 +9,11 @@
       </div>
 
       <div class="flex flex-col sm:flex-row gap-3 flex-wrap">
-        <select v-model="filterTournament" class="bg-surface/80 border border-border rounded-xl px-4 py-2 text-content focus:outline-none focus:border-primary transition-all text-sm">
+        <select v-model="filterTournament" class="select-arrow bg-surface/80 border border-border rounded-xl px-4 py-2 text-content focus:outline-none focus:border-primary transition-all text-sm">
           <option value="">Todos los torneos</option>
           <option v-for="t in matchStore.tournaments" :key="t.id" :value="t.id">{{ t.name }}</option>
         </select>
-        <select v-model="filterStatus" class="bg-surface/80 border border-border rounded-xl px-4 py-2 text-content focus:outline-none focus:border-primary transition-all text-sm">
+        <select v-model="filterStatus" class="select-arrow bg-surface/80 border border-border rounded-xl px-4 py-2 text-content focus:outline-none focus:border-primary transition-all text-sm">
           <option value="">Todos los estados</option>
           <option value="SCHEDULED">Programados</option>
           <option value="IN_PROGRESS">En juego</option>

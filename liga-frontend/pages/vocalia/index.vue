@@ -35,7 +35,7 @@
 
         <!-- Match selector -->
         <select v-model="selectedId" @change="onMatchSelect"
-          class="bg-surface border border-border rounded-xl px-4 py-2.5 text-content focus:outline-none focus:border-emerald-500/50 text-sm font-medium min-w-[250px]">
+          class="match-select bg-surface border border-border rounded-xl px-4 py-2.5 text-content focus:outline-none focus:border-emerald-500/50 text-sm font-medium min-w-[250px]">
           <option value="" disabled>Seleccionar partido...</option>
           <optgroup v-for="grp in matchGroups" :key="grp.status" :label="grp.label">
             <option v-for="m in grp.matches" :key="m.id" :value="m.id">
@@ -1069,6 +1069,16 @@ async function submitEvent() {
 }
 .field-input:focus { border-color: #10b981; }
 .field-input option { background: rgb(var(--color-surface)); color: rgb(var(--color-text)); }
+select.field-input,
+select.match-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1rem;
+  padding-right: 3rem;
+}
 
 .checkin-counter {
   display: inline-flex;

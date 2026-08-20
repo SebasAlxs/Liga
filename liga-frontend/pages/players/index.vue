@@ -11,7 +11,7 @@
         <!-- Filter by team -->
         <select
           v-model="selectedTeamId"
-          class="bg-surface-hover border border-border/10 rounded-xl px-4 py-2 text-content focus:outline-none focus:border-primary/50 transition-all"
+          class="select-arrow bg-surface-hover border border-border/10 rounded-xl px-4 py-2 text-content focus:outline-none focus:border-primary/50 transition-all"
           @change="onTeamFilterChange"
         >
           <option value="">Todos los equipos</option>
