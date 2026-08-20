@@ -6,7 +6,12 @@ import { UpdatePlayerUseCase } from "../../../../../application/use-cases/Player
 import { PrismaPlayerRepository } from "../../../../db/prisma/repositories/PrismaPlayerRepository";
 import { PrismaTeamRepository } from "../../../../db/prisma/repositories/PrismaTeamRepository";
 import { PrismaCategoryRepository } from "../../../../db/prisma/repositories/PrismaCategoryRepository";
-import { successResponse, errorResponse } from "../../../../libs/api-gateway";
+import { successResponse, handleErrorResponse } from "../../../../libs/api-gateway";
+
+const PLAYER_UNIQUE_MESSAGES = {
+    "dni": "Ya existe un jugador registrado con esa cédula.",
+    "teamId,number": "Ese dorsal ya está asignado a otro jugador de este equipo.",
+};
 
 export const handler = async (req: Request, res: Response) => {
     try {
@@ -24,6 +29,6 @@ export const handler = async (req: Request, res: Response) => {
         const player = await useCase.execute(req.params.id as string, req.body);
         return successResponse(res, player, 200, "Jugador actualizado con éxito.");
     } catch (error: any) {
-        return errorResponse(res, error.message);
+        return handleErrorResponse(res, error, PLAYER_UNIQUE_MESSAGES);
     }
 };
