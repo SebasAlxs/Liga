@@ -110,10 +110,7 @@ const handleLogout = () => {
       </aside>
 
       <!-- Main Content Container -->
-      <div 
-        class="transition-all duration-300 min-h-screen" 
-        :class="!authStore.isLoggedIn ? '' : (isMobile ? 'ml-0' : (isSidebarOpen ? 'ml-72' : 'ml-20'))"
-      >
+      <div class="transition-all duration-300 min-h-screen">
         <!-- Public Header -->
         <header 
           v-if="!authStore.isLoggedIn"

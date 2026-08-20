@@ -4,8 +4,8 @@
     <!-- ══ TOP BAR ══════════════════════════════════════════════ -->
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-white font-display">Vocalía</h1>
-        <p class="text-obsidian-400 text-sm mt-0.5">Control de partido en tiempo real.</p>
+        <h1 class="text-3xl font-bold text-content font-display">Vocalía</h1>
+        <p class="text-content-muted text-sm mt-0.5">Control de partido en tiempo real.</p>
       </div>
 
       <div class="flex items-center gap-3 flex-wrap">
@@ -19,23 +19,23 @@
                 v.phase.value === ph.id
                   ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400'
                   : phaseReached(ph.id)
-                    ? 'border-white/10 text-obsidian-300 hover:border-white/20'
-                    : 'border-white/5 text-obsidian-600 cursor-default'
+                    ? 'border-border text-content-muted hover:border-border'
+                    : 'border-border text-content-muted cursor-default'
               ]"
             >
               <span :class="[
                 'w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-black flex-shrink-0',
-                v.phase.value === ph.id ? 'bg-emerald-500 text-obsidian-950' : phaseReached(ph.id) ? 'bg-white/10 text-white' : 'bg-white/5 text-obsidian-600'
+                v.phase.value === ph.id ? 'bg-emerald-500 text-obsidian-950' : phaseReached(ph.id) ? 'bg-surface-hover text-content' : 'bg-surface-hover text-content-muted'
               ]">{{ i + 1 }}</span>
               <span class="hidden sm:inline">{{ ph.label }}</span>
             </button>
-            <div v-if="i < phases.length - 1" :class="`w-4 h-px flex-shrink-0 ${phaseReached(phases[i+1]?.id) ? 'bg-emerald-500/40' : 'bg-white/8'}`"></div>
+            <div v-if="i < phases.length - 1" :class="`w-4 h-px flex-shrink-0 ${phaseReached(phases[i+1]?.id) ? 'bg-emerald-500/40' : 'bg-surface-hover'}`"></div>
           </template>
         </div>
 
         <!-- Match selector -->
         <select v-model="selectedId" @change="onMatchSelect"
-          class="bg-obsidian-800/60 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500/50 text-sm font-medium min-w-[250px]">
+          class="bg-surface border border-border rounded-xl px-4 py-2.5 text-content focus:outline-none focus:border-emerald-500/50 text-sm font-medium min-w-[250px]">
           <option value="" disabled>Seleccionar partido...</option>
           <optgroup v-for="grp in matchGroups" :key="grp.status" :label="grp.label">
             <option v-for="m in grp.matches" :key="m.id" :value="m.id">
@@ -54,7 +54,7 @@
             <Icon name="lucide:log-out" class="w-5 h-5" />
           </button>
         </div>
-        <button v-else @click="navigateTo('/login')" class="btn-premium px-6 py-2.5 text-[10px] uppercase tracking-widest border-white/10 hover:border-emerald-500/50">
+        <button v-else @click="navigateTo('/login')" class="btn-premium px-6 py-2.5 text-[10px] uppercase tracking-widest border-border hover:border-emerald-500/50">
           <Icon name="lucide:lock" class="w-4 h-4 mr-2" />
           Acceso Oficial
         </button>
@@ -62,10 +62,10 @@
     </div>
 
     <!-- No match -->
-    <div v-if="!v.activeMatch.value" class="glass rounded-3xl border border-white/5 p-20 text-center">
-      <Icon name="lucide:clipboard-list" class="w-16 h-16 text-obsidian-700 mx-auto mb-4" />
-      <h3 class="text-xl font-semibold text-white mb-2">Selecciona un partido</h3>
-      <p class="text-obsidian-400 text-sm">Elige un partido para comenzar la gestión vocal.</p>
+    <div v-if="!v.activeMatch.value" class="glass rounded-3xl border border-border p-20 text-center">
+      <Icon name="lucide:clipboard-list" class="w-16 h-16 text-content-muted mx-auto mb-4" />
+      <h3 class="text-xl font-semibold text-content mb-2">Selecciona un partido</h3>
+      <p class="text-content-muted text-sm">Elige un partido para comenzar la gestión vocal.</p>
     </div>
 
     <!-- ════════════════════════════════════════════════════════ -->
@@ -77,23 +77,23 @@
         <div class="flex items-center gap-3">
           <div class="w-9 h-9 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400 text-sm font-black flex-shrink-0">1</div>
           <div>
-            <h2 class="font-bold text-white">Verificación de Nómina</h2>
-            <p class="text-xs text-obsidian-400">Confirma la asistencia de cada jugador.</p>
+            <h2 class="font-bold text-content">Verificación de Nómina</h2>
+            <p class="text-xs text-content-muted">Confirma la asistencia de cada jugador.</p>
           </div>
         </div>
         <!-- Check-in counters + action -->
         <div class="flex items-center gap-3 flex-wrap">
           <div class="flex items-center gap-2">
             <div class="checkin-counter">
-              <span class="text-white font-black">{{ v.homeLineup.value.filter(l => l.checkedIn).length }}</span>
-              <span class="text-obsidian-500">/{{ v.homeLineup.value.length }}</span>
-              <span class="text-xs text-obsidian-500 ml-1 hidden sm:inline">{{ homeTeam?.name }}</span>
+              <span class="text-content font-black">{{ v.homeLineup.value.filter(l => l.checkedIn).length }}</span>
+              <span class="text-content-muted">/{{ v.homeLineup.value.length }}</span>
+              <span class="text-xs text-content-muted ml-1 hidden sm:inline">{{ homeTeam?.name }}</span>
             </div>
-            <span class="text-obsidian-700">·</span>
+            <span class="text-content-muted">·</span>
             <div class="checkin-counter">
-              <span class="text-white font-black">{{ v.awayLineup.value.filter(l => l.checkedIn).length }}</span>
-              <span class="text-obsidian-500">/{{ v.awayLineup.value.length }}</span>
-              <span class="text-xs text-obsidian-500 ml-1 hidden sm:inline">{{ awayTeam?.name }}</span>
+              <span class="text-content font-black">{{ v.awayLineup.value.filter(l => l.checkedIn).length }}</span>
+              <span class="text-content-muted">/{{ v.awayLineup.value.length }}</span>
+              <span class="text-xs text-content-muted ml-1 hidden sm:inline">{{ awayTeam?.name }}</span>
             </div>
           </div>
             <button v-if="auth.isLoggedIn.value" @click="goToFormation" :disabled="v.checkedInPlayers.value.length < 2"
@@ -106,11 +106,11 @@
       </div>
 
       <!-- Arbitration Panel (Phase 1) -->
-      <div class="glass rounded-[2rem] border border-white/8 mb-6 overflow-hidden shadow-2xl">
-        <div class="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-white/2">
+      <div class="glass rounded-[2rem] border border-border mb-6 overflow-hidden shadow-2xl">
+        <div class="px-6 py-4 border-b border-border flex items-center justify-between bg-background">
           <div class="flex items-center gap-2">
             <Icon name="lucide:user-check" class="w-4 h-4 text-purple-400" />
-            <h3 class="text-xs font-black text-white uppercase tracking-widest italic">Arbitraje</h3>
+            <h3 class="text-xs font-black text-content uppercase tracking-widest italic">Arbitraje</h3>
           </div>
           <button
             v-if="v.activeMatch.value?.refereeId"
@@ -123,7 +123,7 @@
         <div class="p-6 space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="space-y-1.5">
-              <label class="text-[9px] font-black text-obsidian-500 uppercase tracking-widest px-1">Árbitro Central</label>
+              <label class="text-[9px] font-black text-content-muted uppercase tracking-widest px-1">Árbitro Central</label>
               <select
                 :value="v.activeMatch.value?.refereeId"
                 @change="e => v.saveArbitration({ refereeId: (e.target.value && e.target.value !== 'null') ? e.target.value : null })"
@@ -134,7 +134,7 @@
               </select>
             </div>
             <div class="space-y-1.5">
-              <label class="text-[9px] font-black text-obsidian-500 uppercase tracking-widest px-1">Asistente 1</label>
+              <label class="text-[9px] font-black text-content-muted uppercase tracking-widest px-1">Asistente 1</label>
               <select
                 :value="v.activeMatch.value?.assistant1Id"
                 @change="e => v.saveArbitration({ assistant1Id: (e.target.value && e.target.value !== 'null') ? e.target.value : null })"
@@ -145,7 +145,7 @@
               </select>
             </div>
             <div class="space-y-1.5">
-              <label class="text-[9px] font-black text-obsidian-500 uppercase tracking-widest px-1">Asistente 2</label>
+              <label class="text-[9px] font-black text-content-muted uppercase tracking-widest px-1">Asistente 2</label>
               <select
                 :value="v.activeMatch.value?.assistant2Id"
                 @change="e => v.saveArbitration({ assistant2Id: (e.target.value && e.target.value !== 'null') ? e.target.value : null })"
@@ -161,17 +161,17 @@
 
       <!-- Two columns: home | away -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div v-for="side in checkinSides" :key="side.id" class="glass rounded-3xl border border-white/5 overflow-hidden">
+        <div v-for="side in checkinSides" :key="side.id" class="glass rounded-3xl border border-border overflow-hidden">
 
           <!-- Panel header -->
-          <div class="px-5 py-4 border-b border-white/5 flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl overflow-hidden bg-obsidian-800 border border-white/10 flex-shrink-0 flex items-center justify-center">
+          <div class="px-5 py-4 border-b border-border flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl overflow-hidden bg-background border border-border flex-shrink-0 flex items-center justify-center">
               <img v-if="side.team?.logo" :src="side.team.logo" class="w-full h-full object-cover" />
-              <Icon v-else name="lucide:shield" class="w-5 h-5 text-obsidian-600" />
+              <Icon v-else name="lucide:shield" class="w-5 h-5 text-content-muted" />
             </div>
             <div class="flex-1 min-w-0">
-              <p class="font-bold text-white truncate">{{ side.team?.name ?? '—' }}</p>
-              <p class="text-xs text-obsidian-500">
+              <p class="font-bold text-content truncate">{{ side.team?.name ?? '—' }}</p>
+              <p class="text-xs text-content-muted">
                 {{ side.lineup.filter(l => l.checkedIn).length }} confirmados &middot; {{ side.lineup.length }} en nómina
               </p>
             </div>
@@ -184,7 +184,7 @@
 
           <!-- Player rows -->
           <div v-else class="p-4 space-y-2 max-h-[520px] overflow-y-auto custom-scroll">
-            <p v-if="!side.players.length" class="text-center text-sm text-obsidian-600 py-8">
+            <p v-if="!side.players.length" class="text-center text-sm text-content-muted py-8">
               Sin jugadores registrados en este equipo.
             </p>
 
@@ -195,32 +195,32 @@
                 'flex items-center gap-3 p-3 rounded-xl border transition-all',
                 v.lineupForPlayer(p.id)?.checkedIn ? 'bg-emerald-500/5 border-emerald-500/20'
                 : v.suspendedPlayerIds.value.includes(p.id) ? 'bg-rose-500/5 border-rose-500/15 opacity-70'
-                : 'border-white/5 hover:border-white/10'
+                : 'border-border hover:border-border'
               ]"
             >
               <!-- Photo -->
-              <div class="w-11 h-11 rounded-xl overflow-hidden bg-obsidian-800 border border-white/10 flex-shrink-0 flex items-center justify-center">
+              <div class="w-11 h-11 rounded-xl overflow-hidden bg-background border border-border flex-shrink-0 flex items-center justify-center">
                 <img
                   v-if="p.picture"
                   :src="p.picture.startsWith('data:') ? p.picture : `data:image/jpeg;base64,${p.picture}`"
                   class="w-full h-full object-cover"
                 />
-                <span v-else class="text-sm font-black text-obsidian-500 select-none">
+                <span v-else class="text-sm font-black text-content-muted select-none">
                   {{ (p.firstName?.[0] ?? '') + (p.lastName?.[0] ?? '') }}
                 </span>
               </div>
 
               <!-- Info -->
               <div class="flex-1 min-w-0">
-                <p class="font-bold text-white text-sm truncate">
+                <p class="font-bold text-content text-sm truncate">
                   {{ p.firstName }} {{ p.lastName }}
-                  <span v-if="p.number" class="text-obsidian-600 font-normal">&nbsp;#{{ p.number }}</span>
+                  <span v-if="p.number" class="text-content-muted font-normal">&nbsp;#{{ p.number }}</span>
                 </p>
                 <p class="text-xs mt-0.5"
                   :class="v.suspendedPlayerIds.value.includes(p.id) ? 'text-rose-400'
                     : v.lineupForPlayer(p.id)?.checkedIn ? 'text-emerald-400'
-                    : v.lineupForPlayer(p.id) ? 'text-obsidian-500'
-                    : 'text-obsidian-700'">
+                    : v.lineupForPlayer(p.id) ? 'text-content-muted'
+                    : 'text-content-muted'">
                   {{ v.suspendedPlayerIds.value.includes(p.id) ? '🚫 Suspendido'
                     : v.lineupForPlayer(p.id)?.checkedIn ? '✅ Confirmado'
                     : v.lineupForPlayer(p.id) ? '⏳ Pendiente de ingreso'
@@ -277,8 +277,8 @@
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 rounded-full bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 text-sm font-black">2</div>
           <div>
-            <h2 class="font-bold text-white">Armado de Formación</h2>
-            <p class="text-xs text-obsidian-400">Asigna titulares y suplentes para cada equipo.</p>
+            <h2 class="font-bold text-content">Armado de Formación</h2>
+            <p class="text-xs text-content-muted">Asigna titulares y suplentes para cada equipo.</p>
           </div>
         </div>
         <button v-if="auth.isLoggedIn.value" @click="doStartMatch"
@@ -316,11 +316,11 @@
     <!-- ════════════════════════════════════════════════════════ -->
     <template v-else-if="v.phase.value === 'live'">
       <!-- Arbitration Panel (Phase 3) -->
-      <div class="glass rounded-[2rem] border border-white/8 mb-6 overflow-hidden shadow-2xl">
-        <div class="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-white/2">
+      <div class="glass rounded-[2rem] border border-border mb-6 overflow-hidden shadow-2xl">
+        <div class="px-6 py-4 border-b border-border flex items-center justify-between bg-background">
           <div class="flex items-center gap-2">
             <Icon name="lucide:user-check" class="w-4 h-4 text-purple-400" />
-            <h3 class="text-xs font-black text-white uppercase tracking-widest italic">Arbitraje</h3>
+            <h3 class="text-xs font-black text-content uppercase tracking-widest italic">Arbitraje</h3>
           </div>
           <button
             v-if="auth.isAdmin.value && v.activeMatch.value?.refereeId"
@@ -333,7 +333,7 @@
         <div class="p-6 space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="space-y-1.5">
-              <label class="text-[9px] font-black text-obsidian-500 uppercase tracking-widest px-1">Árbitro Central</label>
+              <label class="text-[9px] font-black text-content-muted uppercase tracking-widest px-1">Árbitro Central</label>
               <select
                 :disabled="!auth.isAdmin.value"
                 :value="v.activeMatch.value?.refereeId"
@@ -345,7 +345,7 @@
               </select>
             </div>
             <div class="space-y-1.5">
-              <label class="text-[9px] font-black text-obsidian-500 uppercase tracking-widest px-1">Asistente 1</label>
+              <label class="text-[9px] font-black text-content-muted uppercase tracking-widest px-1">Asistente 1</label>
               <select
                 :disabled="!auth.isAdmin.value"
                 :value="v.activeMatch.value?.assistant1Id"
@@ -357,7 +357,7 @@
               </select>
             </div>
             <div class="space-y-1.5">
-              <label class="text-[9px] font-black text-obsidian-500 uppercase tracking-widest px-1">Asistente 2</label>
+              <label class="text-[9px] font-black text-content-muted uppercase tracking-widest px-1">Asistente 2</label>
               <select
                 :disabled="!auth.isAdmin.value"
                 :value="v.activeMatch.value?.assistant2Id"
@@ -417,9 +417,9 @@
 
           <!-- Bench row (Desktop: Grid / Mobile: Horizontal Scroll) -->
           <div :class="isMobile ? 'space-y-4 px-2' : 'grid grid-cols-2 gap-4'">
-            <div class="glass rounded-3xl border border-white/5 p-4 sm:p-5 relative overflow-hidden group">
+            <div class="glass rounded-3xl border border-border p-4 sm:p-5 relative overflow-hidden group">
               <div class="absolute -top-4 -right-4 w-12 h-12 bg-emerald-500/5 rounded-full blur-xl group-hover:bg-emerald-500/10 transition-all"></div>
-              <p class="text-[10px] sm:text-xs font-black text-obsidian-500 mb-3 sm:mb-4 uppercase tracking-[0.15em] flex items-center gap-2">
+              <p class="text-[10px] sm:text-xs font-black text-content-muted mb-3 sm:mb-4 uppercase tracking-[0.15em] flex items-center gap-2">
                 <span class="w-1 h-1 rounded-full bg-emerald-500"></span>
                 Suplentes — {{ homeTeam?.name }}
               </p>
@@ -435,9 +435,9 @@
                 />
               </div>
             </div>
-            <div class="glass rounded-3xl border border-white/5 p-4 sm:p-5 relative overflow-hidden group">
+            <div class="glass rounded-3xl border border-border p-4 sm:p-5 relative overflow-hidden group">
               <div class="absolute -top-4 -right-4 w-12 h-12 bg-blue-500/5 rounded-full blur-xl group-hover:bg-blue-500/10 transition-all"></div>
-              <p class="text-[10px] sm:text-xs font-black text-obsidian-500 mb-3 sm:mb-4 uppercase tracking-[0.15em] flex items-center gap-2">
+              <p class="text-[10px] sm:text-xs font-black text-content-muted mb-3 sm:mb-4 uppercase tracking-[0.15em] flex items-center gap-2">
                 <span class="w-1 h-1 rounded-full bg-blue-500"></span>
                 Suplentes — {{ awayTeam?.name }}
               </p>
@@ -467,48 +467,48 @@
           </Transition>
 
           <!-- No player selected hint / Viewer Mode Info -->
-          <div v-if="!activePlayer || !auth.isLoggedIn.value" class="rounded-2xl border border-dashed border-white/10 p-5 text-center" style="background: rgba(10,14,20,0.3)">
+          <div v-if="!activePlayer || !auth.isLoggedIn.value" class="rounded-2xl border border-dashed border-border p-5 text-center bg-background">
             <div class="w-12 h-12 rounded-full bg-emerald-500/5 border border-emerald-500/15 flex items-center justify-center mx-auto mb-3 animate-pulse">
               <Icon :name="auth.isLoggedIn.value ? 'lucide:hand-metal' : 'lucide:monitor-play'" class="w-6 h-6 text-emerald-600" />
             </div>
-            <p class="text-sm font-semibold text-white mb-1">
+            <p class="text-sm font-semibold text-content mb-1">
               {{ auth.isLoggedIn.value ? 'Selecciona un jugador' : 'Modo Espectador' }}
             </p>
-            <p class="text-xs text-obsidian-500">
+            <p class="text-xs text-content-muted">
               {{ auth.isLoggedIn.value ? 'Haz click en cualquier ficha del campo para registrar acciones.' : 'Estás viendo el partido en tiempo real. Los controles de oficial están restringidos.' }}
             </p>
           </div>
 
           <!-- Events timeline -->
-          <div class="glass rounded-2xl border border-white/5">
-            <div class="px-4 py-3 border-b border-white/5 flex items-center justify-between">
-              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <div class="glass rounded-2xl border border-border">
+            <div class="px-4 py-3 border-b border-border flex items-center justify-between">
+              <h3 class="text-sm font-bold text-content flex items-center gap-2">
                 <Icon name="lucide:activity" class="w-4 h-4 text-blue-400" />Timeline
               </h3>
-              <span class="text-xs text-obsidian-500">{{ v.events.value.length }} eventos</span>
+              <span class="text-xs text-content-muted">{{ v.events.value.length }} eventos</span>
             </div>
             <div class="p-3 space-y-1 max-h-64 overflow-y-auto custom-scroll">
-              <div v-if="!v.events.value.length" class="py-6 text-center text-xs text-obsidian-600 flex flex-col items-center gap-2">
-                <Icon name="lucide:clipboard" class="w-6 h-6 text-obsidian-700" />
+              <div v-if="!v.events.value.length" class="py-6 text-center text-xs text-content-muted flex flex-col items-center gap-2">
+                <Icon name="lucide:clipboard" class="w-6 h-6 text-content-muted" />
                 Sin eventos aún
               </div>
               <div v-for="ev in v.events.value" :key="ev.id"
                 :class="[
-                  'group flex items-center gap-2 pl-2 pr-1.5 py-1.5 rounded-lg hover:bg-white/3 transition-all border-l-2',
+                  'group flex items-center gap-2 pl-2 pr-1.5 py-1.5 rounded-lg hover:bg-surface-hover transition-all border-l-2',
                   eventBorderColor(ev.type)
                 ]">
-                <span class="text-xs font-mono text-obsidian-600 w-7 text-right flex-shrink-0">{{ ev.minute ? ev.minute+"'" : '—' }}</span>
+                <span class="text-xs font-mono text-content-muted w-7 text-right flex-shrink-0">{{ ev.minute ? ev.minute+"'" : '—' }}</span>
                 <span class="text-base flex-shrink-0">{{ emoji(ev.type) }}</span>
                 <div class="flex-1 min-w-0">
-                  <p v-if="ev.type === 'SUBSTITUTION'" class="text-[11px] font-bold text-white leading-tight">
+                  <p v-if="ev.type === 'SUBSTITUTION'" class="text-[11px] font-bold text-content leading-tight">
                     <span class="text-emerald-400">Entra: {{ playerNameById(ev.relatedPlayerId) }}</span>
                     <br/>
-                    <span class="text-obsidian-500 font-medium">Sale: {{ playerNameById(ev.playerId) }}</span>
+                    <span class="text-content-muted font-medium">Sale: {{ playerNameById(ev.playerId) }}</span>
                   </p>
-                  <p v-else class="text-xs font-semibold text-white truncate">{{ playerNameById(ev.playerId) }}</p>
+                  <p v-else class="text-xs font-semibold text-content truncate">{{ playerNameById(ev.playerId) }}</p>
                   <p class="text-[10px] truncate leading-none mt-1" :class="ev.teamId === v.activeMatch.value?.homeTeamId ? 'text-emerald-600' : 'text-blue-600'">{{ teamName(ev.teamId) }}</p>
                 </div>
-                <button @click="v.deleteEvent(ev.id)" class="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-rose-500/10 text-obsidian-700 hover:text-rose-400 transition-all">
+                <button @click="v.deleteEvent(ev.id)" class="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-rose-500/10 text-content-muted hover:text-rose-400 transition-all">
                   <Icon name="lucide:x" class="w-3 h-3" />
                 </button>
               </div>
@@ -524,7 +524,7 @@
       <div v-if="showVerifyModal" 
         :class="[
           'fixed inset-0 z-50 flex p-4',
-          isMobile ? 'items-end bg-obsidian-950/60' : 'items-center justify-center bg-obsidian-950/80 backdrop-blur-md'
+          isMobile ? 'items-end bg-obsidian-950/50' : 'items-center justify-center bg-obsidian-950/70 backdrop-blur-md'
         ]"
       >
         <!-- Backdrop -->
@@ -533,20 +533,20 @@
         <!-- Modal content -->
         <div 
           :class="[
-            'relative glass w-full border border-white/10 overflow-hidden shadow-2xl transition-all',
+            'relative glass w-full border border-border overflow-hidden shadow-2xl transition-all',
             isMobile ? 'rounded-t-[2.5rem] p-6 pb-safe border-b-0 translate-y-0' : 'max-w-lg rounded-[2.5rem] p-8'
           ]"
         >
           <!-- Handle for Bottom Sheet -->
-          <div v-if="isMobile" class="w-12 h-1.5 bg-white/10 rounded-full mx-auto mb-6"></div>
+          <div v-if="isMobile" class="w-12 h-1.5 bg-surface-hover rounded-full mx-auto mb-6"></div>
 
           <!-- Header -->
           <div class="flex justify-between items-start mb-6">
             <div>
-              <h3 :class="[isMobile ? 'text-xl' : 'text-2xl', 'font-black text-white italic tracking-tight uppercase']">Verificar Jugador</h3>
-              <p class="text-obsidian-400 text-xs mt-1">Valida la identidad antes del ingreso.</p>
+              <h3 :class="[isMobile ? 'text-xl' : 'text-2xl', 'font-black text-content italic tracking-tight uppercase']">Verificar Jugador</h3>
+              <p class="text-content-muted text-xs mt-1">Valida la identidad antes del ingreso.</p>
             </div>
-            <button @click="showVerifyModal = false" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-obsidian-400">
+            <button @click="showVerifyModal = false" class="w-10 h-10 rounded-full bg-surface-hover flex items-center justify-center text-content-muted">
               <Icon name="lucide:x" class="w-5 h-5" />
             </button>
           </div>
@@ -556,18 +556,18 @@
             <div :class="['flex gap-6 items-start', isMobile ? 'flex-col items-center' : 'flex-row']">
               <!-- Big Photo -->
               <div class="relative group">
-                <div :class="[isMobile ? 'w-36 h-36' : 'w-44 h-44', 'rounded-3xl overflow-hidden bg-obsidian-900 border-4 border-white/5 shadow-2xl transition-transform group-hover:scale-[1.02]']">
+                <div :class="[isMobile ? 'w-36 h-36' : 'w-44 h-44', 'rounded-3xl overflow-hidden bg-background border-4 border-border shadow-2xl transition-transform group-hover:scale-[1.02]']">
                   <img
                     v-if="verifyingData?.player?.picture"
                     :src="verifyingData.player.picture.startsWith('data:') ? verifyingData.player.picture : `data:image/jpeg;base64,${verifyingData.player.picture}`"
                     class="w-full h-full object-cover"
                   />
-                  <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-obsidian-800 to-obsidian-900">
-                    <Icon name="lucide:user" class="w-16 h-16 text-obsidian-700" />
+                  <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-background to-surface-hover">
+                    <Icon name="lucide:user" class="w-16 h-16 text-content-muted" />
                   </div>
                 </div>
                 <!-- Number Badge -->
-                <div v-if="verifyingData?.player?.number" class="absolute -top-3 -right-3 w-10 h-10 rounded-2xl bg-emerald-500 text-obsidian-950 flex items-center justify-center text-lg font-black shadow-lg border-4 border-obsidian-950">
+                <div v-if="verifyingData?.player?.number" class="absolute -top-3 -right-3 w-10 h-10 rounded-2xl bg-emerald-500 text-obsidian-950 flex items-center justify-center text-lg font-black shadow-lg border-4 border-surface">
                   {{ verifyingData.player.number }}
                 </div>
               </div>
@@ -575,21 +575,21 @@
               <!-- Info -->
               <div :class="['flex-1 space-y-4 w-full', isMobile ? 'text-center' : 'text-left']">
                 <div>
-                  <p :class="[isMobile ? 'text-2xl' : 'text-3xl', 'font-black text-white leading-tight']">
+                  <p :class="[isMobile ? 'text-2xl' : 'text-3xl', 'font-black text-content leading-tight']">
                     {{ verifyingData?.player?.firstName }}<br/>
                     {{ verifyingData?.player?.lastName }}
                   </p>
                   <p class="text-[10px] font-black text-emerald-500 uppercase tracking-wider mt-1">{{ teamName(verifyingData?.teamId) }}</p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 py-4 border-y border-white/5">
+                <div class="grid grid-cols-2 gap-4 py-4 border-y border-border">
                   <div>
-                    <p class="text-[9px] uppercase font-bold text-obsidian-500 tracking-wider">Cédula / DNI</p>
-                    <p class="text-white text-sm font-bold">{{ verifyingData?.player?.dni || 'N/A' }}</p>
+                    <p class="text-[9px] uppercase font-bold text-content-muted tracking-wider">Cédula / DNI</p>
+                    <p class="text-content text-sm font-bold">{{ verifyingData?.player?.dni || 'N/A' }}</p>
                   </div>
                   <div>
-                    <p class="text-[9px] uppercase font-bold text-obsidian-500 tracking-wider">Edad</p>
-                    <p class="text-white text-sm font-bold">{{ getAge(verifyingData?.player?.birthDate) || '—' }} años</p>
+                    <p class="text-[9px] uppercase font-bold text-content-muted tracking-wider">Edad</p>
+                    <p class="text-content text-sm font-bold">{{ getAge(verifyingData?.player?.birthDate) || '—' }} años</p>
                   </div>
                 </div>
               </div>
@@ -600,7 +600,7 @@
             <div class="grid grid-cols-2 gap-3">
               <button
                 @click="showVerifyModal = false"
-                class="px-6 py-4 rounded-2xl font-bold text-obsidian-400 hover:text-white hover:bg-white/5 transition-all text-xs uppercase tracking-widest"
+                class="px-6 py-4 rounded-2xl font-bold text-content-muted hover:text-content hover:bg-surface-hover transition-all text-xs uppercase tracking-widest"
               >
                 Cancelar
               </button>
@@ -633,7 +633,7 @@
           ]"
         >
           <!-- Handle for Bottom Sheet -->
-          <div v-if="isMobile" class="w-12 h-1.5 bg-surface/10 rounded-full mx-auto mb-6"></div>
+          <div v-if="isMobile" class="w-12 h-1.5 bg-surface-hover rounded-full mx-auto mb-6"></div>
 
           <div class="flex items-center gap-4 mb-6">
             <div class="w-14 h-14 rounded-2xl overflow-hidden bg-surface-hover border border-border/10 flex-shrink-0">
@@ -648,7 +648,7 @@
               <p class="text-xl font-black text-content truncate leading-tight">{{ playerName(activePlayer) }}</p>
               <p class="text-xs font-bold text-primary uppercase tracking-widest truncate">{{ teamName(activePlayer.teamId) }}</p>
             </div>
-            <button @click="activePlayer = null" class="w-10 h-10 rounded-full bg-surface/5 flex items-center justify-center text-content-muted hover:text-content transition-colors">
+            <button @click="activePlayer = null" class="w-10 h-10 rounded-full bg-surface-hover flex items-center justify-center text-content-muted hover:text-content transition-colors">
               <Icon name="lucide:x" class="w-5 h-5" />
             </button>
           </div>
@@ -659,7 +659,7 @@
               @click="eventForm.type = ev.value"
               :class="[
                 'flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl border text-[10px] font-bold transition-all active:scale-90',
-                eventForm.type === ev.value ? ev.activeClass + ' bg-surface/5 scale-105 shadow-lg' : 'border-border/5 text-content-muted'
+                eventForm.type === ev.value ? ev.activeClass + ' bg-background scale-105 shadow-lg' : 'border-border text-content-muted'
               ]"
             >
               <span class="text-2xl">{{ ev.emoji }}</span>
@@ -682,7 +682,7 @@
                 Hacer Ingresar a Cancha
               </button>
             </div>
-            <div v-else class="p-8 rounded-[2rem] border-2 border-border/5 bg-surface/2 text-center">
+            <div v-else class="p-8 rounded-[2rem] border-2 border-border bg-background text-center">
               <Icon name="lucide:users" class="w-10 h-10 text-content-muted mb-3 mx-auto" />
               <p class="text-xs font-bold text-content-muted">Plantilla Completa</p>
               <p class="text-[10px] text-content-muted mt-1 uppercase tracking-tighter italic font-bold">Máximo {{ v.MAX_PLAYERS }} por equipo</p>
@@ -957,7 +957,7 @@ function eventBorderColor(type) {
     RED_CARD:     'border-rose-500',
     SUBSTITUTION: 'border-purple-500',
     PLAYER_ENTRY: 'border-emerald-400',
-  }[type] ?? 'border-white/10'
+  }[type] ?? 'border-border'
 }
 
 async function doStartMatch() {
@@ -1039,12 +1039,6 @@ async function submitEvent() {
 </script>
 
 <style scoped>
-.glass {
-  background: rgba(14, 20, 27, 0.45);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
 .player-token {
   transition: transform 0.15s ease;
 }
@@ -1058,36 +1052,36 @@ async function submitEvent() {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(148, 163, 184, 0.55);
+  color: rgb(var(--color-text-muted));
   margin-bottom: 0.5rem;
 }
 
 .field-input {
   width: 100%;
-  background: rgba(10, 14, 20, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgb(var(--color-background));
+  border: 1px solid rgb(var(--color-border));
   border-radius: 0.75rem;
   padding: 0.5rem 0.875rem;
-  color: white;
+  color: rgb(var(--color-text));
   outline: none;
   font-size: 0.875rem;
   transition: border-color 0.2s;
 }
 .field-input:focus { border-color: #10b981; }
-.field-input option { background: #0a0e14; }
+.field-input option { background: rgb(var(--color-surface)); color: rgb(var(--color-text)); }
 
 .checkin-counter {
   display: inline-flex;
   align-items: center;
   padding: 0.25rem 0.75rem;
   border-radius: 0.625rem;
-  background: rgba(10, 14, 20, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgb(var(--color-background));
+  border: 1px solid rgb(var(--color-border));
   font-size: 0.8rem;
   gap: 1px;
 }
 .custom-scroll::-webkit-scrollbar { width: 3px; }
-.custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); border-radius: 4px; }
+.custom-scroll::-webkit-scrollbar-thumb { background: rgb(var(--color-border)); border-radius: 4px; }
 
 .fade-enter-active, .fade-leave-active { transition: all 0.2s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(-8px); }
