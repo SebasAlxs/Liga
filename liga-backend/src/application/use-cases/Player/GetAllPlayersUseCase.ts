@@ -1,12 +1,13 @@
 import { PlayerResponse } from "../../../adapters/http/dto/PlayerResponse";
 import { PlayerRepository } from "../../../domain/repositories/PlayerRepository";
+import { PaginationParams } from "../../../domain/repositories/Pagination";
 
 export class GetAllPlayersUseCase {
     constructor(private playerRepository: PlayerRepository) { }
 
-    async execute(includePicture: boolean = false): Promise<PlayerResponse[]> {
-        const players = await this.playerRepository.findAll();
-        return players.map(p => {
+    async execute(includePicture: boolean = false, pagination?: PaginationParams): Promise<{ items: PlayerResponse[]; total: number }> {
+        const { items: players, total } = await this.playerRepository.findAll(pagination, { includePicture });
+        const items = players.map(p => {
             return {
                 _id: p.id,
                 firstName: p.firstName,
@@ -21,5 +22,6 @@ export class GetAllPlayersUseCase {
                 updatedAt: p.updatedAt?.toISOString() || new Date().toISOString()
             };
         });
+        return { items, total };
     }
 }

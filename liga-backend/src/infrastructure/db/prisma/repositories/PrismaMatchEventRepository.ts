@@ -93,10 +93,22 @@ export class PrismaMatchEventRepository implements MatchEventRepository {
             take: limit
         });
 
-        // We need to fetch player info and team info manually since groupBy doesn't allow include
-        const enrichedScorers = await Promise.all(scorers.map(async (score) => {
-            const player = await this.prisma.player.findUnique({ where: { id: score.playerId } });
-            const team = await this.prisma.team.findUnique({ where: { id: score.teamId } });
+        // groupBy no soporta include, pero podemos traer jugadores y equipos en dos consultas batch
+        // en vez de una por cada scorer.
+        const playerIds = [...new Set(scorers.map(s => s.playerId))];
+        const teamIds = [...new Set(scorers.map(s => s.teamId))];
+
+        const [players, teams] = await Promise.all([
+            this.prisma.player.findMany({ where: { id: { in: playerIds } } }),
+            this.prisma.team.findMany({ where: { id: { in: teamIds } } }),
+        ]);
+
+        const playerById = new Map(players.map(p => [p.id, p]));
+        const teamById = new Map(teams.map(t => [t.id, t]));
+
+        const enrichedScorers = scorers.map((score) => {
+            const player = playerById.get(score.playerId);
+            const team = teamById.get(score.teamId);
             return {
                 playerId: score.playerId,
                 playerName: player ? `${player.firstName} ${player.lastName}` : "Desconocido",
@@ -104,7 +116,7 @@ export class PrismaMatchEventRepository implements MatchEventRepository {
                 teamName: team ? team.name : "Desconocido",
                 goals: score._count.id
             }
-        }));
+        });
 
         return enrichedScorers.sort((a, b) => b.goals - a.goals);
     }
