@@ -2246,7 +2246,7 @@ const _WdrhfXO05QAK_qVBJfZ9wIbFVANNrH2yMuh4CuDQQ = (function(nitro) {
 
 const rootDir = "/Users/alexis/Documents/Magdata/Liga/liga-frontend";
 
-const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"},{"name":"description","content":"Sistema integral de gestión de ligas barriales."}],"link":[{"rel":"icon","type":"image/x-icon","href":"/favicon.ico"},{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap","crossorigin":"anonymous"}],"style":[],"script":[],"noscript":[],"title":"Portal de Liga - Premium Management"};
+const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"},{"name":"description","content":"Sistema integral de gestión de ligas barriales."}],"link":[{"rel":"icon","type":"image/x-icon","href":"/favicon.ico"},{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@400;500;600;700&display=swap","crossorigin":"anonymous"}],"style":[],"script":[],"noscript":[],"title":"Portal de Liga - Premium Management"};
 
 const appRootTag = "div";
 

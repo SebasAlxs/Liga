@@ -59,7 +59,7 @@ export class CreatePlayerUseCase {
             request.dni,
             request.birthDate ? new Date(request.birthDate) : undefined,
             request.isLocal,
-            request.picture ? Buffer.from(request.picture, 'base64') : undefined
+            request.picture || undefined
         );
 
         const created = await this.playerRepository.create(player);
@@ -73,7 +73,7 @@ export class CreatePlayerUseCase {
             dni: created.dni,
             birthDate: created.birthDate?.toISOString(),
             isLocal: created.isLocal,
-            picture: created.picture ? Buffer.from(created.picture).toString('base64') : undefined,
+            picture: created.picture || undefined,
             createdAt: created.createdAt?.toISOString() || new Date().toISOString(),
             updatedAt: created.updatedAt?.toISOString() || new Date().toISOString()
         };

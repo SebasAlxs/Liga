@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import compression from "compression";
 import { TeamHandlers } from "./infrastructure/handlers/Team/src";
 import { PlayerHandlers } from "./infrastructure/handlers/Player/src";
 import { MatchHandlers } from "./infrastructure/handlers/Match/src";
@@ -32,6 +33,7 @@ app.use((req, res, next) => {
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
+app.use(compression());
 
 // Helpers for role-based protection
 const adminOnly = [verifyToken, hasRole(["SUPERADMIN"])];
@@ -109,6 +111,10 @@ router.get("/suspensions", SuspensionHandlers.getPlayerSuspensions);
 // Stats Routes (Public)
 router.get("/stats/top-scorers/:tournamentId", MatchEventHandlers.getTopScorers);
 router.get("/stats/standings/:tournamentId", TeamHandlers.getStandings);
+
+router.get("/server-time", (_req, res) => {
+  res.json({ now: new Date().toISOString() });
+});
 
 router.get("/", (_req, res) => {
   res.json({ message: "Liga API is running" });

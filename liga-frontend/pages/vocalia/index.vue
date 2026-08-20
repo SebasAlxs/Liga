@@ -244,7 +244,7 @@
               <div v-else-if="v.lineupForPlayer(p.id) && auth.isLoggedIn.value" class="flex gap-1.5 flex-shrink-0">
                 <button
                   @click="doToggleCheckIn(v.lineupForPlayer(p.id).id, v.lineupForPlayer(p.id).checkedIn)"
-                  :disabled="checkingInId === v.lineupForPlayer(p.id).id"
+                  :disabled="checkingInId === v.lineupForPlayer(p.id).id || v.suspendedPlayerIds.value.includes(p.id)"
                   :class="[
                     'px-3 py-1.5 rounded-lg text-xs font-bold border transition-all flex items-center gap-1.5 active:scale-95',
                     v.lineupForPlayer(p.id).checkedIn
@@ -410,6 +410,7 @@
               :is-mobile="isMobile"
               :clickable="auth.isLoggedIn.value"
               :stats-map="playerStatsMap"
+              :red-carded-ids="v.redCardedPlayerIds.value"
               @player-click="onPlayerClick"
             />
           </div>
@@ -428,6 +429,7 @@
                   :player="s.player"
                   :size="'sm'"
                   :is-active="activePlayer?.lineupId === s.id"
+                  :class="{ 'opacity-50 grayscale pointer-events-none': v.redCardedPlayerIds.value.includes(s.playerId) }"
                   :stats="playerStatsMap[s.playerId]"
                   @click="onPlayerClick(s)"
                 />
@@ -445,6 +447,7 @@
                   :player="s.player"
                   :size="'sm'"
                   :is-active="activePlayer?.lineupId === s.id"
+                  :class="{ 'opacity-50 grayscale pointer-events-none': v.redCardedPlayerIds.value.includes(s.playerId) }"
                   :stats="playerStatsMap[s.playerId]"
                   @click="onPlayerClick(s)"
                 />
@@ -460,118 +463,6 @@
             <div v-if="eventNotif" :class="`px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2 border ${eventNotif.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'}`">
               <Icon :name="eventNotif.type === 'success' ? 'lucide:check-circle' : 'lucide:alert-circle'" class="w-4 h-4" />
               {{ eventNotif.message }}
-            </div>
-          </Transition>
-
-          <!-- Active player panel (Only for Officials) -->
-          <Transition :name="isMobile ? 'sheet' : 'slide-up'">
-            <div v-if="activePlayer && auth.isLoggedIn.value" 
-               :class="[
-                 'glass border-emerald-500/20 shadow-2xl',
-                 isMobile 
-                   ? 'fixed bottom-0 left-0 right-0 z-50 rounded-t-[2.5rem] border-t p-6 pb-safe' 
-                   : 'rounded-2xl border p-5'
-               ]"
-            >
-              <!-- Handle for Bottom Sheet -->
-              <div v-if="isMobile" class="w-12 h-1.5 bg-white/10 rounded-full mx-auto mb-6"></div>
-
-              <div class="flex items-center gap-4 mb-6">
-                <div class="w-14 h-14 rounded-2xl overflow-hidden bg-obsidian-800 border border-white/10 flex-shrink-0">
-                  <img v-if="activePlayer.player?.photo"
-                    :src="activePlayer.player.photo.startsWith('data:') ? activePlayer.player.photo : `data:image/jpeg;base64,${activePlayer.player.photo}`"
-                    class="w-full h-full object-cover" />
-                  <div v-else class="w-full h-full flex items-center justify-center">
-                    <Icon name="lucide:user" class="w-6 h-6 text-obsidian-600" />
-                  </div>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <p class="text-xl font-black text-white truncate leading-tight">{{ playerName(activePlayer) }}</p>
-                  <p class="text-xs font-bold text-emerald-500 uppercase tracking-widest truncate">{{ teamName(activePlayer.teamId) }}</p>
-                </div>
-                <button @click="activePlayer = null" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-obsidian-400 hover:text-white transition-colors">
-                  <Icon name="lucide:x" class="w-5 h-5" />
-                </button>
-              </div>
-
-              <!-- Event type buttons -->
-              <div v-if="activePlayerOnField" class="grid grid-cols-5 gap-2 mb-6">
-                <button v-for="ev in eventTypes" :key="ev.value"
-                  @click="eventForm.type = ev.value"
-                  :class="[
-                    'flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl border text-[10px] font-bold transition-all active:scale-90',
-                    eventForm.type === ev.value ? ev.activeClass + ' bg-white/5 scale-105 shadow-lg' : 'border-white/5 text-obsidian-600'
-                  ]"
-                >
-                  <span class="text-2xl">{{ ev.emoji }}</span>
-                  <span class="leading-tight text-center">{{ ev.label }}</span>
-                </button>
-              </div>
-
-              <!-- OR: Direct entry for bench players -->
-              <div v-else class="mb-6">
-                <div v-if="(activePlayer.teamId === v.activeMatch.value.homeTeamId && v.homeActiveLineup.value.length < v.MAX_PLAYERS) || (activePlayer.teamId === v.activeMatch.value.awayTeamId && v.awayActiveLineup.value.length < v.MAX_PLAYERS)"
-                  class="flex flex-col items-center p-6 rounded-[2rem] border-2 border-emerald-500/20 bg-emerald-500/5 group text-center">
-                  <Icon name="lucide:user-plus" class="w-10 h-10 text-emerald-400 mb-3 group-hover:scale-110 transition-all" />
-                  <p class="text-sm font-bold text-white mb-1">Ingreso Directo</p>
-                  <p class="text-[10px] text-obsidian-400 text-center mb-4 italic uppercase tracking-widest">Completar Plantilla</p>
-                  <button 
-                    @click="() => { eventForm.type = 'PLAYER_ENTRY'; submitEvent() }"
-                    class="btn-premium btn-emerald w-full py-4 text-[10px] uppercase tracking-widest font-black"
-                  >
-                    Hacer Ingresar a Cancha
-                  </button>
-                </div>
-                <div v-else class="p-8 rounded-[2rem] border-2 border-white/5 bg-white/2 text-center">
-                  <Icon name="lucide:users" class="w-10 h-10 text-obsidian-700 mb-3 mx-auto" />
-                  <p class="text-xs font-bold text-obsidian-400">Plantilla Completa</p>
-                  <p class="text-[10px] text-obsidian-600 mt-1 uppercase tracking-tighter italic font-bold">Máximo {{ v.MAX_PLAYERS }} por equipo</p>
-                </div>
-              </div>
-
-              <!-- Related player for substitution -->
-              <div v-if="eventForm.type === 'SUBSTITUTION'" class="mb-4 animate-fade-in">
-                <label class="field-label">Jugador que entra</label>
-                <div class="relative">
-                  <select v-model="eventForm.relatedPlayerId" class="field-input appearance-none">
-                    <option value="">Seleccionar relevo...</option>
-                    <option v-for="s in subsByTeam(activePlayer.teamId)" :key="s.playerId" :value="s.playerId">
-                      {{ playerName(s) }} {{ s.isVerified ? '' : '(⏳ No Verificado)' }}
-                    </option>
-                  </select>
-                  <Icon name="lucide:chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 text-obsidian-500 pointer-events-none" />
-                </div>
-              </div>
-
-              <!-- Minute with quick-select -->
-              <div class="mb-6">
-                <label class="field-label">Minuto del evento</label>
-                <div class="flex gap-2 mb-3 overflow-x-auto pb-1 no-scrollbar">
-                  <button v-for="m in [15, 30, 45, 60, 75, 90]" :key="m"
-                    type="button"
-                    @click="eventForm.minute = m"
-                    :class="[
-                      'flex-shrink-0 px-4 py-2 rounded-xl text-[10px] font-black border transition-all',
-                      eventForm.minute === m
-                        ? 'bg-emerald-500 text-obsidian-950 border-emerald-500'
-                        : 'border-white/10 text-obsidian-400'
-                    ]"
-                  >
-                    {{ m }}'
-                  </button>
-                </div>
-                <input v-model.number="eventForm.minute" type="number" min="1" max="120" class="field-input" placeholder="O escribe el minuto manual..." />
-              </div>
-
-              <button v-if="activePlayerOnField" @click="submitEvent" :disabled="eventLoading || !eventForm.type"
-                class="btn-premium btn-emerald w-full py-4 text-sm uppercase tracking-[0.2em]"
-              >
-                <Icon v-if="eventLoading" name="lucide:loader-2" class="w-5 h-5 animate-spin" />
-                <template v-else>
-                  <Icon name="lucide:zap" class="w-4 h-4" />
-                  Registrar Acción
-                </template>
-              </button>
             </div>
           </Transition>
 
@@ -725,6 +616,125 @@
         </div>
       </Transition>
 
+      <!-- MODAL DE ACCIONES (ACTION DRAWER) -->
+    <Transition :name="isMobile ? 'sheet' : 'fade'">
+      <div v-if="activePlayer && auth.isLoggedIn.value" 
+        :class="[
+          'fixed inset-0 z-[100] flex',
+          isMobile ? 'items-end' : 'items-center justify-center p-4'
+        ]"
+      >
+        <div class="absolute inset-0 bg-background/80 backdrop-blur-sm" @click="activePlayer = null"></div>
+
+        <div 
+          :class="[
+            'relative glass w-full border border-primary/30 shadow-2xl transition-all overflow-y-auto max-h-[90vh] custom-scroll',
+            isMobile ? 'rounded-t-[2.5rem] p-6 pb-safe border-b-0' : 'max-w-md rounded-[2.5rem] p-8'
+          ]"
+        >
+          <!-- Handle for Bottom Sheet -->
+          <div v-if="isMobile" class="w-12 h-1.5 bg-surface/10 rounded-full mx-auto mb-6"></div>
+
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-14 h-14 rounded-2xl overflow-hidden bg-surface-hover border border-border/10 flex-shrink-0">
+              <img v-if="activePlayer.player?.picture"
+                :src="activePlayer.player.picture"
+                class="w-full h-full object-cover" />
+              <div v-else class="w-full h-full flex items-center justify-center">
+                <Icon name="lucide:user" class="w-6 h-6 text-content-muted" />
+              </div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-xl font-black text-content truncate leading-tight">{{ playerName(activePlayer) }}</p>
+              <p class="text-xs font-bold text-primary uppercase tracking-widest truncate">{{ teamName(activePlayer.teamId) }}</p>
+            </div>
+            <button @click="activePlayer = null" class="w-10 h-10 rounded-full bg-surface/5 flex items-center justify-center text-content-muted hover:text-content transition-colors">
+              <Icon name="lucide:x" class="w-5 h-5" />
+            </button>
+          </div>
+
+          <!-- Event type buttons -->
+          <div v-if="activePlayerOnField" class="grid grid-cols-5 gap-2 mb-6">
+            <button v-for="ev in eventTypes" :key="ev.value"
+              @click="eventForm.type = ev.value"
+              :class="[
+                'flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl border text-[10px] font-bold transition-all active:scale-90',
+                eventForm.type === ev.value ? ev.activeClass + ' bg-surface/5 scale-105 shadow-lg' : 'border-border/5 text-content-muted'
+              ]"
+            >
+              <span class="text-2xl">{{ ev.emoji }}</span>
+              <span class="leading-tight text-center">{{ ev.label }}</span>
+            </button>
+          </div>
+
+          <!-- OR: Direct entry for bench players -->
+          <div v-else class="mb-6">
+            <div v-if="(activePlayer.teamId === v.activeMatch.value.homeTeamId && v.homeActiveLineup.value.length < v.MAX_PLAYERS) || (activePlayer.teamId === v.activeMatch.value.awayTeamId && v.awayActiveLineup.value.length < v.MAX_PLAYERS)"
+              class="flex flex-col items-center p-6 rounded-[2rem] border-2 border-primary/20 bg-primary/5 group text-center">
+              <Icon name="lucide:user-plus" class="w-10 h-10 text-emerald-400 mb-3 group-hover:scale-110 transition-all" />
+              <p class="text-sm font-bold text-content mb-1">Ingreso Directo</p>
+              <p class="text-[10px] text-content-muted text-center mb-4 italic uppercase tracking-widest">Completar Plantilla</p>
+              <button 
+                @click="() => { eventForm.type = 'PLAYER_ENTRY'; submitEvent() }"
+                :disabled="v.isProcessingAction.value"
+                class="btn-premium btn-emerald w-full py-4 text-[10px] uppercase tracking-widest font-black disabled:opacity-50 disabled:pointer-events-none"
+              >
+                Hacer Ingresar a Cancha
+              </button>
+            </div>
+            <div v-else class="p-8 rounded-[2rem] border-2 border-border/5 bg-surface/2 text-center">
+              <Icon name="lucide:users" class="w-10 h-10 text-content-muted mb-3 mx-auto" />
+              <p class="text-xs font-bold text-content-muted">Plantilla Completa</p>
+              <p class="text-[10px] text-content-muted mt-1 uppercase tracking-tighter italic font-bold">Máximo {{ v.MAX_PLAYERS }} por equipo</p>
+            </div>
+          </div>
+
+          <!-- Related player for substitution -->
+          <div v-if="eventForm.type === 'SUBSTITUTION'" class="mb-4 animate-fade-in">
+            <label class="field-label">Jugador que entra</label>
+            <div class="relative">
+              <select v-model="eventForm.relatedPlayerId" class="field-input appearance-none">
+                <option value="">Seleccionar relevo...</option>
+                <option v-for="s in subsByTeam(activePlayer.teamId)" :key="s.playerId" :value="s.playerId">
+                  {{ playerName(s) }} {{ s.isVerified ? '' : '(⏳ No Verificado)' }}
+                </option>
+              </select>
+              <Icon name="lucide:chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 text-content-muted pointer-events-none" />
+            </div>
+          </div>
+
+          <!-- Minute with quick-select -->
+          <div class="mb-6">
+            <label class="field-label">Minuto del evento</label>
+            <div class="flex gap-2 mb-3 overflow-x-auto pb-1 no-scrollbar">
+              <button v-for="m in [15, 30, 45, 60, 75, 90]" :key="m"
+                type="button"
+                @click="eventForm.minute = m"
+                :class="[
+                  'flex-shrink-0 px-4 py-2 rounded-xl text-[10px] font-black border transition-all',
+                  eventForm.minute === m
+                    ? 'bg-primary text-obsidian-950 border-primary'
+                    : 'border-border/10 text-content-muted'
+                ]"
+              >
+                {{ m }}'
+              </button>
+            </div>
+            <input v-model.number="eventForm.minute" type="number" min="1" max="120" class="field-input" placeholder="O escribe el minuto manual..." />
+          </div>
+
+          <button v-if="activePlayerOnField" @click="submitEvent" :disabled="eventLoading || !eventForm.type || v.isProcessingAction.value"
+            class="btn-premium btn-emerald w-full py-4 text-sm uppercase tracking-[0.2em] disabled:opacity-50 disabled:pointer-events-none"
+          >
+            <Icon v-if="eventLoading || v.isProcessingAction.value" name="lucide:loader-2" class="w-5 h-5 animate-spin" />
+            <template v-else>
+              <Icon name="lucide:zap" class="w-4 h-4" />
+              Registrar Acción
+            </template>
+          </button>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 

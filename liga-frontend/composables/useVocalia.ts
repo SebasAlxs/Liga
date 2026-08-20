@@ -18,6 +18,9 @@ export function useVocalia() {
   const loadingLineup = ref(false)
   const loadingEvents = ref(false)
   const loadingReferees = ref(false)
+  
+  const isProcessingAction = ref(false)
+  const timeOffset = ref(0)
 
   // ── Timer State ────────────────────────────────────────
   const matchMinute = ref(0)
@@ -38,7 +41,7 @@ export function useVocalia() {
     }
 
     if (m.firstHalfStartedAt && !m.firstHalfEndedAt) {
-      const diffMs = new Date().getTime() - new Date(m.firstHalfStartedAt).getTime()
+      const diffMs = (new Date().getTime() + timeOffset.value) - new Date(m.firstHalfStartedAt).getTime()
       let diffSecs = Math.floor(diffMs / 1000)
       if (diffSecs < 0) diffSecs = 0
       const mins = Math.floor(diffSecs / 60)
@@ -49,7 +52,7 @@ export function useVocalia() {
       matchMinute.value = 45
       matchMinuteFormatted.value = "MD"
     } else if (m.secondHalfStartedAt) {
-      const diffMs = new Date().getTime() - new Date(m.secondHalfStartedAt).getTime()
+      const diffMs = (new Date().getTime() + timeOffset.value) - new Date(m.secondHalfStartedAt).getTime()
       let diffSecs = Math.floor(diffMs / 1000)
       if (diffSecs < 0) diffSecs = 0
       const mins = 45 + Math.floor(diffSecs / 60)
@@ -62,11 +65,27 @@ export function useVocalia() {
     }
   }
 
-  onMounted(() => {
+  let pollInterval: any = null
+
+  onMounted(async () => {
+    try {
+      const res: any = await $api('/server-time')
+      if (res?.now) {
+        timeOffset.value = new Date(res.now).getTime() - new Date().getTime()
+      }
+    } catch (e) {}
+
     timerInterval = setInterval(updateTimer, 1000)
+
+    pollInterval = setInterval(async () => {
+      if (phase.value === 'live' && selectedMatchId.value && !isProcessingAction.value) {
+        await Promise.all([loadMatchById(selectedMatchId.value), loadEvents()])
+      }
+    }, 3000)
   })
   onUnmounted(() => {
     if (timerInterval) clearInterval(timerInterval)
+    if (pollInterval) clearInterval(pollInterval)
   })
 
   // ── Helpers & Computed ──────────────────────────────────
@@ -164,6 +183,7 @@ export function useVocalia() {
   })
 
   const suspendedPlayerIds = computed(() => suspensions.value.filter((s: any) => s.status === 'ACTIVE').map((s: any) => s.playerId))
+  const redCardedPlayerIds = computed(() => events.value.filter(e => e.type === 'RED_CARD').map(e => e.playerId))
   const checkedInPlayers = computed(() => lineup.value.filter(l => l.checkedIn))
   const lineupForPlayer = (playerId: string) => lineup.value.find(l => l.playerId === playerId)
 
@@ -256,82 +276,126 @@ export function useVocalia() {
 
   // ── Actions ───────────────────────────────────────────
   async function addToLineup(playerId: string, teamId: string, checkedIn: boolean = false, status: 'STARTER' | 'SUBSTITUTE' = 'STARTER') {
-    if (!selectedMatchId.value) return
-    await $api('/match-lineups', { method: 'POST', body: { matchId: selectedMatchId.value, playerId, teamId, status, checkedIn } })
-    await loadLineup()
+    if (isProcessingAction.value) return
+    isProcessingAction.value = true
+    try {
+      if (!selectedMatchId.value) return
+      await $api('/match-lineups', { method: 'POST', body: { matchId: selectedMatchId.value, playerId, teamId, status, checkedIn } })
+      await loadLineup()
+    } finally { isProcessingAction.value = false }
   }
 
   async function removeFromLineup(lineupId: string) {
-    await $api(`/match-lineups/${lineupId}`, { method: 'DELETE' })
-    await loadLineup()
+    if (isProcessingAction.value) return
+    isProcessingAction.value = true
+    try {
+      await $api(`/match-lineups/${lineupId}`, { method: 'DELETE' })
+      await loadLineup()
+    } finally { isProcessingAction.value = false }
   }
 
   async function toggleCheckIn(lineupId: string, current: boolean) {
-    await $api(`/match-lineups/${lineupId}`, { method: 'PUT', body: { checkedIn: !current } })
-    await loadLineup()
+    if (isProcessingAction.value) return
+    isProcessingAction.value = true
+    try {
+      await $api(`/match-lineups/${lineupId}`, { method: 'PUT', body: { checkedIn: !current } })
+      await loadLineup()
+    } finally { isProcessingAction.value = false }
   }
 
   async function setLineupStatus(lineupId: string, status: 'STARTER' | 'SUBSTITUTE') {
-    await $api(`/match-lineups/${lineupId}`, { method: 'PUT', body: { status } })
-    await loadLineup()
+    if (isProcessingAction.value) return
+    isProcessingAction.value = true
+    try {
+      await $api(`/match-lineups/${lineupId}`, { method: 'PUT', body: { status } })
+      await loadLineup()
+    } finally { isProcessingAction.value = false }
   }
 
   async function saveArbitration(payload: any) {
-    if (!selectedMatchId.value) return
-    await $api(`/matches/${selectedMatchId.value}`, { method: 'PUT', body: payload })
-    await refreshMatches()
+    if (isProcessingAction.value) return
+    isProcessingAction.value = true
+    try {
+      if (!selectedMatchId.value) return
+      await $api(`/matches/${selectedMatchId.value}`, { method: 'PUT', body: payload })
+      await refreshMatches()
+    } finally { isProcessingAction.value = false }
   }
 
   async function startMatch() {
-    if (!selectedMatchId.value) return
-    const now = new Date().toISOString()
-    await $api(`/matches/${selectedMatchId.value}`, { method: 'PUT', body: { status: 'IN_PROGRESS', firstHalfStartedAt: now } })
-    await refreshMatches()
-    phase.value = 'live'
-    await loadEvents()
-    updateTimer()
+    if (isProcessingAction.value) return
+    isProcessingAction.value = true
+    try {
+      if (!selectedMatchId.value) return
+      const now = new Date().toISOString()
+      await $api(`/matches/${selectedMatchId.value}`, { method: 'PUT', body: { status: 'IN_PROGRESS', firstHalfStartedAt: now } })
+      await refreshMatches()
+      phase.value = 'live'
+      await loadEvents()
+      updateTimer()
+    } finally { isProcessingAction.value = false }
   }
 
   async function endFirstHalf() {
-    if (!selectedMatchId.value) return
-    const now = new Date().toISOString()
-    await $api(`/matches/${selectedMatchId.value}`, { method: 'PUT', body: { firstHalfEndedAt: now } })
-    await refreshMatches()
-    updateTimer()
+    if (isProcessingAction.value) return
+    isProcessingAction.value = true
+    try {
+      if (!selectedMatchId.value) return
+      const now = new Date().toISOString()
+      await $api(`/matches/${selectedMatchId.value}`, { method: 'PUT', body: { firstHalfEndedAt: now } })
+      await refreshMatches()
+      updateTimer()
+    } finally { isProcessingAction.value = false }
   }
 
   async function startSecondHalf() {
-    if (!selectedMatchId.value) return
-    const now = new Date().toISOString()
-    await $api(`/matches/${selectedMatchId.value}`, { method: 'PUT', body: { secondHalfStartedAt: now } })
-    await refreshMatches()
-    updateTimer()
+    if (isProcessingAction.value) return
+    isProcessingAction.value = true
+    try {
+      if (!selectedMatchId.value) return
+      const now = new Date().toISOString()
+      await $api(`/matches/${selectedMatchId.value}`, { method: 'PUT', body: { secondHalfStartedAt: now } })
+      await refreshMatches()
+      updateTimer()
+    } finally { isProcessingAction.value = false }
   }
 
   async function finishMatch() {
-    await $api(`/matches/${selectedMatchId.value}`, { method: 'PUT', body: { status: 'FINISHED' } })
-    await refreshMatches()
-    updateTimer()
+    if (isProcessingAction.value) return
+    isProcessingAction.value = true
+    try {
+      await $api(`/matches/${selectedMatchId.value}`, { method: 'PUT', body: { status: 'FINISHED' } })
+      await refreshMatches()
+      updateTimer()
+    } finally { isProcessingAction.value = false }
   }
 
   async function addEvent(payload: any) {
-    const match = activeMatch.value
-    const body = { ...payload, matchId: selectedMatchId.value, tournamentId: match?.tournamentId }
-    await $api('/match-events', { method: 'POST', body })
-    await Promise.all([loadEvents(), loadSuspensions(), refreshMatches()])
+    if (isProcessingAction.value) return
+    isProcessingAction.value = true
+    try {
+      const match = activeMatch.value
+      const body = { ...payload, matchId: selectedMatchId.value, tournamentId: match?.tournamentId }
+      await $api('/match-events', { method: 'POST', body })
+      await Promise.all([loadEvents(), loadSuspensions(), refreshMatches()])
+    } finally { isProcessingAction.value = false }
   }
 
   async function deleteEvent(eventId: string) {
-    await $api(`/match-events/${eventId}`, { method: 'DELETE' })
-    await loadEvents()
+    if (isProcessingAction.value) return
+    isProcessingAction.value = true
+    try {
+      await $api(`/match-events/${eventId}`, { method: 'DELETE' })
+      await loadEvents()
+    } finally { isProcessingAction.value = false }
   }
 
   return {
     phase, selectedMatchId, matches, lineup, events, suspensions, referees,
-    loadingLineup, loadingEvents, loadingReferees,
+    loadingLineup, loadingEvents, loadingReferees, isProcessingAction,
     activeMatch,
     homeLineup, awayLineup, homeStarters, homeActiveLineup, awayActiveLineup, homeSubstitutes, awayStarters, awaySubstitutes,
-    suspendedPlayerIds, checkedInPlayers,
+    suspendedPlayerIds, checkedInPlayers, redCardedPlayerIds,
     homeReady, awayReady, matchCanStart, MIN_PLAYERS, MAX_PLAYERS,
     matchMinute, matchMinuteFormatted,
     teamName, teamLogo,

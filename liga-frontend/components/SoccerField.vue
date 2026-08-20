@@ -1,6 +1,6 @@
 <template>
   <div 
-    class="relative w-full rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl transition-all"
+    class="relative w-full rounded-[2.5rem] overflow-hidden border border-border/5 shadow-2xl transition-all"
     :style="fieldContainerStyle"
   >
     <!-- Field background with lines -->
@@ -12,20 +12,20 @@
       
       <!-- Field markings -->
       <div class="absolute inset-0 pointer-events-none p-[4%]">
-        <div class="w-full h-full border-2 border-white/20 rounded-sm relative">
+        <div class="w-full h-full border-2 border-border/20 rounded-sm relative">
           <!-- Center line -->
-          <div class="absolute top-1/2 left-0 right-0 h-0.5 bg-white/15 -translate-y-1/2"></div>
+          <div class="absolute top-1/2 left-0 right-0 h-0.5 bg-surface/15 -translate-y-1/2"></div>
           <!-- Center circle -->
-          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/4 aspect-square border-2 border-white/15 rounded-full"></div>
-          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-white/30 rounded-full"></div>
+          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/4 aspect-square border-2 border-border/15 rounded-full"></div>
+          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-surface/30 rounded-full"></div>
           
           <!-- Penalty areas -->
-          <div class="absolute top-0 left-1/4 right-1/4 h-[18%] border-x-2 border-b-2 border-white/15 rounded-b-sm"></div>
-          <div class="absolute bottom-0 left-1/4 right-1/4 h-[18%] border-x-2 border-t-2 border-white/15 rounded-t-sm"></div>
+          <div class="absolute top-0 left-1/4 right-1/4 h-[18%] border-x-2 border-b-2 border-border/15 rounded-b-sm"></div>
+          <div class="absolute bottom-0 left-1/4 right-1/4 h-[18%] border-x-2 border-t-2 border-border/15 rounded-t-sm"></div>
           
           <!-- Goals -->
-          <div class="absolute -top-[2%] left-[40%] right-[40%] h-[2%] border-2 border-white/25 border-t-0 rounded-b-md bg-white/5"></div>
-          <div class="absolute -bottom-[2%] left-[40%] right-[40%] h-[2%] border-2 border-white/25 border-b-0 rounded-t-md bg-white/5"></div>
+          <div class="absolute -top-[2%] left-[40%] right-[40%] h-[2%] border-2 border-border/25 border-t-0 rounded-b-md bg-surface/5"></div>
+          <div class="absolute -bottom-[2%] left-[40%] right-[40%] h-[2%] border-2 border-border/25 border-b-0 rounded-t-md bg-surface/5"></div>
         </div>
       </div>
     </div>
@@ -34,6 +34,7 @@
     <template v-for="p in allPositioned" :key="p.id">
       <div 
         class="absolute transition-all duration-700 ease-in-out"
+        :class="{ 'opacity-50 grayscale pointer-events-none shadow-[inset_0_0_20px_rgba(225,29,72,0.5)] rounded-full': redCardedIds?.includes(p.playerId) }"
         :style="{ 
           left: `${p.fieldX}%`, 
           top: `${p.fieldY}%`, 
@@ -64,7 +65,8 @@ const props = defineProps({
   isMobile: Boolean,
   clickable: Boolean,
   activePlayerId: String,
-  statsMap: Object
+  statsMap: Object,
+  redCardedIds: Array
 })
 
 const emit = defineEmits(['playerClick'])

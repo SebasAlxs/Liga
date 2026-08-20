@@ -3,21 +3,21 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
-        <h1 class="text-4xl font-extrabold tracking-tight text-white mb-2">
+        <h1 class="text-4xl font-extrabold tracking-tight text-content mb-2">
           Gestión de <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Torneos</span>
         </h1>
-        <p class="text-slate-400">Organiza y supervisa tus campeonatos activos.</p>
+        <p class="text-content-muted">Organiza y supervisa tus campeonatos activos.</p>
       </div>
     </div>
 
     <!-- Empty State / Placeholder -->
     <div class="glass-card p-12 flex flex-col items-center justify-center text-center space-y-6">
-      <div class="w-20 h-20 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20 shadow-xl shadow-emerald-500/5">
+      <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-emerald-400 border border-primary/20 shadow-xl shadow-emerald-500/5">
         <Icon name="ph:trophy-duotone" class="text-4xl" />
       </div>
       <div class="max-w-md">
-        <h3 class="text-xl font-bold text-white mb-2">Módulo en Desarrollo</h3>
-        <p class="text-slate-400">
+        <h3 class="text-xl font-bold text-content mb-2">Módulo en Desarrollo</h3>
+        <p class="text-content-muted">
           Estamos preparando las herramientas para que puedas crear torneos, definir fases y gestionar tablas de posiciones automáticamente.
         </p>
       </div>

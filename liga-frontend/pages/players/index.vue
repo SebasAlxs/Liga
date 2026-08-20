@@ -3,15 +3,15 @@
     <!-- Header -->
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-white font-display">Gestión de Jugadores</h1>
-        <p class="text-obsidian-400 mt-1">Administra la plantilla de jugadores de la liga.</p>
+        <h1 class="text-3xl font-bold text-content font-display">Gestión de Jugadores</h1>
+        <p class="text-content-muted mt-1">Administra la plantilla de jugadores de la liga.</p>
       </div>
 
       <div class="flex flex-col sm:flex-row gap-3">
         <!-- Filter by team -->
         <select
           v-model="selectedTeamId"
-          class="bg-obsidian-800/50 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-emerald-500/50 transition-all"
+          class="bg-surface-hover border border-border/10 rounded-xl px-4 py-2 text-content focus:outline-none focus:border-primary/50 transition-all"
           @change="onTeamFilterChange"
         >
           <option value="">Todos los equipos</option>
@@ -22,12 +22,12 @@
 
         <!-- Search -->
         <div class="relative group">
-          <Icon name="lucide:search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-obsidian-500 group-focus-within:text-emerald-500 transition-colors" />
+          <Icon name="lucide:search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-content-muted group-focus-within:text-primary transition-colors" />
           <input
             v-model="searchQuery"
             type="text"
             placeholder="Buscar jugador..."
-            class="bg-obsidian-800/50 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-white focus:outline-none focus:border-emerald-500/50 transition-all w-full sm:w-56"
+            class="bg-surface-hover border border-border/10 rounded-xl pl-10 pr-4 py-2 text-content focus:outline-none focus:border-primary/50 transition-all w-full sm:w-56"
           >
         </div>
 
@@ -35,7 +35,7 @@
           v-if="authStore.isAdmin"
           id="btn-add-player"
           @click="openAddModal"
-          class="flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-obsidian-950 px-5 py-2 rounded-xl font-bold transition-all shadow-lg shadow-emerald-500/20 active:scale-95 whitespace-nowrap"
+          class="flex items-center justify-center gap-2 bg-primary hover:bg-emerald-600 text-obsidian-950 px-5 py-2 rounded-xl font-bold transition-all shadow-lg shadow-emerald-500/20 active:scale-95 whitespace-nowrap"
         >
           <Icon name="lucide:user-plus" class="w-5 h-5" />
           Nuevo Jugador
@@ -47,7 +47,7 @@
     <Transition name="fade">
       <div
         v-if="notification"
-        :class="`fixed top-6 right-6 z-[60] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border backdrop-blur-md ${notification.type === 'success' ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' : 'bg-rose-500/20 border-rose-500/50 text-rose-400'}`"
+        :class="`fixed top-6 right-6 z-[60] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border backdrop-blur-md ${notification.type === 'success' ? 'bg-primary/20 border-primary/50 text-emerald-400' : 'bg-rose-500/20 border-rose-500/50 text-rose-400'}`"
       >
         <Icon :name="notification.type === 'success' ? 'lucide:check-circle' : 'lucide:alert-circle'" class="w-5 h-5" />
         <span class="font-medium">{{ notification.message }}</span>
@@ -56,31 +56,31 @@
 
     <!-- Loading -->
     <div v-if="playerStore.loading && !playerStore.players.length" class="flex justify-center py-20 flex-col items-center gap-4">
-      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
-      <p class="text-obsidian-400 animate-pulse">Cargando jugadores...</p>
+      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <p class="text-content-muted animate-pulse">Cargando jugadores...</p>
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="filteredPlayers.length === 0" class="glass-card p-12 text-center rounded-3xl border border-white/5 max-w-lg mx-auto">
-      <Icon :name="searchQuery ? 'lucide:search-x' : 'lucide:users'" class="w-16 h-16 text-obsidian-600 mx-auto mb-4" />
-      <h3 class="text-xl font-semibold text-white">
+    <div v-else-if="filteredPlayers.length === 0" class="glass-card p-12 text-center rounded-3xl border border-border/5 max-w-lg mx-auto">
+      <Icon :name="searchQuery ? 'lucide:search-x' : 'lucide:users'" class="w-16 h-16 text-content-muted mx-auto mb-4" />
+      <h3 class="text-xl font-semibold text-content">
         {{ searchQuery ? 'No se encontraron jugadores' : 'No hay jugadores registrados' }}
       </h3>
-      <p class="text-obsidian-400 mt-2">
+      <p class="text-content-muted mt-2">
         {{ searchQuery ? 'Intenta con otro nombre.' : 'Agrega el primer jugador a la liga.' }}
       </p>
     </div>
 
     <!-- Players Table -->
-    <div v-else class="glass-card rounded-3xl border border-white/5 overflow-hidden">
+    <div v-else class="glass-card rounded-3xl border border-border/5 overflow-hidden">
       <!-- Stats Bar -->
-      <div class="px-6 py-4 border-b border-white/5 flex items-center justify-between">
-        <span class="text-sm text-obsidian-400">
-          <span class="text-white font-bold">{{ filteredPlayers.length }}</span> jugadores encontrados
+      <div class="px-6 py-4 border-b border-border/5 flex items-center justify-between">
+        <span class="text-sm text-content-muted">
+          <span class="text-content font-bold">{{ filteredPlayers.length }}</span> jugadores encontrados
         </span>
-        <div class="flex items-center gap-4 text-xs text-obsidian-500">
+        <div class="flex items-center gap-4 text-xs text-content-muted">
           <span class="flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Local
+            <span class="w-2 h-2 rounded-full bg-primary"></span> Local
           </span>
           <span class="flex items-center gap-1">
             <span class="w-2 h-2 rounded-full bg-amber-500"></span> Foráneo
@@ -91,25 +91,25 @@
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead>
-            <tr class="border-b border-white/5 text-left">
-              <th class="px-6 py-4 text-xs font-bold text-obsidian-500 uppercase tracking-widest w-12">#</th>
-              <th class="px-6 py-4 text-xs font-bold text-obsidian-500 uppercase tracking-widest">Jugador</th>
-              <th class="px-6 py-4 text-xs font-bold text-obsidian-500 uppercase tracking-widest hidden md:table-cell">Cédula</th>
-              <th class="px-6 py-4 text-xs font-bold text-obsidian-500 uppercase tracking-widest hidden lg:table-cell">Equipo</th>
-              <th class="px-6 py-4 text-xs font-bold text-obsidian-500 uppercase tracking-widest hidden lg:table-cell">Edad</th>
-              <th class="px-6 py-4 text-xs font-bold text-obsidian-500 uppercase tracking-widest hidden md:table-cell">Tipo</th>
-              <th class="px-6 py-4 text-xs font-bold text-obsidian-500 uppercase tracking-widest text-right">Acciones</th>
+            <tr class="border-b border-border/5 text-left">
+              <th class="px-6 py-4 text-xs font-bold text-content-muted uppercase tracking-widest w-12">#</th>
+              <th class="px-6 py-4 text-xs font-bold text-content-muted uppercase tracking-widest">Jugador</th>
+              <th class="px-6 py-4 text-xs font-bold text-content-muted uppercase tracking-widest hidden md:table-cell">Cédula</th>
+              <th class="px-6 py-4 text-xs font-bold text-content-muted uppercase tracking-widest hidden lg:table-cell">Equipo</th>
+              <th class="px-6 py-4 text-xs font-bold text-content-muted uppercase tracking-widest hidden lg:table-cell">Edad</th>
+              <th class="px-6 py-4 text-xs font-bold text-content-muted uppercase tracking-widest hidden md:table-cell">Tipo</th>
+              <th class="px-6 py-4 text-xs font-bold text-content-muted uppercase tracking-widest text-right">Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr
               v-for="player in filteredPlayers"
               :key="player.id"
-              class="border-b border-white/5 hover:bg-white/2 transition-colors group"
+              class="border-b border-border/5 hover:bg-surface/2 transition-colors group"
             >
               <!-- Dorsal -->
               <td class="px-6 py-4">
-                <span class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm font-mono">
+                <span class="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-emerald-400 font-bold text-sm font-mono">
                   {{ player.number }}
                 </span>
               </td>
@@ -117,19 +117,19 @@
               <!-- Name + Photo -->
               <td class="px-6 py-4">
                 <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-xl overflow-hidden bg-obsidian-800 border border-white/10 flex-shrink-0">
+                  <div class="w-10 h-10 rounded-xl overflow-hidden bg-surface-hover border border-border/10 flex-shrink-0">
                     <img
                       v-if="player.picture"
-                      :src="player.picture.startsWith('data:') ? player.picture : `data:image/jpeg;base64,${player.picture}`"
+                      :src="player.picture"
                       class="w-full h-full object-cover"
                       alt="Foto jugador"
                     />
                     <div v-else class="w-full h-full flex items-center justify-center">
-                      <Icon name="lucide:user" class="w-5 h-5 text-obsidian-600" />
+                      <Icon name="lucide:user" class="w-5 h-5 text-content-muted" />
                     </div>
                   </div>
                   <div>
-                    <p class="font-semibold text-white group-hover:text-emerald-400 transition-colors">
+                    <p class="font-semibold text-content group-hover:text-emerald-400 transition-colors">
                       {{ player.firstName }} {{ player.lastName }}
                     </p>
                   </div>
@@ -138,23 +138,23 @@
 
               <!-- Cédula -->
               <td class="px-6 py-4 hidden md:table-cell">
-                <span class="text-sm text-obsidian-400 font-mono">{{ player.dni || '—' }}</span>
+                <span class="text-sm text-content-muted font-mono">{{ player.dni || '—' }}</span>
               </td>
 
               <!-- Team -->
               <td class="px-6 py-4 hidden lg:table-cell">
-                <span class="text-sm text-obsidian-300">{{ getTeamName(player.teamId) }}</span>
+                <span class="text-sm text-content-muted">{{ getTeamName(player.teamId) }}</span>
               </td>
 
               <!-- Age -->
               <td class="px-6 py-4 hidden lg:table-cell">
-                <span class="text-sm text-obsidian-300">{{ player.birthDate ? calculateAge(player.birthDate) + ' años' : '—' }}</span>
+                <span class="text-sm text-content-muted">{{ player.birthDate ? calculateAge(player.birthDate) + ' años' : '—' }}</span>
               </td>
 
               <!-- Local/Foráneo -->
               <td class="px-6 py-4 hidden md:table-cell">
-                <span :class="`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold ${player.isLocal ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'}`">
-                  <span :class="`w-1.5 h-1.5 rounded-full ${player.isLocal ? 'bg-emerald-400' : 'bg-amber-400'}`"></span>
+                <span :class="`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold ${player.isLocal ? 'bg-primary/10 text-emerald-400 border border-primary/30' : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'}`">
+                  <span :class="`w-1.5 h-1.5 rounded-full ${player.isLocal ? 'bg-primary-hover' : 'bg-amber-400'}`"></span>
                   {{ player.isLocal ? 'Local' : 'Foráneo' }}
                 </span>
               </td>
@@ -164,14 +164,14 @@
                 <div v-if="authStore.isAdmin" class="flex items-center justify-end gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
                   <button
                     @click="openEditModal(player)"
-                    class="p-2 hover:bg-emerald-500/20 rounded-lg text-obsidian-400 hover:text-emerald-400 transition-colors"
+                    class="p-2 hover:bg-primary/20 rounded-lg text-content-muted hover:text-emerald-400 transition-colors"
                     title="Editar"
                   >
                     <Icon name="lucide:edit-2" class="w-4 h-4" />
                   </button>
                   <button
                     @click="handleDeletePlayer(player)"
-                    class="p-2 hover:bg-rose-500/20 rounded-lg text-obsidian-400 hover:text-rose-400 transition-colors"
+                    class="p-2 hover:bg-rose-500/20 rounded-lg text-content-muted hover:text-rose-400 transition-colors"
                     title="Eliminar"
                   >
                     <Icon name="lucide:trash-2" class="w-4 h-4" />
@@ -186,17 +186,17 @@
 
     <!-- Modal Form -->
     <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-obsidian-950/80 backdrop-blur-md" @click="closeModal"></div>
+      <div class="absolute inset-0 bg-background backdrop-blur-md" @click="closeModal"></div>
 
-      <div class="glass-card w-full max-w-lg rounded-3xl border border-white/10 p-8 shadow-2xl relative animate-in fade-in zoom-in duration-300 overflow-hidden overflow-y-auto max-h-[90vh]">
+      <div class="glass-card w-full max-w-lg rounded-3xl border border-border/10 p-8 shadow-2xl relative animate-in fade-in zoom-in duration-300 overflow-hidden overflow-y-auto max-h-[90vh]">
         <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent"></div>
 
         <header class="flex justify-between items-start mb-8">
           <div>
-            <h2 class="text-2xl font-bold text-white">{{ isEditing ? 'Editar Jugador' : 'Nuevo Jugador' }}</h2>
-            <p class="text-sm text-obsidian-400 mt-1">Completa la información del jugador.</p>
+            <h2 class="text-2xl font-bold text-content">{{ isEditing ? 'Editar Jugador' : 'Nuevo Jugador' }}</h2>
+            <p class="text-sm text-content-muted mt-1">Completa la información del jugador.</p>
           </div>
-          <button @click="closeModal" class="p-2 hover:bg-white/5 rounded-xl text-obsidian-500 hover:text-white transition-colors">
+          <button @click="closeModal" class="p-2 hover:bg-surface/5 rounded-xl text-content-muted hover:text-content transition-colors">
             <Icon name="lucide:x" class="w-6 h-6" />
           </button>
         </header>
@@ -205,18 +205,18 @@
           <!-- Photo Upload -->
           <div class="flex justify-center mb-2">
             <div class="relative group cursor-pointer" @click="$refs.fileInput.click()">
-              <div class="w-24 h-24 rounded-3xl bg-obsidian-800 border-2 border-dashed border-white/10 flex items-center justify-center overflow-hidden group-hover:border-emerald-500 transition-colors">
+              <div class="w-24 h-24 rounded-3xl bg-surface-hover border-2 border-dashed border-border/10 flex items-center justify-center overflow-hidden group-hover:border-primary transition-colors">
                 <img
                   v-if="form.picture"
-                  :src="form.picture.startsWith('data:') ? form.picture : `data:image/jpeg;base64,${form.picture}`"
+                  :src="form.picture"
                   class="w-full h-full object-cover"
                 />
                 <div v-else class="text-center p-2">
-                  <Icon name="lucide:camera" class="w-8 h-8 text-obsidian-600 mb-1 mx-auto" />
-                  <span class="text-[10px] text-obsidian-500 font-bold uppercase">Foto</span>
+                  <Icon name="lucide:camera" class="w-8 h-8 text-content-muted mb-1 mx-auto" />
+                  <span class="text-[10px] text-content-muted font-bold uppercase">Foto</span>
                 </div>
               </div>
-              <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+              <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-primary rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                 <Icon name="lucide:upload" class="w-4 h-4 text-obsidian-950" />
               </div>
               <input ref="fileInput" type="file" hidden accept="image/*" @change="onFileSelected">
@@ -226,22 +226,22 @@
           <!-- Nombre y Apellido -->
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-bold text-obsidian-500 uppercase tracking-widest mb-2">Nombre</label>
+              <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-2">Nombre</label>
               <input
                 v-model="form.firstName"
                 type="text"
                 required
-                class="w-full bg-obsidian-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-all"
+                class="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-content focus:outline-none focus:border-primary transition-all"
                 placeholder="Juan"
               >
             </div>
             <div>
-              <label class="block text-xs font-bold text-obsidian-500 uppercase tracking-widest mb-2">Apellido</label>
+              <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-2">Apellido</label>
               <input
                 v-model="form.lastName"
                 type="text"
                 required
-                class="w-full bg-obsidian-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-all"
+                class="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-content focus:outline-none focus:border-primary transition-all"
                 placeholder="Pérez"
               >
             </div>
@@ -250,23 +250,23 @@
           <!-- Dorsal y Cédula -->
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-bold text-obsidian-500 uppercase tracking-widest mb-2">Dorsal #</label>
+              <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-2">Dorsal #</label>
               <input
                 v-model.number="form.number"
                 type="number"
                 required
                 min="1"
                 max="99"
-                class="w-full bg-obsidian-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-all font-mono"
+                class="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-content focus:outline-none focus:border-primary transition-all font-mono"
                 placeholder="10"
               >
             </div>
             <div>
-              <label class="block text-xs font-bold text-obsidian-500 uppercase tracking-widest mb-2">Cédula / DNI</label>
+              <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-2">Cédula / DNI</label>
               <input
                 v-model="form.dni"
                 type="text"
-                class="w-full bg-obsidian-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-all font-mono"
+                class="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-content focus:outline-none focus:border-primary transition-all font-mono"
                 placeholder="Opcional"
               >
             </div>
@@ -274,11 +274,11 @@
 
           <!-- Equipo -->
           <div>
-            <label class="block text-xs font-bold text-obsidian-500 uppercase tracking-widest mb-2">Equipo</label>
+            <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-2">Equipo</label>
             <select
               v-model="form.teamId"
               required
-              class="w-full bg-obsidian-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-all"
+              class="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-content focus:outline-none focus:border-primary transition-all"
             >
               <option value="" disabled>Selecciona un equipo...</option>
               <option v-for="team in teamStore.teams" :key="team.id" :value="team.id">
@@ -289,22 +289,22 @@
 
           <!-- Fecha de Nacimiento -->
           <div>
-            <label class="block text-xs font-bold text-obsidian-500 uppercase tracking-widest mb-2">Fecha de Nacimiento</label>
+            <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-2">Fecha de Nacimiento</label>
             <input
               v-model="form.birthDate"
               type="date"
-              class="w-full bg-obsidian-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-all"
+              class="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-content focus:outline-none focus:border-primary transition-all"
             >
           </div>
 
           <!-- Tipo de Jugador -->
           <div>
-            <label class="block text-xs font-bold text-obsidian-500 uppercase tracking-widest mb-3">Tipo de Jugador</label>
+            <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-3">Tipo de Jugador</label>
             <div class="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 @click="form.isLocal = true"
-                :class="`px-4 py-3 rounded-xl border text-sm font-bold transition-all ${form.isLocal ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 'bg-obsidian-900 border-white/10 text-obsidian-400 hover:border-white/20'}`"
+                :class="`px-4 py-3 rounded-xl border text-sm font-bold transition-all ${form.isLocal ? 'bg-primary/20 border-primary text-emerald-400' : 'bg-surface border-border/10 text-content-muted hover:border-border/20'}`"
               >
                 <Icon name="lucide:home" class="w-4 h-4 inline-block mr-1" />
                 Local
@@ -312,7 +312,7 @@
               <button
                 type="button"
                 @click="form.isLocal = false"
-                :class="`px-4 py-3 rounded-xl border text-sm font-bold transition-all ${!form.isLocal ? 'bg-amber-500/20 border-amber-500 text-amber-400' : 'bg-obsidian-900 border-white/10 text-obsidian-400 hover:border-white/20'}`"
+                :class="`px-4 py-3 rounded-xl border text-sm font-bold transition-all ${!form.isLocal ? 'bg-amber-500/20 border-amber-500 text-amber-400' : 'bg-surface border-border/10 text-content-muted hover:border-border/20'}`"
               >
                 <Icon name="lucide:plane" class="w-4 h-4 inline-block mr-1" />
                 Foráneo
@@ -325,7 +325,7 @@
             <button
               type="button"
               @click="closeModal"
-              class="flex-1 px-4 py-4 rounded-2xl border border-white/10 text-white hover:bg-white/5 transition-all font-bold text-sm"
+              class="flex-1 px-4 py-4 rounded-2xl border border-border/10 text-content hover:bg-surface/5 transition-all font-bold text-sm"
             >
               Cancelar
             </button>
@@ -522,11 +522,7 @@ async function onTeamFilterChange() {
 </script>
 
 <style scoped>
-.glass-card {
-  background: rgba(14, 20, 27, 0.4);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
+
 
 .fade-enter-active, .fade-leave-active {
   transition: all 0.3s ease;

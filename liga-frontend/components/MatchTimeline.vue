@@ -1,8 +1,8 @@
 <template>
   <div class="space-y-4">
-    <div v-if="events.length === 0" class="text-center py-10 glass rounded-[2rem] border border-white/5">
-      <Icon name="lucide:hourglass" class="w-8 h-8 text-obsidian-700 mb-2 mx-auto" />
-      <p class="text-xs font-bold text-obsidian-600 uppercase tracking-widest">Esperando sucesos del partido...</p>
+    <div v-if="events.length === 0" class="text-center py-10 glass rounded-[2rem] border border-border/5">
+      <Icon name="lucide:hourglass" class="w-8 h-8 text-content-muted mb-2 mx-auto" />
+      <p class="text-xs font-bold text-content-muted uppercase tracking-widest">Esperando sucesos del partido...</p>
     </div>
 
     <div v-else class="relative pl-8 space-y-6 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-px before:bg-gradient-to-b before:from-emerald-500/50 before:via-white/5 before:to-emerald-500/50">
@@ -13,28 +13,28 @@
       >
         <!-- Connector Dot -->
         <div 
-          class="absolute -left-8 top-1.5 w-6 h-6 rounded-lg border-2 border-obsidian-900 flex items-center justify-center transition-all group-hover:scale-125 z-10"
+          class="absolute -left-8 top-1.5 w-6 h-6 rounded-lg border-2 border-border flex items-center justify-center transition-all group-hover:scale-125 z-10"
           :class="getEventBg(event.type)"
         >
           <span class="text-xs">{{ emoji(event.type) }}</span>
         </div>
 
-        <div class="glass p-4 rounded-2xl border border-white/5 hover:border-white/20 transition-all flex items-center justify-between group">
+        <div class="glass p-4 rounded-2xl border border-border/5 hover:border-border/20 transition-all flex items-center justify-between group">
           <div class="flex items-center gap-4">
             <!-- Minute -->
-            <div class="w-10 h-10 rounded-xl bg-obsidian-950/50 flex items-center justify-center border border-white/5">
+            <div class="w-10 h-10 rounded-xl bg-background flex items-center justify-center border border-border/5">
               <span class="text-xs font-black text-emerald-400 font-mono">{{ event.minute }}'</span>
             </div>
             
             <!-- Context -->
             <div>
-              <p class="text-[10px] font-black uppercase tracking-widest text-obsidian-500 mb-0.5">{{ teamName(event.teamId) }}</p>
-              <h4 class="font-bold text-white text-sm group-hover:text-emerald-400 transition-colors">
+              <p class="text-[10px] font-black uppercase tracking-widest text-content-muted mb-0.5">{{ teamName(event.teamId) }}</p>
+              <h4 class="font-bold text-content text-sm group-hover:text-emerald-400 transition-colors">
                 {{ event.type === 'SUBSTITUTION' ? 'Cambio' : event.type === 'GOAL' ? '¡GOL!' : 'Amonestación' }}
               </h4>
-              <p class="text-xs text-obsidian-300">
+              <p class="text-xs text-content-muted">
                 {{ playerName(event.playerId) }}
-                <span v-if="event.relatedPlayerId" class="text-obsidian-500">
+                <span v-if="event.relatedPlayerId" class="text-content-muted">
                    ↔ {{ playerName(event.relatedPlayerId) }}
                 </span>
               </p>
@@ -67,13 +67,13 @@ function emoji(type) {
 
 function getEventBg(type) {
   const map = { 
-    GOAL: 'bg-emerald-500', 
+    GOAL: 'bg-primary', 
     YELLOW_CARD: 'bg-yellow-500', 
     RED_CARD: 'bg-rose-500', 
     SUBSTITUTION: 'bg-blue-500', 
-    PLAYER_ENTRY: 'bg-emerald-400' 
+    PLAYER_ENTRY: 'bg-primary-hover' 
   }
-  return map[type] || 'bg-obsidian-800'
+  return map[type] || 'bg-surface-hover'
 }
 
 function teamName(id) { return props.teams.find(t => t.id === id)?.name || '' }

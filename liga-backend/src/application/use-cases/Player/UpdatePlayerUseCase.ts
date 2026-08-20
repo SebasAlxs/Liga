@@ -64,7 +64,7 @@ export class UpdatePlayerUseCase {
         if (request.isLocal !== undefined) existingPlayer.isLocal = request.isLocal;
 
         if (request.picture !== undefined) {
-            existingPlayer.picture = request.picture ? Buffer.from(request.picture, 'base64') : undefined;
+            existingPlayer.picture = request.picture || undefined;
         }
 
         const updated = await this.playerRepository.update(existingPlayer);
@@ -78,7 +78,7 @@ export class UpdatePlayerUseCase {
             dni: updated.dni,
             birthDate: updated.birthDate?.toISOString(),
             isLocal: updated.isLocal,
-            picture: updated.picture ? Buffer.from(updated.picture).toString('base64') : undefined,
+            picture: updated.picture || undefined,
             createdAt: updated.createdAt?.toISOString() || new Date().toISOString(),
             updatedAt: updated.updatedAt?.toISOString() || new Date().toISOString()
         };

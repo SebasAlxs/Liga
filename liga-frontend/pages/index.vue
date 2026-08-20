@@ -1,316 +1,274 @@
 <template>
-  <div class="page-container p-6">
-    <!-- ── PUBLIC VIEW: DIARIO DEPORTIVO ───────────────────────────────── -->
-    <div v-if="!authStore.isLoggedIn" class="animate-fade-in max-w-7xl mx-auto py-6">
+  <div class="page-container p-4 sm:p-8 min-h-screen text-content">
+    <!-- ── PUBLIC VIEW ───────────────────────────────── -->
+    <div v-if="!authStore.isLoggedIn" class="max-w-7xl mx-auto py-4">
       
       <!-- Top Branding -->
-      <div class="flex items-center justify-between mb-8 pb-6 border-b border-white/5">
-        <div class="flex items-center gap-4">
-          <div class="w-14 h-14 rounded-2xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-            <Icon name="lucide:trophy" class="text-3xl text-obsidian-950" />
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+        <div>
+          <div class="inline-flex items-center gap-3 mb-4 px-3 py-1.5 bg-emerald-50 rounded-full text-primary border border-emerald-100 shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-primary shadow-sm animate-pulse"></span>
+            <span class="text-xs font-bold uppercase tracking-widest">Temporada en Curso</span>
           </div>
-          <div>
-            <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tighter uppercase font-display leading-none">
-              La Liga <span class="text-emerald-500">Oficial</span>
-            </h1>
-            <p class="text-xs text-obsidian-400 font-bold uppercase tracking-widest mt-1">El portal del fútbol</p>
-          </div>
+          <h1 class="text-4xl sm:text-5xl font-extrabold text-content tracking-tight leading-tight drop-shadow-sm">
+            La Liga <span class="text-primary">Oficial</span><br/>
+            <span class="text-2xl text-content-muted font-normal tracking-wide">El portal del fútbol</span>
+          </h1>
         </div>
-        <div class="text-right hidden sm:block">
-          <div class="text-xs font-bold text-obsidian-500 uppercase tracking-widest">{{ todayDate }}</div>
-          <div class="text-[10px] text-emerald-500 font-bold uppercase mt-1 flex items-center justify-end gap-1">
-             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-             Temporada en curso
-          </div>
+        <div class="text-left md:text-right">
+          <p class="text-sm font-semibold text-content-muted mb-1">{{ todayDate }}</p>
+          <p class="text-primary text-sm flex items-center gap-2 md:justify-end font-bold">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary shadow-sm"></span> En curso
+          </p>
         </div>
       </div>
 
-      <div v-if="pageLoading" class="py-20 flex flex-col items-center justify-center">
-        <Icon name="lucide:loader-2" class="w-10 h-10 text-emerald-500 animate-spin mb-4" />
-        <p class="text-obsidian-500 font-bold uppercase tracking-widest text-xs">Cargando datos deportivos...</p>
+      <div v-if="pageLoading" class="py-32 flex flex-col items-center justify-center">
+        <Icon name="lucide:loader-2" class="w-8 h-8 text-primary animate-spin mb-4" />
+        <p class="text-content-muted text-sm font-medium">Sincronizando datos...</p>
       </div>
 
-      <div v-else class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <!-- BENTO GRID LAYOUT -->
+      <div v-else class="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8">
         
-        <!-- MAIN CONTENT (Left 8 cols) -->
-        <div class="lg:col-span-8 space-y-8">
-          
-          <!-- PARTIDO DESTACADO -->
-          <section v-if="featuredMatch">
-            <div class="flex items-center justify-between mb-4">
-               <h2 class="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-2">
-                 <Icon name="lucide:flame" class="text-emerald-500" />
-                 {{ featuredMatch.status === 'IN_PROGRESS' ? 'En Vivo' : 'Partido Destacado' }}
-               </h2>
-            </div>
+        <!-- PARTIDO DESTACADO (Hero Box) -->
+        <div class="md:col-span-12 lg:col-span-8 group relative z-10">
+          <h2 class="text-base font-bold text-content mb-4 flex items-center gap-2 tracking-widest uppercase">
+            <Icon name="lucide:flame" class="text-primary w-5 h-5" />
+            Partido Destacado
+          </h2>
+          <div class="relative bg-surface/80 backdrop-blur-3xl rounded-[2rem] border border-border shadow-xl p-8 sm:p-12 hover:shadow-2xl hover:border-primary/50 transition-all duration-500 overflow-hidden">
+            <!-- Volumetric Light Orb -->
+            <div class="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-[100px] -mr-20 -mt-20 pointer-events-none group-hover:bg-primary/20 transition-colors duration-500"></div>
+
+            <div v-if="featuredMatch" class="relative z-10">
             
-            <div class="relative rounded-[2.5rem] overflow-hidden bg-obsidian-900 border border-white/5 group">
-              <!-- Background abstract -->
-              <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent"></div>
-              
-              <div class="relative p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
-                <!-- Home Team -->
-                <div class="flex flex-col items-center text-center w-full md:w-1/3">
-                  <div class="w-24 h-24 sm:w-32 sm:h-32 mb-4 drop-shadow-2xl transition-transform group-hover:scale-105">
-                    <img v-if="teamLogo(featuredMatch.homeTeamId)" :src="teamLogo(featuredMatch.homeTeamId)" class="w-full h-full object-contain" />
-                    <Icon v-else name="lucide:shield" class="w-full h-full text-obsidian-700" />
-                  </div>
-                  <h3 class="text-xl sm:text-2xl font-black text-white uppercase tracking-tighter leading-tight">{{ teamName(featuredMatch.homeTeamId) }}</h3>
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-8">
+              <!-- Home -->
+              <div class="flex flex-col items-center text-center w-full sm:w-1/3">
+                <div class="w-24 h-24 sm:w-32 sm:h-32 mb-6 drop-shadow-xl relative">
+                  <div class="absolute inset-0 bg-surface-hover/50 rounded-full blur-xl"></div>
+                  <img v-if="teamLogo(featuredMatch.homeTeamId)" :src="teamLogo(featuredMatch.homeTeamId)" class="w-full h-full object-contain relative z-10" />
+                  <div v-else class="w-full h-full rounded-full bg-background flex items-center justify-center border border-border relative z-10"><Icon name="lucide:shield" class="w-12 h-12 text-slate-300" /></div>
                 </div>
+                <h3 class="text-xl sm:text-2xl font-bold text-content leading-tight">{{ teamName(featuredMatch.homeTeamId) }}</h3>
+              </div>
 
-                <!-- Score / Time -->
-                <div class="flex flex-col items-center w-full md:w-1/3 shrink-0">
-                  <div v-if="featuredMatch.status === 'IN_PROGRESS' || featuredMatch.status === 'FINISHED'" class="flex items-center gap-4 py-4 px-6 rounded-3xl bg-obsidian-950/50 backdrop-blur-md border border-white/5">
-                    <span class="text-5xl sm:text-6xl font-black text-white tabular-nums tracking-tighter">{{ featuredMatch.homeScore ?? 0 }}</span>
-                    <span class="text-2xl text-obsidian-600 font-bold">-</span>
-                    <span class="text-5xl sm:text-6xl font-black text-white tabular-nums tracking-tighter">{{ featuredMatch.awayScore ?? 0 }}</span>
-                  </div>
-                  <div v-else class="text-center">
-                    <div class="text-3xl sm:text-4xl font-black text-white tabular-nums tracking-tighter bg-obsidian-950/50 px-6 py-4 rounded-3xl border border-white/5 inline-block">
-                      {{ formatTime(featuredMatch.matchDate) }}
-                    </div>
-                  </div>
-                  
-                  <div v-if="featuredMatch.status === 'IN_PROGRESS'" class="mt-6">
-                    <NuxtLink :to="`/matches/${featuredMatch.id}`" 
-                      class="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-emerald-500 text-obsidian-950 font-black uppercase tracking-widest text-[10px] sm:text-xs transition-all hover:scale-105 active:scale-95 shadow-xl shadow-emerald-500/30 group/btn">
-                      <Icon name="lucide:play-circle" class="w-4 h-4 group-hover/btn:animate-pulse" />
-                      Seguir en Vivo
-                    </NuxtLink>
-                  </div>
-                  <div v-else class="text-xs text-obsidian-500 mt-2 font-bold">{{ formatDateShort(featuredMatch.matchDate) }}</div>
+              <!-- Score -->
+              <div class="flex flex-col items-center w-full sm:w-1/3 shrink-0">
+                <div v-if="featuredMatch.status === 'IN_PROGRESS' || featuredMatch.status === 'FINISHED'" class="flex items-center gap-6">
+                  <span class="text-7xl sm:text-9xl font-display text-content tabular-nums drop-shadow-sm">{{ featuredMatch.homeScore ?? 0 }}</span>
+                  <span class="text-4xl text-primary/50 font-light">-</span>
+                  <span class="text-7xl sm:text-9xl font-display text-content tabular-nums drop-shadow-sm">{{ featuredMatch.awayScore ?? 0 }}</span>
                 </div>
-
-                <!-- Away Team -->
-                <div class="flex flex-col items-center text-center w-full md:w-1/3">
-                  <div class="w-24 h-24 sm:w-32 sm:h-32 mb-4 drop-shadow-2xl transition-transform group-hover:scale-105">
-                    <img v-if="teamLogo(featuredMatch.awayTeamId)" :src="teamLogo(featuredMatch.awayTeamId)" class="w-full h-full object-contain" />
-                    <Icon v-else name="lucide:shield" class="w-full h-full text-obsidian-700" />
+                <div v-else class="text-center">
+                  <div class="text-6xl sm:text-8xl font-display text-content tabular-nums tracking-tight drop-shadow-sm">
+                    {{ formatTime(featuredMatch.matchDate) }}
                   </div>
-                  <h3 class="text-xl sm:text-2xl font-black text-white uppercase tracking-tighter leading-tight">{{ teamName(featuredMatch.awayTeamId) }}</h3>
+                  <div class="text-base font-medium text-primary mt-4 tracking-widest uppercase">{{ formatDateShort(featuredMatch.matchDate) }}</div>
+                </div>
+                
+                <div v-if="featuredMatch.status === 'IN_PROGRESS'" class="mt-8">
+                  <NuxtLink :to="`/matches/${featuredMatch.id}`" 
+                    class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-emerald-600 text-content font-bold text-sm hover:bg-primary transition-colors shadow-lg shadow-emerald-600/20">
+                    <Icon name="lucide:play" class="w-4 h-4 fill-current" />
+                    Seguir Partido
+                  </NuxtLink>
                 </div>
               </div>
-            </div>
-          </section>
 
-          <!-- RESULTADOS RECIENTES -->
-          <section v-if="recentMatches.length">
-            <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
-               <h2 class="text-lg font-black text-white uppercase tracking-widest text-obsidian-300">
-                 Últimos Resultados
-               </h2>
-               <NuxtLink to="/matches" class="text-xs font-bold text-emerald-500 hover:text-emerald-400 transition-colors uppercase tracking-widest flex items-center gap-1">Ver todos <Icon name="lucide:arrow-right" class="w-3 h-3" /></NuxtLink>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div v-for="match in recentMatches" :key="match.id" class="glass-card p-4 rounded-2xl border border-white/5 hover:bg-white/5 transition-colors group cursor-default">
-                <div class="flex justify-between items-center text-[10px] uppercase font-bold text-obsidian-500 tracking-wider mb-3">
-                  <span>{{ formatDateShort(match.matchDate) }}</span>
-                  <span class="text-emerald-500/50">Final</span>
+              <!-- Away -->
+              <div class="flex flex-col items-center text-center w-full sm:w-1/3">
+                <div class="w-24 h-24 sm:w-32 sm:h-32 mb-6 drop-shadow-xl relative">
+                  <div class="absolute inset-0 bg-surface-hover/50 rounded-full blur-xl"></div>
+                  <img v-if="teamLogo(featuredMatch.awayTeamId)" :src="teamLogo(featuredMatch.awayTeamId)" class="w-full h-full object-contain relative z-10" />
+                  <div v-else class="w-full h-full rounded-full bg-background flex items-center justify-center border border-border relative z-10"><Icon name="lucide:shield" class="w-12 h-12 text-slate-300" /></div>
                 </div>
-                <div class="space-y-2">
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                      <div class="w-6 h-6 rounded-md bg-white/5 overflow-hidden flex items-center justify-center p-0.5"><img v-if="teamLogo(match.homeTeamId)" :src="teamLogo(match.homeTeamId)" class="w-full h-full object-contain"/><Icon v-else name="lucide:shield" class="w-3 h-3 text-emerald-500/50" /></div>
-                      <span class="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">{{ teamName(match.homeTeamId) }}</span>
-                    </div>
-                    <span class="text-lg font-black text-white tabular-nums">{{ match.homeScore ?? 0 }}</span>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                      <div class="w-6 h-6 rounded-md bg-white/5 overflow-hidden flex items-center justify-center p-0.5"><img v-if="teamLogo(match.awayTeamId)" :src="teamLogo(match.awayTeamId)" class="w-full h-full object-contain"/><Icon v-else name="lucide:shield" class="w-3 h-3 text-emerald-500/50" /></div>
-                      <span class="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">{{ teamName(match.awayTeamId) }}</span>
-                    </div>
-                    <span class="text-lg font-black text-white tabular-nums">{{ match.awayScore ?? 0 }}</span>
-                  </div>
-                </div>
+                <h3 class="text-xl sm:text-2xl font-bold text-content leading-tight">{{ teamName(featuredMatch.awayTeamId) }}</h3>
               </div>
             </div>
-          </section>
-
+          </div>
+          <div v-else class="text-center py-12 text-content-muted">No hay partidos destacados en este momento.</div>
+          </div>
         </div>
 
-        <!-- SIDEBAR (Right 4 cols) -->
-        <div class="lg:col-span-4 space-y-8">
+        <!-- POSICIONES MINI -->
+        <div class="md:col-span-6 lg:col-span-4 bg-surface/80 backdrop-blur-3xl rounded-[2rem] border border-border shadow-xl p-6 sm:p-8 flex flex-col hover:border-primary/50 transition-all duration-300">
+          <div class="flex items-center justify-between mb-8">
+             <h3 class="text-base font-bold text-content flex items-center gap-2 tracking-widest uppercase">
+               <Icon name="lucide:list" class="text-emerald-400 w-5 h-5" /> Posiciones
+             </h3>
+             <NuxtLink to="/standings" class="text-emerald-400 hover:text-emerald-300 text-sm font-bold uppercase tracking-widest">Completa</NuxtLink>
+          </div>
           
-          <!-- TABLA DE POSICIONES MINI -->
-          <div class="glass-card p-6 rounded-3xl border border-white/5">
-            <div class="flex items-center justify-between mb-5">
-               <h3 class="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
-                 <Icon name="lucide:list-ordered" class="text-emerald-500" /> Posiciones
-               </h3>
-               <NuxtLink to="/standings" class="text-[10px] font-bold text-emerald-500 hover:text-emerald-400 transition-colors uppercase tracking-widest">Completa</NuxtLink>
-            </div>
-            
-            <table class="w-full text-left">
+          <div class="flex-1">
+            <table class="w-full text-left border-collapse">
               <thead>
-                <tr class="border-b border-white/5">
-                  <th class="pb-2 text-[10px] uppercase font-bold text-obsidian-500 w-6">#</th>
-                  <th class="pb-2 text-[10px] uppercase font-bold text-obsidian-500">Club</th>
-                  <th class="pb-2 text-[10px] uppercase font-bold text-obsidian-500 text-center w-8">PJ</th>
-                  <th class="pb-2 text-[10px] uppercase font-bold text-emerald-500 text-center w-8">PTS</th>
+                <tr>
+                  <th class="pb-4 text-xs font-bold text-content-muted uppercase tracking-widest w-8">#</th>
+                  <th class="pb-4 text-xs font-bold text-content-muted uppercase tracking-widest">Club</th>
+                  <th class="pb-4 text-xs font-bold text-content-muted uppercase tracking-widest text-right w-10">PJ</th>
+                  <th class="pb-4 text-xs font-bold text-primary uppercase tracking-widest text-right">PTS</th>
                 </tr>
               </thead>
               <tbody class="text-sm">
-                <tr v-for="(team, idx) in topTeams" :key="team.id" class="border-b border-white/5 last:border-0 hover:bg-white/2 transition-colors group">
-                  <td class="py-3 text-[10px] font-black text-obsidian-500">{{ idx + 1 }}</td>
-                  <td class="py-3">
-                    <div class="flex items-center gap-2">
-                      <div class="w-5 h-5 rounded overflow-hidden flex items-center justify-center p-0.5"><img v-if="team.logo" :src="team.logo" class="w-full h-full object-contain"/><Icon v-else name="lucide:shield" class="w-3 h-3 text-obsidian-600" /></div>
-                      <span class="font-bold text-white group-hover:text-emerald-400 truncate max-w-[120px]">{{ team.name }}</span>
+                <tr v-for="(team, index) in topTeams" :key="team.id" class="border-b border-border hover:bg-background/80 transition-colors cursor-pointer" @click="$router.push(`/teams/${team.id}`)">
+                  <td class="py-4 text-content-muted font-bold" :class="index < 3 ? 'text-primary font-display text-xl' : ''">{{ index + 1 }}</td>
+                  <td class="py-4">
+                    <div class="flex items-center gap-3">
+                      <img v-if="team.logo" :src="team.logo" class="w-8 h-8 object-contain drop-shadow-md"/>
+                      <div v-else class="w-8 h-8 rounded-full bg-background flex items-center justify-center border border-border"><Icon name="lucide:shield" class="w-4 h-4 text-slate-300" /></div>
+                      <span class="font-bold text-content text-base">{{ team.name }}</span>
                     </div>
                   </td>
-                  <td class="py-3 text-center text-obsidian-400 font-mono">{{ team.matchesPlayed || 0 }}</td>
-                  <td class="py-3 text-center font-black text-emerald-400 font-mono">{{ team.points || 0 }}</td>
+                  <td class="py-4 text-content-muted text-right font-medium">{{ team.stats?.played || 0 }}</td>
+                  <td class="py-4 font-display text-2xl text-primary text-right">{{ team.points || 0 }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
+        </div>
 
-          <!-- TOP GOLEADORES -->
-          <div class="glass-card p-6 rounded-3xl border border-white/5">
-            <h3 class="text-sm font-black text-white uppercase tracking-widest mb-5 flex items-center gap-2">
-              <Icon name="lucide:crosshair" class="text-rose-500" /> Goleadores
-            </h3>
-            
-            <div class="space-y-4">
-              <NuxtLink v-for="(player, idx) in topScorers" :key="player.id" :to="`/players/${player.id}`" 
-                class="flex items-center justify-between group p-2 -mx-2 rounded-xl hover:bg-white/5 transition-all">
-                <div class="flex items-center gap-3">
-                  <div class="text-[10px] font-black text-obsidian-500 w-3">{{ idx + 1 }}</div>
-                  <div class="w-10 h-10 rounded-xl overflow-hidden bg-obsidian-800 border border-white/10 flex-shrink-0 flex items-center justify-center">
-                    <img v-if="player.picture" :src="player.picture.startsWith('data:') ? player.picture : `data:image/jpeg;base64,${player.picture}`" class="w-full h-full object-cover" />
-                    <Icon v-else name="lucide:user" class="w-4 h-4 text-obsidian-600" />
+        <!-- ÚLTIMOS RESULTADOS -->
+        <div class="md:col-span-6 lg:col-span-8">
+          <div class="flex items-center justify-between mb-4">
+             <h2 class="text-base font-bold text-content tracking-widest uppercase">Últimos Resultados</h2>
+             <NuxtLink to="/matches" class="text-sm font-bold tracking-widest uppercase text-primary flex items-center gap-1 hover:text-emerald-700">
+               Ver todos <Icon name="lucide:arrow-right" class="w-4 h-4"/>
+             </NuxtLink>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div v-for="match in recentMatches" :key="match.id" 
+              class="bg-surface/80 backdrop-blur-md rounded-2xl border border-border shadow-md p-5 hover:bg-surface hover:border-primary/50 transition-all cursor-pointer group" @click="$router.push('/matches')">
+              <div class="text-[10px] font-bold text-content-muted mb-4 flex justify-between uppercase tracking-widest">
+                <span>{{ formatDateShort(match.matchDate) }}</span>
+                <span class="text-primary">Final</span>
+              </div>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <img v-if="teamLogo(match.homeTeamId)" :src="teamLogo(match.homeTeamId)" class="w-8 h-8 object-contain drop-shadow-md"/>
+                    <div v-else class="w-8 h-8 rounded-full bg-background flex items-center justify-center border border-border"><Icon name="lucide:shield" class="w-4 h-4 text-slate-300" /></div>
+                    <span class="text-base font-bold text-content group-hover:text-content transition-colors">{{ teamName(match.homeTeamId) }}</span>
                   </div>
-                  <div>
-                    <h4 class="font-bold text-white text-sm leading-none mb-1 group-hover:text-emerald-400 transition-colors">{{ player.firstName }} {{ player.lastName }}</h4>
-                    <p class="text-[10px] text-obsidian-500 uppercase tracking-widest font-bold">{{ teamName(player.teamId) }}</p>
+                  <span class="text-3xl font-display text-content">{{ match.homeScore ?? 0 }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <img v-if="teamLogo(match.awayTeamId)" :src="teamLogo(match.awayTeamId)" class="w-8 h-8 object-contain drop-shadow-md"/>
+                    <div v-else class="w-8 h-8 rounded-full bg-background flex items-center justify-center border border-border"><Icon name="lucide:shield" class="w-4 h-4 text-slate-300" /></div>
+                    <span class="text-base font-bold text-content group-hover:text-content transition-colors">{{ teamName(match.awayTeamId) }}</span>
                   </div>
+                  <span class="text-3xl font-display text-content">{{ match.awayScore ?? 0 }}</span>
                 </div>
-                <div class="text-xl font-black text-white tabular-nums shrink-0">
-                  {{ player.stats?.goals || 0 }}<span class="text-[10px] text-obsidian-600 ml-0.5">⚽</span>
-                </div>
-              </NuxtLink>
-
-              <div v-if="!topScorers.length" class="text-center py-4 text-xs font-bold text-obsidian-600 uppercase tracking-widest">
-                No hay datos disp.
               </div>
             </div>
           </div>
-          
         </div>
+
+        <!-- GOLEADORES -->
+        <div class="md:col-span-12 lg:col-span-4 bg-surface/80 backdrop-blur-3xl rounded-[2rem] border border-border shadow-xl p-6 sm:p-8 hover:border-primary/50 transition-all duration-300">
+          <h3 class="text-base font-bold text-content mb-6 flex items-center gap-2 uppercase tracking-widest">
+            <Icon name="lucide:crosshair" class="text-primary w-5 h-5" /> Goleadores
+          </h3>
+          <div class="space-y-2">
+            <NuxtLink v-for="(player, index) in topScorers" :key="player.id" :to="`/players/${player.id}`"
+              class="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-background/80 transition-colors group">
+              <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-full bg-background flex items-center justify-center border border-border overflow-hidden">
+                  <img v-if="player.picture" :src="player.picture" class="w-full h-full object-cover" />
+                  <Icon v-else name="lucide:user" class="w-5 h-5 text-content-muted group-hover:text-content-muted transition-colors" />
+                </div>
+                <div>
+                  <h4 class="font-bold text-content text-sm group-hover:text-primary transition-colors">{{ player.firstName }} {{ player.lastName }}</h4>
+                  <p class="text-xs font-medium text-content-muted">{{ teamName(player.teamId) }}</p>
+                </div>
+              </div>
+              <div class="text-3xl font-display text-primary">
+                {{ player.stats?.goals || 0 }}
+              </div>
+            </NuxtLink>
+            <div v-if="topScorers.length === 0" class="text-content-muted text-sm py-4 text-center">No hay datos disponibles</div>
+          </div>
+        </div>
+        
       </div>
     </div>
 
     <!-- ── ADMIN VIEW ────────────────────────────────── -->
-    <div v-else class="animate-fade-in">
+    <div v-else class="max-w-7xl mx-auto py-8">
       <!-- Welcome Section -->
-      <div class="mb-10 animate-fade-in">
-        <h1 class="text-4xl font-black text-white tracking-tight font-display mb-2">
-          Bienvenido, <span class="text-emerald-500">{{ authStore.user?.email?.split('@')[0] || 'Admin' }}</span>
+      <div class="mb-10">
+        <h1 class="text-3xl font-bold text-content mb-2">
+          Hola de nuevo, <span class="text-primary">{{ authStore.user?.email?.split('@')[0] || 'Admin' }}</span>
         </h1>
-        <p class="text-obsidian-400 font-medium">Aquí tienes el resumen de tu liga hoy.</p>
+        <p class="text-content-muted">Resumen administrativo de la liga.</p>
       </div>
 
       <!-- KPI Cards Grid -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-10">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div v-for="kpi in kpis" :key="kpi.label" 
-          class="glass-card p-4 sm:p-6 rounded-[2rem] border border-white/5 group relative overflow-hidden active-pop">
-          <div class="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity">
-            <Icon :name="kpi.icon" class="text-5xl text-emerald-500" />
+          class="bg-surface p-6 sm:p-8 rounded-[2rem] border border-border shadow-md flex flex-col gap-4 hover:border-primary/50 hover:shadow-lg transition-all duration-300">
+          <div class="w-12 h-12 rounded-xl bg-background flex items-center justify-center border border-border text-primary shrink-0">
+            <Icon :name="kpi.icon" class="text-2xl" />
           </div>
-          
-          <div class="flex flex-col gap-3">
-            <div :class="`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br ${kpi.color} flex items-center justify-center shadow-lg text-obsidian-950` ">
-              <Icon :name="kpi.icon" class="text-xl sm:text-2xl" />
-            </div>
-            <div>
-              <p class="text-[10px] sm:text-xs font-bold text-obsidian-500 uppercase tracking-widest">{{ kpi.label }}</p>
-              <h3 class="text-2xl sm:text-3xl font-black text-white tabular-nums">
-                <span v-if="dashboardStore.loading" class="inline-block w-8 h-8 rounded bg-white/5 animate-pulse"></span>
-                <span v-else>{{ dashboardStore.stats[kpi.key] }}</span>
-              </h3>
-            </div>
+          <div>
+            <h3 class="text-4xl font-display text-content tracking-wider">
+              <span v-if="dashboardStore.loading" class="inline-block w-8 h-8 rounded bg-surface-hover animate-pulse"></span>
+              <span v-else>{{ dashboardStore.stats[kpi.key] }}</span>
+            </h3>
+            <p class="text-[10px] font-bold text-content-muted mt-2 uppercase tracking-widest">{{ kpi.label }}</p>
           </div>
         </div>
       </div>
 
       <!-- Main Modules Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Quick Management -->
-        <div class="lg:col-span-2 space-y-8">
-          <section>
-            <div class="flex items-center justify-between mb-6">
-              <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                <Icon name="lucide:zap" class="text-emerald-500" />
-                Gestión Rápida
-              </h2>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <NuxtLink v-for="mod in quickModules" :key="mod.label" :to="mod.link"
-                class="glass-card p-5 rounded-[2rem] border border-white/5 hover:bg-emerald-500/10 hover:border-emerald-500/50 transition-all group flex items-center gap-4 active-pop">
-                <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-obsidian-950 transition-all text-slate-400">
-                  <Icon :name="mod.icon" class="text-2xl" />
-                </div>
-                <div>
-                  <h4 class="font-black text-white group-hover:text-emerald-400 transition-colors uppercase tracking-tight">{{ mod.label }}</h4>
-                  <p class="text-xs text-obsidian-500">{{ mod.desc }}</p>
-                </div>
-              </NuxtLink>
-            </div>
-          </section>
-
-          <!-- Recent Activity Placeholder -->
-          <section>
-            <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <Icon name="lucide:history" class="text-emerald-500" />
-              Actividad Reciente
+        <div class="lg:col-span-2 bg-surface rounded-[2rem] border border-border shadow-md p-8">
+          <div class="mb-8 flex items-center justify-between">
+            <h2 class="text-base font-bold text-content uppercase tracking-widest flex items-center gap-2">
+              <Icon name="lucide:zap" class="text-primary w-5 h-5" />
+              Accesos Rápidos
             </h2>
-            <div class="glass-card rounded-[2.5rem] border border-white/5 divide-y divide-white/5 overflow-hidden">
-              <div v-for="i in 3" :key="i" class="p-6 hover:bg-emerald-500/5 transition-colors flex items-center gap-4 group">
-                <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover:bg-emerald-500 group-hover:text-obsidian-950 transition-all">
-                  <Icon name="lucide:check-circle-2" />
-                </div>
-                <div class="flex-1 min-w-0">
-                  <p class="text-sm font-bold text-white truncate">Nuevo resultado registrado</p>
-                  <p class="text-xs text-obsidian-500 truncate">Real Madrid 2 - 1 FC Barcelona • Torneo Apertura</p>
-                </div>
-                <span class="text-[10px] text-obsidian-600 font-bold uppercase tracking-widest whitespace-nowrap">2h ago</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <NuxtLink v-for="mod in quickModules" :key="mod.label" :to="mod.link"
+              class="p-6 rounded-[1.5rem] bg-background hover:bg-emerald-50 transition-colors flex items-start gap-4 border border-border hover:border-emerald-100 group">
+              <div class="w-12 h-12 rounded-full bg-surface flex items-center justify-center border border-border shadow-sm group-hover:scale-110 transition-transform shrink-0">
+                <Icon :name="mod.icon" class="text-primary text-xl" />
               </div>
-            </div>
-          </section>
+              <div>
+                <h3 class="font-bold text-content text-sm mb-1 group-hover:text-emerald-700 transition-colors">{{ mod.label }}</h3>
+                <p class="text-xs text-content-muted">{{ mod.desc }}</p>
+              </div>
+            </NuxtLink>
+          </div>
         </div>
 
-        <!-- Side Panel: Stats/Live -->
-        <div class="space-y-8">
-          <section>
-            <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <Icon name="lucide:shield" class="text-emerald-500" />
-              Próximos Partidos
-            </h2>
-            <div class="space-y-4">
-              <div v-for="j in 3" :key="j" class="glass-card p-5 rounded-[2rem] border border-white/5 active-pop">
-                <div class="flex items-center justify-between mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-obsidian-600">
-                  <span>Cancha 1</span>
-                  <span class="text-emerald-500 px-2 py-0.5 rounded-lg bg-emerald-500/10">18:00</span>
-                </div>
-                <div class="flex items-center justify-center gap-6 py-2">
-                  <div class="text-center w-20">
-                    <div class="w-12 h-12 bg-white/5 rounded-2xl mb-2 mx-auto flex items-center justify-center border border-white/5">
-                       <Icon name="lucide:shield" class="text-obsidian-700" />
-                    </div>
-                    <span class="text-[10px] font-black text-white uppercase tracking-tighter truncate block w-full">EQU A</span>
-                  </div>
-                  <span class="text-xs font-black text-emerald-500/40 italic">VS</span>
-                  <div class="text-center w-20">
-                    <div class="w-12 h-12 bg-white/5 rounded-2xl mb-2 mx-auto flex items-center justify-center border border-white/5">
-                       <Icon name="lucide:shield" class="text-obsidian-700" />
-                    </div>
-                    <span class="text-[10px] font-black text-white uppercase tracking-tighter truncate block w-full">EQU B</span>
-                  </div>
-                </div>
+        <!-- System Status -->
+        <div class="bg-surface rounded-[2rem] border border-border shadow-md p-8">
+          <h2 class="text-base font-bold text-content flex items-center gap-2 mb-8 uppercase tracking-widest">
+            <Icon name="lucide:activity" class="text-primary w-5 h-5" />
+            Estado del Sistema
+          </h2>
+          <div class="space-y-6">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-bold text-content-muted uppercase tracking-widest">Base de Datos</span>
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-primary shadow-sm animate-pulse"></span>
+                <span class="text-xs font-bold text-content uppercase tracking-widest">Online</span>
               </div>
             </div>
-          </section>
+            
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-bold text-content-muted uppercase tracking-widest">API Backend</span>
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-primary"></span>
+                <span class="text-xs font-bold text-content uppercase tracking-widest">Conectado</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -402,14 +360,14 @@ const kpis = [
 const quickModules = [
   { label: 'Hojas de Vocalía', icon: 'lucide:clipboard-list', desc: 'Gestionar planillas en vivo', link: '/vocalia' },
   { label: 'Programación', icon: 'lucide:calendar-clock', desc: 'Asignar horarios y canchas', link: '/matches' },
-  { label: 'Reglamentos', icon: 'lucide:file-text', desc: 'Control de suspensiones', link: '/settings' },
+  { label: 'Opciones', desc: 'Ajustes del sistema', icon: 'lucide:settings', link: '/settings' },
   { label: 'Estadísticas', icon: 'lucide:bar-chart-3', desc: 'Goleadores y posiciones', link: '/standings' },
 ]
 
 onMounted(async () => {
   pageLoading.value = true
   if (authStore.isLoggedIn) {
-     dashboardStore.fetchSummary()
+     await dashboardStore.fetchSummary()
   } else {
      await Promise.all([
        matchStore.fetchMatches(),
@@ -420,11 +378,3 @@ onMounted(async () => {
   pageLoading.value = false
 })
 </script>
-
-<style scoped>
-.glass-card {
-  background: rgba(14, 20, 27, 0.4);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-</style>

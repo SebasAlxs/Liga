@@ -3,22 +3,44 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --color-primary: 16 185 129; /* emerald-500 */
+    --color-primary-hover: 52 211 153; /* emerald-400 */
+    --color-background: 248 250 252; /* slate-50 */
+    --color-surface: 255 255 255; /* white */
+    --color-surface-hover: 241 245 249; /* slate-100 */
+    --color-border: 226 232 240; /* slate-200 */
+    --color-text: 15 23 42; /* slate-900 */
+    --color-text-muted: 100 116 139; /* slate-500 */
+  }
+
+  .dark {
+    --color-primary: 16 185 129; /* emerald-500 */
+    --color-primary-hover: 52 211 153; /* emerald-400 */
+    --color-background: 15 23 42; /* slate-900 */
+    --color-surface: 30 41 59; /* slate-800 */
+    --color-surface-hover: 51 65 85; /* slate-700 */
+    --color-border: 51 65 85; /* slate-700 */
+    --color-text: 248 250 252; /* slate-50 */
+    --color-text-muted: 148 163 184; /* slate-400 */
+  }
+
   body {
-    @apply bg-obsidian-950 text-slate-50 antialiased selection:bg-emerald-500/30;
+    @apply bg-background text-content antialiased selection:bg-primary/30;
   }
 }
 
 @layer components {
   .glass {
-    @apply bg-obsidian-900/70 backdrop-blur-xl border border-white/5;
+    @apply bg-surface/80 backdrop-blur-xl border border-border shadow-md;
   }
   
   .glass-card {
-    @apply glass rounded-3xl shadow-2xl shadow-black/50 transition-all duration-300;
+    @apply glass rounded-3xl shadow-xl shadow-border/50 transition-all duration-300;
   }
   
   .glass-card:hover {
-    @apply -translate-y-1 border-white/10 shadow-emerald-500/10;
+    @apply -translate-y-1 border-primary/50 shadow-xl shadow-primary/10;
   }
   
   .btn-premium {
@@ -26,11 +48,11 @@
   }
   
   .btn-emerald {
-    @apply bg-emerald-500 text-obsidian-950 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:bg-emerald-400;
+    @apply bg-primary text-obsidian-950 shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:bg-primary-hover;
   }
   
   .btn-glass {
-    @apply glass hover:bg-white/5;
+    @apply glass hover:bg-surface-hover/80;
   }
 
   .text-glow {
@@ -46,7 +68,7 @@
   @apply bg-transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-white/10 rounded-full transition-colors hover:bg-emerald-500/50;
+  @apply bg-border rounded-full transition-colors hover:bg-primary/50;
 }
 
 /* Custom container constraints */
@@ -80,11 +102,11 @@
 
 /* Bottom Sheet Base Styles */
 .sheet-backdrop {
-  @apply fixed inset-0 bg-obsidian-950/60 backdrop-blur-sm z-50 transition-opacity duration-300;
+  @apply fixed inset-0 bg-background/60 backdrop-blur-sm z-50 transition-opacity duration-300;
 }
 
 .bottom-sheet {
-  @apply fixed bottom-0 left-0 right-0 glass border-t border-white/10 rounded-t-[2.5rem] z-50 transition-transform duration-500 ease-out p-6 pb-safe overflow-y-auto max-h-[92vh];
+  @apply fixed bottom-0 left-0 right-0 glass border-t border-border rounded-t-[2.5rem] z-50 transition-transform duration-500 ease-out p-6 pb-safe overflow-y-auto max-h-[92vh];
 }
 
 /* Advanced 3D & Premium Visuals */

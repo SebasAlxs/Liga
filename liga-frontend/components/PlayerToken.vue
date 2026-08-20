@@ -10,13 +10,13 @@
     <div 
       :class="[
         'rounded-full overflow-hidden border flex items-center justify-center backdrop-blur-sm transition-all shadow-lg',
-        isActive ? 'border-emerald-500 ring-2 ring-emerald-500/50' : isHome ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-blue-500/40 bg-blue-500/10'
+        isActive ? 'border-primary ring-2 ring-emerald-500/50' : isHome ? 'border-primary/40 bg-primary/10' : 'border-blue-500/40 bg-blue-500/10'
       ]"
       :style="tokenStyle"
     >
       <img 
-        v-if="player?.photo" 
-        :src="player.photo.startsWith('data:') ? player.photo : `data:image/jpeg;base64,${player.photo}`" 
+        v-if="player?.picture" 
+        :src="player.picture" 
         class="w-full h-full object-cover"
       />
       <div v-else class="flex items-center justify-center">
@@ -24,15 +24,21 @@
           {{ player?.firstName?.[0] || '?' }}{{ player?.lastName?.[0] || '' }}
         </span>
       </div>
+      
+      <!-- Jersey Number Badge -->
+      <div v-if="player?.number" class="absolute -top-1 -right-1 bg-obsidian-900 text-content font-black rounded-full border border-border/20 shadow-md flex items-center justify-center"
+        :style="{ width: size === 'lg' ? '18px' : '14px', height: size === 'lg' ? '18px' : '14px', fontSize: size === 'lg' ? '9px' : '7px' }">
+        {{ player.number }}
+      </div>
     </div>
 
     <!-- Info Label -->
     <div v-if="showName" class="flex flex-col items-center">
       <div 
-        class="whitespace-nowrap font-bold text-white bg-obsidian-950/80 px-2 py-0.5 rounded-md border border-white/5 shadow-md"
-        :style="{ fontSize: size === 'lg' ? '0.65rem' : '0.55rem' }"
+        class="whitespace-nowrap font-bold text-content bg-background px-2 py-0.5 rounded-md border border-border/5 shadow-md truncate max-w-full"
+        :style="{ fontSize: size === 'lg' ? '0.65rem' : '0.55rem', maxWidth: size === 'lg' ? '70px' : '50px' }"
       >
-        {{ player?.firstName }}
+        {{ player?.lastName || player?.firstName }}
       </div>
       <EventIndicators v-if="stats" :stats="stats" />
     </div>

@@ -3,7 +3,7 @@ model Player {
   firstName   String
   lastName    String
   number      Int
-  picture     Bytes?
+  picture     String?
   teamId      String
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt

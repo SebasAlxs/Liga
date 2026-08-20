@@ -1,9 +1,24 @@
 import type { Config } from 'tailwindcss'
 
 export default <Partial<Config>>{
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
+        primary: {
+          DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
+          hover: 'rgb(var(--color-primary-hover) / <alpha-value>)',
+        },
+        background: 'rgb(var(--color-background) / <alpha-value>)',
+        surface: {
+          DEFAULT: 'rgb(var(--color-surface) / <alpha-value>)',
+          hover: 'rgb(var(--color-surface-hover) / <alpha-value>)',
+        },
+        border: 'rgb(var(--color-border) / <alpha-value>)',
+        content: {
+          DEFAULT: 'rgb(var(--color-text) / <alpha-value>)',
+          muted: 'rgb(var(--color-text-muted) / <alpha-value>)',
+        },
         'obsidian-950': '#020617',
         'obsidian-900': '#0f172a',
         'obsidian-800': '#1e293b',
@@ -22,7 +37,8 @@ export default <Partial<Config>>{
         },
       },
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+        sans: ['"Source Sans 3"', 'sans-serif'],
+        display: ['"Bebas Neue"', 'sans-serif'],
       },
       animation: {
         'fade-up': 'fade-up 0.5s cubic-bezier(0.2, 0, 0, 1) forwards',
