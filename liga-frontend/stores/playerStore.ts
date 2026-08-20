@@ -23,17 +23,22 @@ export interface Player {
 export const usePlayerStore = defineStore('player', () => {
   const players = ref<Player[]>([])
   const loading = ref(false)
+  // players.value también lo sobreescribe fetchPlayersByTeam con un subconjunto,
+  // así que no podemos inferir "ya cargué todos" de players.value.length.
+  const allPlayersLoaded = ref(false)
 
   function normalize(p: any): Player {
     return { ...p, id: p._id || p.id }
   }
 
-  async function fetchPlayers() {
+  async function fetchPlayers(force = false) {
+    if (!force && allPlayersLoaded.value) return
     loading.value = true
     try {
       const res: any = await $api('/players')
       const raw = res?.data || []
       players.value = raw.map(normalize)
+      allPlayersLoaded.value = true
     } catch (err) {
       console.error('Failed to fetch players:', err)
     } finally {
@@ -47,6 +52,7 @@ export const usePlayerStore = defineStore('player', () => {
       const res: any = await $api(`/players/team/${teamId}`)
       const raw = res?.data || []
       players.value = raw.map(normalize)
+      allPlayersLoaded.value = false
     } catch (err) {
       console.error('Failed to fetch players by team:', err)
     } finally {
@@ -78,7 +84,7 @@ export const usePlayerStore = defineStore('player', () => {
         method: 'POST',
         body: playerData
       })
-      await fetchPlayers()
+      await fetchPlayers(true)
       return { success: true, message: 'Jugador creado correctamente' }
     } catch (err: any) {
       console.error('Failed to create player:', err)
@@ -92,7 +98,7 @@ export const usePlayerStore = defineStore('player', () => {
         method: 'PUT',
         body: playerData
       })
-      await fetchPlayers()
+      await fetchPlayers(true)
       return { success: true, message: 'Jugador actualizado correctamente' }
     } catch (err: any) {
       console.error('Failed to update player:', err)
@@ -103,7 +109,7 @@ export const usePlayerStore = defineStore('player', () => {
   async function deletePlayer(id: string) {
     try {
       await $api(`/players/${id}`, { method: 'DELETE' })
-      await fetchPlayers()
+      await fetchPlayers(true)
       return { success: true, message: 'Jugador eliminado correctamente' }
     } catch (err: any) {
       console.error('Failed to delete player:', err)

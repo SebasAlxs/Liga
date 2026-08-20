@@ -188,13 +188,12 @@ const loadingPlayers = computed(() => playerStore.loading)
 
 onMounted(async () => {
   loading.value = true
-  const res = await teamStore.fetchTeamById(route.params.id)
-  team.value = res
+  const [teamRes] = await Promise.all([
+    teamStore.fetchTeamById(route.params.id),
+    playerStore.fetchPlayersByTeam(route.params.id),
+  ])
+  team.value = teamRes
   loading.value = false
-  
-  if (team.value) {
-    await playerStore.fetchPlayersByTeam(route.params.id)
-  }
 })
 </script>
 
