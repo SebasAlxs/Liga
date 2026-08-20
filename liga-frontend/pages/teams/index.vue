@@ -2,8 +2,8 @@
   <div class="page-container p-6">
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-content font-display">{{ authStore.isAdmin ? 'Gestión de Equipos' : 'Equipos de la Liga' }}</h1>
-        <p class="text-content-muted mt-1">{{ authStore.isAdmin ? 'Administra lo clubes y delegados de la liga.' : 'Conoce a los clubes que participan en el torneo.' }}</p>
+        <h1 class="text-3xl font-bold text-content font-display">{{ authStore.canManageTeams ? 'Gestión de Equipos' : 'Equipos de la Liga' }}</h1>
+        <p class="text-content-muted mt-1">{{ authStore.canManageTeams ? 'Administra lo clubes y delegados de la liga.' : 'Conoce a los clubes que participan en el torneo.' }}</p>
       </div>
       
       <div class="flex flex-col sm:flex-row gap-3">
@@ -17,12 +17,12 @@
           >
         </div>
         <button 
-          v-if="authStore.isAdmin"
+          v-if="authStore.canManageTeams"
           @click="openAddModal"
           class="flex items-center justify-center gap-2 bg-primary hover:bg-emerald-600 text-content px-5 py-2 rounded-xl font-bold transition-all shadow-lg shadow-emerald-500/20 active:scale-95 whitespace-nowrap"
         >
           <Icon name="lucide:plus" class="w-5 h-5" />
-          {{ authStore.isAdmin ? 'Nuevo Equipo' : 'Inscribir Equipo' }}
+          {{ authStore.canManageTeams ? 'Nuevo Equipo' : 'Inscribir Equipo' }}
         </button>
       </div>
     </div>
@@ -65,11 +65,11 @@
               <img v-if="team.logo" :src="team.logo" class="w-full h-full object-cover" />
               <Icon v-else name="lucide:shield" class="w-10 h-10 text-emerald-300" />
             </div>
-            <div v-if="authStore.isAdmin" class="flex gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
+            <div v-if="authStore.canManageTeams" class="flex gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
               <button @click.stop="openEditModal(team)" class="p-2 hover:bg-emerald-100 rounded-lg text-content-muted hover:text-primary transition-colors" title="Editar">
                 <Icon name="lucide:edit-2" class="w-4 h-4" />
               </button>
-              <button @click.stop="handleDeleteTeam(team)" class="p-2 hover:bg-rose-100 rounded-lg text-content-muted hover:text-rose-600 transition-colors" title="Eliminar">
+              <button v-if="authStore.isAdmin" @click.stop="handleDeleteTeam(team)" class="p-2 hover:bg-rose-100 rounded-lg text-content-muted hover:text-rose-600 transition-colors" title="Eliminar">
                 <Icon name="lucide:trash-2" class="w-4 h-4" />
               </button>
             </div>
@@ -94,7 +94,7 @@
         
         <!-- "Gestionar Plantilla" solo para admins o vocales, o quiza solo quitar el boton de CRUD. Pero si un publico entra a "ver", deberia decir "Ver Plantilla" -->
         <NuxtLink :to="`/teams/${team.id}`" class="px-6 py-4 bg-background/50 hover:bg-emerald-50 transition-all flex justify-between items-center group/link border-t border-border">
-          <span class="text-sm font-bold text-content-muted group-hover/link:text-content transition-colors">{{ authStore.isAdmin ? 'Gestionar Plantilla' : 'Ver Plantilla' }}</span>
+          <span class="text-sm font-bold text-content-muted group-hover/link:text-content transition-colors">{{ authStore.canManageTeams ? 'Gestionar Plantilla' : 'Ver Plantilla' }}</span>
           <div class="w-8 h-8 rounded-full bg-surface-hover flex items-center justify-center group-hover/link:bg-primary group-hover/link:text-content transition-all">
             <Icon name="lucide:arrow-right" class="w-4 h-4" />
           </div>

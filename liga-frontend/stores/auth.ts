@@ -20,8 +20,12 @@ export const useAuthStore = defineStore('auth', () => {
 
   const token = computed(() => tokenCookie.value)
   const isLoggedIn = computed(() => !!tokenCookie.value)
-  const isAdmin = computed(() => user.value?.role === 'SUPERADMIN')
+  const isSuperAdmin = computed(() => user.value?.role === 'SUPERADMIN')
+  const isAdmin = computed(() => ['SUPERADMIN', 'ADMIN'].includes(user.value?.role))
   const isVocal = computed(() => user.value?.role === 'VOCAL')
+  const isDirigente = computed(() => user.value?.role === 'DIRIGENTE')
+  // Puede crear/editar equipos y jugadores: admins + dirigentes
+  const canManageTeams = computed(() => ['SUPERADMIN', 'ADMIN', 'DIRIGENTE'].includes(user.value?.role))
 
   // En el cliente, sincronizar si hay un cambio o si existe en localStorage
   if (import.meta.client) {
@@ -82,8 +86,11 @@ export const useAuthStore = defineStore('auth', () => {
     token,
     loading,
     isLoggedIn,
+    isSuperAdmin,
     isAdmin,
     isVocal,
+    isDirigente,
+    canManageTeams,
     login,
     logout
   }

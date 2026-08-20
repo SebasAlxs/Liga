@@ -223,6 +223,55 @@
 
     </div><!-- /grid -->
 
+    <!-- ══════════════════════════════════ -->
+    <!-- USUARIOS (solo SUPERADMIN)         -->
+    <!-- ══════════════════════════════════ -->
+    <div v-if="authStore.isSuperAdmin" class="config-section mt-6">
+      <div class="section-header">
+        <div class="flex items-center gap-3">
+          <div class="section-icon bg-emerald-500/10 border-emerald-500/20">
+            <Icon name="lucide:shield-check" class="w-5 h-5 text-emerald-400" />
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-content">Usuarios</h2>
+            <p class="text-xs text-content-muted">{{ users.length }} cuenta{{ users.length !== 1 ? 's' : '' }} registrada{{ users.length !== 1 ? 's' : '' }}</p>
+          </div>
+        </div>
+        <button @click="openModal('user')" class="add-btn">
+          <Icon name="lucide:plus" class="w-4 h-4" /> Nuevo
+        </button>
+      </div>
+
+      <div class="section-body max-h-none">
+        <div v-if="loading.users" class="py-8 flex justify-center">
+          <div class="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-emerald-500"></div>
+        </div>
+        <div v-else-if="!users.length" class="py-8 text-center">
+          <Icon name="lucide:shield-check" class="w-8 h-8 text-content-muted mx-auto mb-2" />
+          <p class="text-sm text-content-muted">Sin usuarios registrados</p>
+        </div>
+        <div v-else class="space-y-2">
+          <div v-for="item in users" :key="item.id" class="item-row group">
+            <div class="flex-1 min-w-0">
+              <p class="font-semibold text-content text-sm truncate">{{ item.email }}</p>
+              <p class="text-xs text-content-muted">Creado {{ new Date(item.createdAt).toLocaleDateString('es-ES') }}</p>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <span :class="`status-badge ${roleBadgeClass(item.role)}`">{{ item.role }}</span>
+              <div class="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                <button @click="openEditModal('user', item)" class="action-btn hover:text-emerald-400 hover:bg-primary/10" title="Editar">
+                  <Icon name="lucide:edit-2" class="w-3.5 h-3.5" />
+                </button>
+                <button @click="handleDelete('user', item)" class="action-btn hover:text-rose-400 hover:bg-rose-500/10" title="Eliminar">
+                  <Icon name="lucide:trash-2" class="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ─────────────────────────────────── -->
     <!-- Modal universal                     -->
     <!-- ─────────────────────────────────── -->
@@ -343,6 +392,28 @@
             </div>
           </template>
 
+          <!-- USER -->
+          <template v-else-if="modalType === 'user'">
+            <div>
+              <label class="field-label">Correo electrónico *</label>
+              <input v-model="modalForm.email" type="email" required class="field-input" placeholder="dirigente@liga.com" />
+            </div>
+            <div>
+              <label class="field-label">{{ isEditing ? 'Nueva contraseña' : 'Contraseña *' }}</label>
+              <input v-model="modalForm.password" type="password" :required="!isEditing" minlength="8" class="field-input" placeholder="Mínimo 8 caracteres" />
+              <p v-if="isEditing" class="text-xs text-content-muted mt-1.5">Déjalo en blanco para no cambiar la contraseña.</p>
+            </div>
+            <div>
+              <label class="field-label">Rol *</label>
+              <select v-model="modalForm.role" required class="field-input">
+                <option value="SUPERADMIN">Super Admin</option>
+                <option value="ADMIN">Admin</option>
+                <option value="VOCAL">Vocal</option>
+                <option value="DIRIGENTE">Dirigente</option>
+              </select>
+            </div>
+          </template>
+
           <!-- Buttons -->
           <div class="pt-4 flex gap-3">
             <button type="button" @click="closeModal" class="flex-1 px-4 py-4 rounded-2xl font-bold text-sm text-content transition-all" style="border: 1px solid rgba(255,255,255,0.1); background: transparent">
@@ -374,11 +445,12 @@ const tournaments = ref([])
 const categories = ref([])
 const headquarters = ref([])
 const referees = ref([])
-const loading = reactive({ tournaments: false, categories: false, headquarters: false, referees: false })
+const users = ref([])
+const loading = reactive({ tournaments: false, categories: false, headquarters: false, referees: false, users: false })
 
 // ── Helpers ──────────────────────────────────────────────────
 const modalTitle = computed(() => {
-  const map = { tournament: 'Torneo', category: 'Categoría', headquarters: 'Sede', referee: 'Árbitro' }
+  const map = { tournament: 'Torneo', category: 'Categoría', headquarters: 'Sede', referee: 'Árbitro', user: 'Usuario' }
   return `${isEditing.value ? 'Editar' : 'Nuevo'} ${map[modalType.value] ?? ''}`
 })
 
@@ -388,19 +460,31 @@ const modalAccent = computed(() => {
     category: 'via-purple-500',
     headquarters: 'via-blue-500',
     referee: 'via-orange-500',
+    user: 'via-emerald-500',
   }
   return map[modalType.value] ?? 'via-emerald-500'
 })
 
-const endpointMap = { tournament: '/tournaments', category: '/categories', headquarters: '/headquarters', referee: '/referees' }
-const storeRefMap = computed(() => ({ tournament: tournaments, category: categories, headquarters: headquarters, referee: referees }))
-const loadingKeyMap = { tournament: 'tournaments', category: 'categories', headquarters: 'headquarters', referee: 'referees' }
+const endpointMap = { tournament: '/tournaments', category: '/categories', headquarters: '/headquarters', referee: '/referees', user: '/users' }
+const storeRefMap = computed(() => ({ tournament: tournaments, category: categories, headquarters: headquarters, referee: referees, user: users }))
+const loadingKeyMap = { tournament: 'tournaments', category: 'categories', headquarters: 'headquarters', referee: 'referees', user: 'users' }
 
 const defaultForms = {
   tournament: () => ({ name: '', maxYellowCardsForSuspension: 3, active: true, headquartersId: '' }),
   category: () => ({ name: '', minAge: null, maxAge: null }),
   headquarters: () => ({ name: '', city: '', address: '', active: true }),
   referee: () => ({ name: '', license: '', phone: '', email: '' }),
+  user: () => ({ email: '', password: '', role: 'DIRIGENTE' }),
+}
+
+function roleBadgeClass(role) {
+  const map = {
+    SUPERADMIN: 'bg-rose-500/10 text-rose-500 border-rose-500/30',
+    ADMIN: 'bg-amber-500/10 text-amber-500 border-amber-500/30',
+    VOCAL: 'bg-blue-500/10 text-blue-500 border-blue-500/30',
+    DIRIGENTE: 'bg-purple-500/10 text-purple-500 border-purple-500/30',
+  }
+  return map[role] ?? 'badge-inactive'
 }
 
 // ── API ───────────────────────────────────────────────────────
@@ -414,12 +498,14 @@ async function loadSection(endpoint, storeRef, key) {
 }
 
 async function fetchAll() {
-  await Promise.all([
+  const tasks = [
     loadSection('/tournaments', tournaments, 'tournaments'),
     loadSection('/categories', categories, 'categories'),
     loadSection('/headquarters', headquarters, 'headquarters'),
     loadSection('/referees', referees, 'referees'),
-  ])
+  ]
+  if (authStore.isSuperAdmin) tasks.push(loadSection('/users', users, 'users'))
+  await Promise.all(tasks)
 }
 
 // ── Modal ─────────────────────────────────────────────────────
@@ -451,6 +537,7 @@ async function handleModalSubmit() {
   if (payload.minAge === null || payload.minAge === '') delete payload.minAge
   if (payload.maxAge === null || payload.maxAge === '') delete payload.maxAge
   if (payload.headquartersId === '') delete payload.headquartersId
+  if (modalType.value === 'user' && isEditing.value && !payload.password) delete payload.password
 
   try {
     if (isEditing.value) {
@@ -470,7 +557,7 @@ async function handleModalSubmit() {
 }
 
 async function handleDelete(type, item) {
-  if (!confirm(`¿Eliminar "${item.name}"? Esta acción no se puede deshacer.`)) return
+  if (!confirm(`¿Eliminar "${item.name || item.email}"? Esta acción no se puede deshacer.`)) return
   const endpoint = endpointMap[type]
   const storeRef = storeRefMap.value[type]
   const key = loadingKeyMap[type]

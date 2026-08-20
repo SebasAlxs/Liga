@@ -12,6 +12,7 @@ import { SuspensionHandlers } from "./infrastructure/handlers/Suspension/src";
 import { AuthHandlers } from "./infrastructure/handlers/Auth/src";
 import { MatchLineupHandlers } from "./infrastructure/handlers/MatchLineup/src";
 import { RefereeHandlers } from "./infrastructure/handlers/Referee/src";
+import { UserHandlers } from "./infrastructure/handlers/User/src";
 import { verifyToken, hasRole } from "./infrastructure/middlewares/auth.middleware";
 
 dotenv.config();
@@ -36,29 +37,36 @@ app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(compression());
 
 // Helpers for role-based protection
-const adminOnly = [verifyToken, hasRole(["SUPERADMIN"])];
-const vocalOrAdmin = [verifyToken, hasRole(["VOCAL", "SUPERADMIN"])];
+const adminOnly = [verifyToken, hasRole(["SUPERADMIN", "ADMIN"])];
+const superAdminOnly = [verifyToken, hasRole(["SUPERADMIN"])];
+const teamManagers = [verifyToken, hasRole(["SUPERADMIN", "ADMIN", "DIRIGENTE"])];
+const vocalOrAdmin = [verifyToken, hasRole(["VOCAL", "SUPERADMIN", "ADMIN"])];
 
 // Routes using functional handlers (Cluster Pattern)
 const router = express.Router();
 
 // Auth Routes
 router.post("/auth/login", AuthHandlers.login);
-router.post("/auth/register", AuthHandlers.register);
 
-// Team Routes (GET Public, others Admin)
+// User Management Routes (SUPERADMIN only)
+router.get("/users", ...superAdminOnly, UserHandlers.getAllUsers);
+router.post("/users", ...superAdminOnly, UserHandlers.createUser);
+router.put("/users/:id", ...superAdminOnly, UserHandlers.updateUser);
+router.delete("/users/:id", ...superAdminOnly, UserHandlers.deleteUser);
+
+// Team Routes (GET Public, Create/Edit: Admin/Dirigente, Delete: Admin)
 router.get("/teams", TeamHandlers.getAllTeams);
 router.get("/teams/:id", TeamHandlers.getTeam);
-router.post("/teams", ...adminOnly, TeamHandlers.createTeam);
-router.put("/teams/:id", ...adminOnly, TeamHandlers.updateTeam);
+router.post("/teams", ...teamManagers, TeamHandlers.createTeam);
+router.put("/teams/:id", ...teamManagers, TeamHandlers.updateTeam);
 router.delete("/teams/:id", ...adminOnly, TeamHandlers.deleteTeam);
 
-// Player Routes (GET Public, others Admin)
+// Player Routes (GET Public, Create/Edit: Admin/Dirigente, Delete: Admin)
 router.get("/players", PlayerHandlers.getAllPlayers);
 router.get("/players/team/:teamId", PlayerHandlers.getPlayersByTeam);
 router.get("/players/:id", PlayerHandlers.getPlayer);
-router.post("/players", ...adminOnly, PlayerHandlers.createPlayer);
-router.put("/players/:id", ...adminOnly, PlayerHandlers.updatePlayer);
+router.post("/players", ...teamManagers, PlayerHandlers.createPlayer);
+router.put("/players/:id", ...teamManagers, PlayerHandlers.updatePlayer);
 router.delete("/players/:id", ...adminOnly, PlayerHandlers.deletePlayer);
 
 // Match Routes (GET Public, Modify Vocal/Admin)

@@ -1,5 +1,6 @@
+import { EventType } from "@prisma/client";
 import prisma from "../PrismaClient";
-import { MatchEvent, EventType } from "../../../../domain/entities/MatchEvent"; // will export it later correctly
+import { MatchEvent } from "../../../../domain/entities/MatchEvent";
 import { MatchEventRepository } from "../../../../domain/repositories/MatchEventRepository";
 
 export class PrismaMatchEventRepository implements MatchEventRepository {

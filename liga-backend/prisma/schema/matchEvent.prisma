@@ -23,4 +23,5 @@ enum EventType {
   GOAL
   ASSIST
   SUBSTITUTION
+  PLAYER_ENTRY
 }

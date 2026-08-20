@@ -1,6 +1,4 @@
-import { EventType as PrismaEventType } from "@prisma/client";
-export type EventType = PrismaEventType;
-export const EventType = PrismaEventType;
+export type EventType = "YELLOW_CARD" | "RED_CARD" | "GOAL" | "ASSIST" | "SUBSTITUTION" | "PLAYER_ENTRY";
 
 export class MatchEvent {
     constructor(
@@ -22,7 +20,7 @@ export class MatchEvent {
         if (!this.playerId || this.playerId.trim() === "") throw new Error("MatchEvent require un playerId válido.");
         if (!this.teamId || this.teamId.trim() === "") throw new Error("MatchEvent require un teamId válido.");
 
-        const validTypes = ["YELLOW_CARD", "RED_CARD", "GOAL", "ASSIST", "SUBSTITUTION"];
+        const validTypes = ["YELLOW_CARD", "RED_CARD", "GOAL", "ASSIST", "SUBSTITUTION", "PLAYER_ENTRY"];
         if (!validTypes.includes(this.type)) {
             throw new Error(`Tipo de evento no válido. Opciones: ${validTypes.join(", ")}`);
         }
