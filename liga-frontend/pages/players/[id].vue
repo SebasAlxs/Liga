@@ -115,8 +115,28 @@
              </div>
           </div>
 
+          <!-- TODO: datos quemados temporalmente en el front, pendiente de conectar al backend.
+               Agrupados por categoría para poder quitar/ajustar campos según feedback. -->
+          <div class="space-y-6">
+            <div v-for="group in statGroups" :key="group.title">
+              <h4 class="text-xs font-bold text-content-muted uppercase tracking-widest mb-3 flex items-center gap-2">
+                <Icon :name="group.icon" class="w-4 h-4 text-primary" /> {{ group.title }}
+              </h4>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div
+                  v-for="stat in group.stats"
+                  :key="stat.label"
+                  class="p-4 rounded-2xl border border-border/5 bg-surface/2 text-center"
+                >
+                  <div class="text-2xl font-black text-content tabular-nums tracking-tighter">{{ stat.value }}</div>
+                  <div class="text-[10px] font-bold text-content-muted uppercase tracking-widest mt-1">{{ stat.label }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Actividad Reciente -> Podriamos en el futuro mostrar historial de partidos, pero por ahora mostramos un mensaje placeholder elegante -->
-          <div class="p-8 rounded-3xl border border-dashed border-border/10 text-center bg-surface/2">
+          <div class="p-8 mt-6 rounded-3xl border border-dashed border-border/10 text-center bg-surface/2">
             <Icon name="lucide:history" class="w-10 h-10 text-content-muted mx-auto mb-3" />
             <h4 class="text-content font-bold mb-1">Historial de Partidos</h4>
             <p class="text-xs text-content-muted">Pronto podrás ver el detalle de los partidos donde el jugador ha participado.</p>
@@ -134,6 +154,57 @@ const teamStore = useTeamStore()
 
 const player = ref(null)
 const loading = ref(true)
+
+// Datos quemados temporalmente para maquetar la vista. Reemplazar por player.stats?.x cuando el backend los provea.
+const statGroups = computed(() => [
+  {
+    title: 'General',
+    icon: 'lucide:activity',
+    stats: [
+      { label: 'Partidos Jugados', value: 12 },
+      { label: 'Titularidades', value: 9 },
+      { label: 'Minutos Jugados', value: 810 }
+    ]
+  },
+  {
+    title: 'Ataque',
+    icon: 'lucide:target',
+    stats: [
+      { label: 'Goles', value: player.value?.stats?.goals || 0 },
+      { label: 'Asistencias', value: 3 },
+      { label: 'Tiros', value: 21 },
+      { label: 'Tiros a Puerta', value: 11 }
+    ]
+  },
+  {
+    title: 'Pases',
+    icon: 'lucide:arrow-right-left',
+    stats: [
+      { label: 'Pases Completados', value: 254 },
+      { label: '% Precisión', value: '82%' }
+    ]
+  },
+  {
+    title: 'Defensa',
+    icon: 'lucide:shield',
+    stats: [
+      { label: 'Duelos Ganados', value: 34 },
+      { label: 'Intercepciones', value: 14 },
+      { label: 'Recuperaciones', value: 22 },
+      { label: 'Balones Perdidos', value: 18 }
+    ]
+  },
+  {
+    title: 'Disciplina',
+    icon: 'lucide:flag',
+    stats: [
+      { label: 'Faltas Cometidas', value: 7 },
+      { label: 'Faltas Recibidas', value: 10 },
+      { label: 'Amarillas', value: player.value?.stats?.yellowCards || 0 },
+      { label: 'Rojas', value: player.value?.stats?.redCards || 0 }
+    ]
+  }
+])
 
 const teamName = computed(() => {
   if (!player.value) return '—'
