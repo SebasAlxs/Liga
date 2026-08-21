@@ -1,1 +1,0 @@
-export { default } from "file:///Users/alexandercatagna/Documents/GitHub/Liga/liga-frontend/node_modules/@nuxt/vite-builder/dist/vite-node-entry.mjs"
