@@ -15,8 +15,7 @@ export const useAuthStore = defineStore('auth', () => {
     sameSite: 'lax'
   })
 
-  // computed (no ref) para que siempre refleje el cookie actual, incluso si
-  // otro composable (useAuth) lo modifica directamente sin pasar por este store
+  // computed (no ref) para que siempre refleje el cookie actual
   const user = computed(() => userCookie.value)
   const loading = ref(false)
 

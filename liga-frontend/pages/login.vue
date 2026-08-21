@@ -82,7 +82,7 @@ definePageMeta({
   layout: false
 })
 
-const auth = useAuth()
+const authStore = useAuthStore()
 const loading = ref(false)
 const error = ref('')
 const form = reactive({
@@ -93,9 +93,9 @@ const form = reactive({
 async function handleLogin() {
   loading.value = true
   error.value = ''
-  
+
   try {
-    const res = await auth.login(form.email, form.password)
+    const res = await authStore.login({ email: form.email, password: form.password })
     if (res.success) {
       navigateTo('/vocalia')
     } else {

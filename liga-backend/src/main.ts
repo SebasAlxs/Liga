@@ -13,6 +13,7 @@ import { AuthHandlers } from "./infrastructure/handlers/Auth/src";
 import { MatchLineupHandlers } from "./infrastructure/handlers/MatchLineup/src";
 import { RefereeHandlers } from "./infrastructure/handlers/Referee/src";
 import { UserHandlers } from "./infrastructure/handlers/User/src";
+import { ModuleAccessHandlers } from "./infrastructure/handlers/ModuleAccess/src";
 import { verifyToken, hasRole } from "./infrastructure/middlewares/auth.middleware";
 
 dotenv.config();
@@ -53,6 +54,11 @@ router.get("/users", ...superAdminOnly, UserHandlers.getAllUsers);
 router.post("/users", ...superAdminOnly, UserHandlers.createUser);
 router.put("/users/:id", ...superAdminOnly, UserHandlers.updateUser);
 router.delete("/users/:id", ...superAdminOnly, UserHandlers.deleteUser);
+
+// Module Access Routes (qué módulos ve cada rol en el menú)
+router.get("/module-access/me", verifyToken, ModuleAccessHandlers.getMyModules);
+router.get("/module-access", ...superAdminOnly, ModuleAccessHandlers.getAllModuleAccess);
+router.put("/module-access", ...superAdminOnly, ModuleAccessHandlers.updateModuleAccess);
 
 // Team Routes (GET Public, Create/Edit: Admin/Dirigente, Delete: Admin)
 router.get("/teams", TeamHandlers.getAllTeams);

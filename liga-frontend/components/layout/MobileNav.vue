@@ -29,13 +29,27 @@
 </template>
 
 <script setup>
-const navItems = [
-  { label: 'Inicio', icon: 'lucide:layout-dashboard', link: '/' },
-  { label: 'Partidos', icon: 'lucide:calendar-check', link: '/matches' },
-  { label: 'Equipos', icon: 'lucide:users-2', link: '/teams' },
-  { label: 'Stats', icon: 'lucide:bar-chart-3', link: '/standings' },
-  { label: 'Ajustes', icon: 'lucide:settings-2', link: '/settings' },
-]
+import { MODULE_CATALOG } from '~/stores/moduleAccess'
+
+// Subconjunto de módulos con etiquetas cortas para la barra móvil.
+// Sigue las mismas claves que el catálogo, así que respeta la visibilidad por rol.
+const MOBILE_LABELS = {
+  dashboard: 'Inicio',
+  matches: 'Partidos',
+  teams: 'Equipos',
+  standings: 'Stats',
+  settings: 'Ajustes',
+}
+const MOBILE_KEYS = Object.keys(MOBILE_LABELS)
+
+const moduleAccessStore = useModuleAccessStore()
+
+const navItems = computed(() =>
+  MODULE_CATALOG
+    .filter(item => MOBILE_KEYS.includes(item.key) && moduleAccessStore.isVisible(item.key))
+    .sort((a, b) => MOBILE_KEYS.indexOf(a.key) - MOBILE_KEYS.indexOf(b.key))
+    .map(item => ({ ...item, label: MOBILE_LABELS[item.key] }))
+)
 </script>
 
 <style scoped>

@@ -10,7 +10,7 @@
 
       <div class="flex items-center gap-3 flex-wrap">
         <!-- Phase stepper (Vocal/Admin only) -->
-        <div v-if="v.activeMatch.value && auth.isLoggedIn.value" class="flex items-center gap-1">
+        <div v-if="v.activeMatch.value && auth.isLoggedIn" class="flex items-center gap-1">
           <template v-for="(ph, i) in phases" :key="ph.id">
             <button
               @click="v.phase.value = ph.id"
@@ -45,10 +45,10 @@
         </select>
 
         <!-- Auth Actions -->
-        <div v-if="auth.isLoggedIn.value" class="flex items-center gap-3">
+        <div v-if="auth.isLoggedIn" class="flex items-center gap-3">
           <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 rounded-full border border-emerald-500/20">
             <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-            <span class="text-[10px] font-black text-emerald-400 font-display tracking-widest uppercase">{{ auth.user.value?.role }}</span>
+            <span class="text-[10px] font-black text-emerald-400 font-display tracking-widest uppercase">{{ auth.user?.role }}</span>
           </div>
           <button @click="auth.logout()" class="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-obsidian-950 transition-all border border-rose-500/20 shadow-lg shadow-rose-500/10">
             <Icon name="lucide:log-out" class="w-5 h-5" />
@@ -96,7 +96,7 @@
               <span class="text-xs text-content-muted ml-1 hidden sm:inline">{{ awayTeam?.name }}</span>
             </div>
           </div>
-            <button v-if="auth.isLoggedIn.value" @click="goToFormation" :disabled="v.checkedInPlayers.value.length < 2"
+            <button v-if="auth.isLoggedIn" @click="goToFormation" :disabled="v.checkedInPlayers.value.length < 2"
               class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all disabled:opacity-40 whitespace-nowrap"
               style="background: linear-gradient(to right, #10b981, #14b8a6); color: #0a1a14; box-shadow: 0 4px 16px rgba(16,185,129,0.2)">
               <Icon name="lucide:arrow-right" class="w-4 h-4" />
@@ -230,7 +230,7 @@
 
               <!-- Not in lineup: Add (Admin/Vocal only) -->
               <button
-                v-if="!v.lineupForPlayer(p.id) && auth.isLoggedIn.value"
+                v-if="!v.lineupForPlayer(p.id) && auth.isLoggedIn"
                 @click="doStartVerification(p, side.teamId)"
                 :disabled="v.suspendedPlayerIds.value.includes(p.id) || addingPlayerId === p.id"
                 class="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
@@ -241,7 +241,7 @@
               </button>
 
               <!-- In lineup: check-in or remove -->
-              <div v-else-if="v.lineupForPlayer(p.id) && auth.isLoggedIn.value" class="flex gap-1.5 flex-shrink-0">
+              <div v-else-if="v.lineupForPlayer(p.id) && auth.isLoggedIn" class="flex gap-1.5 flex-shrink-0">
                 <button
                   @click="doToggleCheckIn(v.lineupForPlayer(p.id).id, v.lineupForPlayer(p.id).checkedIn)"
                   :disabled="checkingInId === v.lineupForPlayer(p.id).id || v.suspendedPlayerIds.value.includes(p.id)"
@@ -281,7 +281,7 @@
             <p class="text-xs text-content-muted">Asigna titulares y suplentes para cada equipo.</p>
           </div>
         </div>
-        <button v-if="auth.isLoggedIn.value" @click="doStartMatch"
+        <button v-if="auth.isLoggedIn" @click="doStartMatch"
           class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
           style="background: linear-gradient(to right, #10b981, #14b8a6); color: #0a1a14; box-shadow: 0 4px 16px rgba(16,185,129,0.2)">
           <Icon name="lucide:play" class="w-4 h-4" />
@@ -299,7 +299,7 @@
           <SoccerField
             :home-starters="v.homeStarters.value"
             :away-starters="v.awayStarters.value"
-            :interactive="auth.isLoggedIn.value"
+            :interactive="auth.isLoggedIn"
             :stats-map="playerStatsMap"
             @make-substitute="(lid) => v.setLineupStatus(lid.id, 'SUBSTITUTE')"
           />
@@ -323,7 +323,7 @@
             <h3 class="text-xs font-black text-content uppercase tracking-widest italic">Arbitraje</h3>
           </div>
           <button
-            v-if="auth.isAdmin.value && v.activeMatch.value?.refereeId"
+            v-if="auth.isAdmin && v.activeMatch.value?.refereeId"
             @click="v.saveArbitration({ refereeId: null, assistant1Id: null, assistant2Id: null })"
             class="text-[10px] text-rose-400/60 hover:text-rose-400 font-bold"
           >
@@ -335,7 +335,7 @@
             <div class="space-y-1.5">
               <label class="text-[9px] font-black text-content-muted uppercase tracking-widest px-1">Árbitro Central</label>
               <select
-                :disabled="!auth.isAdmin.value"
+                :disabled="!auth.isAdmin"
                 :value="v.activeMatch.value?.refereeId"
                 @change="e => v.saveArbitration({ refereeId: (e.target.value && e.target.value !== 'null') ? e.target.value : null })"
                 class="field-input text-xs disabled:opacity-50"
@@ -347,7 +347,7 @@
             <div class="space-y-1.5">
               <label class="text-[9px] font-black text-content-muted uppercase tracking-widest px-1">Asistente 1</label>
               <select
-                :disabled="!auth.isAdmin.value"
+                :disabled="!auth.isAdmin"
                 :value="v.activeMatch.value?.assistant1Id"
                 @change="e => v.saveArbitration({ assistant1Id: (e.target.value && e.target.value !== 'null') ? e.target.value : null })"
                 class="field-input text-xs disabled:opacity-50"
@@ -359,7 +359,7 @@
             <div class="space-y-1.5">
               <label class="text-[9px] font-black text-content-muted uppercase tracking-widest px-1">Asistente 2</label>
               <select
-                :disabled="!auth.isAdmin.value"
+                :disabled="!auth.isAdmin"
                 :value="v.activeMatch.value?.assistant2Id"
                 @change="e => v.saveArbitration({ assistant2Id: (e.target.value && e.target.value !== 'null') ? e.target.value : null })"
                 class="field-input text-xs disabled:opacity-50"
@@ -380,7 +380,7 @@
       />
 
       <!-- Match Controller Actions -->
-      <div v-if="auth.isLoggedIn.value && v.activeMatch.value?.status !== 'FINISHED'" class="flex flex-wrap items-center justify-center gap-3 mb-6">
+      <div v-if="auth.isLoggedIn && v.activeMatch.value?.status !== 'FINISHED'" class="flex flex-wrap items-center justify-center gap-3 mb-6">
         <button v-if="!v.activeMatch.value?.firstHalfEndedAt" @click="doEndFirstHalf"
           class="flex items-center gap-2 px-6 py-2.5 rounded-xl border border-yellow-500/30 text-yellow-500 text-xs font-black hover:bg-yellow-500/10 transition-all uppercase tracking-widest bg-yellow-500/5">
           <Icon name="lucide:pause" class="w-4 h-4" /> Medio Tiempo
@@ -408,7 +408,7 @@
               :away-starters="v.awayActiveLineup.value"
               :active-player-id="activePlayer?.id"
               :is-mobile="isMobile"
-              :clickable="auth.isLoggedIn.value"
+              :clickable="auth.isLoggedIn"
               :stats-map="playerStatsMap"
               :red-carded-ids="v.redCardedPlayerIds.value"
               @player-click="onPlayerClick"
@@ -467,15 +467,15 @@
           </Transition>
 
           <!-- No player selected hint / Viewer Mode Info -->
-          <div v-if="!activePlayer || !auth.isLoggedIn.value" class="rounded-2xl border border-dashed border-border p-5 text-center bg-background">
+          <div v-if="!activePlayer || !auth.isLoggedIn" class="rounded-2xl border border-dashed border-border p-5 text-center bg-background">
             <div class="w-12 h-12 rounded-full bg-emerald-500/5 border border-emerald-500/15 flex items-center justify-center mx-auto mb-3 animate-pulse">
-              <Icon :name="auth.isLoggedIn.value ? 'lucide:hand-metal' : 'lucide:monitor-play'" class="w-6 h-6 text-emerald-600" />
+              <Icon :name="auth.isLoggedIn ? 'lucide:hand-metal' : 'lucide:monitor-play'" class="w-6 h-6 text-emerald-600" />
             </div>
             <p class="text-sm font-semibold text-content mb-1">
-              {{ auth.isLoggedIn.value ? 'Selecciona un jugador' : 'Modo Espectador' }}
+              {{ auth.isLoggedIn ? 'Selecciona un jugador' : 'Modo Espectador' }}
             </p>
             <p class="text-xs text-content-muted">
-              {{ auth.isLoggedIn.value ? 'Haz click en cualquier ficha del campo para registrar acciones.' : 'Estás viendo el partido en tiempo real. Los controles de oficial están restringidos.' }}
+              {{ auth.isLoggedIn ? 'Haz click en cualquier ficha del campo para registrar acciones.' : 'Estás viendo el partido en tiempo real. Los controles de oficial están restringidos.' }}
             </p>
           </div>
 
@@ -618,7 +618,7 @@
 
       <!-- MODAL DE ACCIONES (ACTION DRAWER) -->
     <Transition :name="isMobile ? 'sheet' : 'fade'">
-      <div v-if="activePlayer && auth.isLoggedIn.value" 
+      <div v-if="activePlayer && auth.isLoggedIn" 
         :class="[
           'fixed inset-0 z-[100] flex',
           isMobile ? 'items-end' : 'items-center justify-center p-4'
@@ -743,11 +743,11 @@
 const teamStore = useTeamStore()
 const playerStore = usePlayerStore()
 const v = useVocalia()
-const auth = useAuth()
+const auth = useAuthStore()
 
 // Handle public view (Phase 3 only)
 watchEffect(() => {
-  if (!auth.isLoggedIn.value && v.phase.value !== 'live') {
+  if (!auth.isLoggedIn && v.phase.value !== 'live') {
     v.phase.value = 'live'
   }
 })

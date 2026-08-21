@@ -1,15 +1,25 @@
 <script setup>
 import { useWindowSize } from '@vueuse/core'
 import MobileNav from '~/components/layout/MobileNav.vue'
+import { MODULE_CATALOG } from '~/stores/moduleAccess'
 
 const isSidebarOpen = ref(true)
 const { width } = useWindowSize()
 const isMobile = computed(() => width.value < 768)
 const authStore = useAuthStore()
+const moduleAccessStore = useModuleAccessStore()
 const isMounted = ref(false)
 
 onMounted(() => {
   isMounted.value = true
+  if (authStore.isLoggedIn) {
+    moduleAccessStore.fetchMyModules()
+  }
+})
+
+// Si el login ocurre dentro de la misma sesión (sin recargar), traer los módulos también
+watch(() => authStore.isLoggedIn, (loggedIn) => {
+  if (loggedIn) moduleAccessStore.fetchMyModules()
 })
 
 // Auto-close sidebar on mobile
@@ -19,17 +29,7 @@ watchEffect(() => {
   }
 })
 
-const allMenuItems = [
-  { label: 'Dashboard', icon: 'lucide:layout-dashboard', link: '/' },
-  { label: 'Partidos', icon: 'lucide:calendar-check', link: '/matches' },
-  { label: 'Equipos', icon: 'lucide:users-2', link: '/teams' },
-  { label: 'Jugadores', icon: 'lucide:user-check', link: '/players' },
-  { label: 'Posiciones', icon: 'lucide:list-ordered', link: '/standings' },
-  { label: 'Vocalía', icon: 'lucide:clipboard-list', link: '/vocalia', hideFor: ['DIRIGENTE'] },
-  { label: 'Configuración', icon: 'lucide:settings-2', link: '/settings' },
-]
-
-const menuItems = computed(() => allMenuItems.filter(item => !item.hideFor?.includes(authStore.user?.role)))
+const menuItems = computed(() => MODULE_CATALOG.filter(item => moduleAccessStore.isVisible(item.key)))
 
 const handleLogout = () => {
   authStore.logout()
@@ -82,6 +82,25 @@ const handleLogout = () => {
                 </span>
               </NuxtLink>
             </template>
+
+            <!-- Panel Super Admin: fuera del sistema de módulos configurables a propósito,
+                 para que un Super Admin nunca pueda quitarse el acceso a sí mismo por error. -->
+            <NuxtLink
+              v-if="authStore.isSuperAdmin"
+              to="/admin/modules"
+              class="flex items-center gap-4 p-3.5 rounded-xl group transition-all duration-300 hover:bg-background"
+              :class="{ 'bg-emerald-50 border border-emerald-100': $route.path === '/admin/modules' }"
+            >
+              <Icon
+                name="lucide:shield-check"
+                class="text-xl transition-colors"
+                :class="$route.path === '/admin/modules' ? 'text-primary' : 'text-content-muted group-hover:text-primary'"
+              />
+              <span v-show="isSidebarOpen" class="text-sm font-semibold whitespace-nowrap transition-colors"
+                :class="$route.path === '/admin/modules' ? 'text-emerald-700' : 'text-content-muted group-hover:text-emerald-700'">
+                Módulos por Rol
+              </span>
+            </NuxtLink>
           </nav>
 
           <!-- Logout & Toggle Section -->
