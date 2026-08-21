@@ -15,6 +15,64 @@
       </div>
     </Transition>
 
+    <!-- ══════════════════════════════════ -->
+    <!-- REGLAS DEL CAMPEONATO               -->
+    <!-- ══════════════════════════════════ -->
+    <div class="config-section mb-6">
+      <div class="section-header">
+        <div class="flex items-center gap-3">
+          <div class="section-icon bg-cyan-500/10 border-cyan-500/20">
+            <Icon name="lucide:scroll-text" class="w-5 h-5 text-cyan-400" />
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-content">Reglas del Campeonato</h2>
+            <p class="text-xs text-content-muted">Reglas generales, aplican a toda la liga</p>
+          </div>
+        </div>
+        <button v-if="authStore.isAdmin" @click="openModal('ruleItem')" class="add-btn">
+          <Icon name="lucide:plus" class="w-4 h-4" /> Nueva Regla
+        </button>
+      </div>
+
+      <div class="section-body max-h-none space-y-4">
+        <!-- Foráneos en cancha: campo fijo, siempre visible arriba de la lista -->
+        <div class="item-row !cursor-default">
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-content text-sm">Foráneos en cancha</p>
+            <p class="text-xs text-content-muted">Máximo {{ leagueRulesStore.rules.maxForeignPlayersOnField }}, el resto locales</p>
+          </div>
+          <button v-if="authStore.isAdmin" @click="openRulesModal" class="action-btn hover:text-emerald-400 hover:bg-primary/10" title="Editar">
+            <Icon name="lucide:edit-2" class="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <!-- Lista libre de reglas -->
+        <div v-if="ruleItemsLoading" class="py-8 flex justify-center">
+          <div class="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-cyan-500"></div>
+        </div>
+        <div v-else-if="!leagueRuleItemStore.items.length" class="py-8 text-center">
+          <Icon name="lucide:scroll-text" class="w-8 h-8 text-content-muted mx-auto mb-2" />
+          <p class="text-sm text-content-muted">Sin reglas adicionales registradas</p>
+        </div>
+        <div v-else class="space-y-2">
+          <div v-for="item in leagueRuleItemStore.items" :key="item.id" class="item-row group items-start">
+            <div class="flex-1 min-w-0">
+              <p class="font-semibold text-content text-sm">{{ item.title }}</p>
+              <p class="text-xs text-content-muted whitespace-pre-line">{{ item.description || 'Sin descripción' }}</p>
+            </div>
+            <div v-if="authStore.isAdmin" class="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex-shrink-0">
+              <button @click="openEditModal('ruleItem', item)" class="action-btn hover:text-emerald-400 hover:bg-primary/10" title="Editar">
+                <Icon name="lucide:edit-2" class="w-3.5 h-3.5" />
+              </button>
+              <button @click="handleDelete('ruleItem', item)" class="action-btn hover:text-rose-400 hover:bg-rose-500/10" title="Eliminar">
+                <Icon name="lucide:trash-2" class="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 2x2 Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
@@ -189,8 +247,29 @@
 
         <form @submit.prevent="handleModalSubmit" class="space-y-5">
 
+          <!-- LEAGUE RULES (foráneos en cancha) -->
+          <template v-if="modalType === 'rules'">
+            <div>
+              <label class="field-label">Máximo de foráneos en cancha *</label>
+              <input v-model.number="modalForm.maxForeignPlayersOnField" type="number" min="0" max="11" required class="field-input" placeholder="4" />
+              <p class="text-xs text-content-muted mt-1.5">El resto de jugadores en cancha deben ser locales.</p>
+            </div>
+          </template>
+
+          <!-- RULE ITEM (lista libre de reglas) -->
+          <template v-else-if="modalType === 'ruleItem'">
+            <div>
+              <label class="field-label">Título *</label>
+              <input v-model="modalForm.title" type="text" required class="field-input" placeholder="Ej. Suspensiones" />
+            </div>
+            <div>
+              <label class="field-label">Descripción</label>
+              <textarea v-model="modalForm.description" rows="3" class="field-input" placeholder="Ej. 3 amarillas acumuladas = 1 partido de suspensión"></textarea>
+            </div>
+          </template>
+
           <!-- CATEGORY -->
-          <template v-if="modalType === 'category'">
+          <template v-else-if="modalType === 'category'">
             <div>
               <label class="field-label">Nombre de la Categoría *</label>
               <input v-model="modalForm.name" type="text" required class="field-input" placeholder="Ej. Sub-20, Mayores, Masters" />
@@ -271,6 +350,8 @@
 
 <script setup>
 const authStore = useAuthStore()
+const leagueRulesStore = useLeagueRulesStore()
+const leagueRuleItemStore = useLeagueRuleItemStore()
 const notification = ref(null)
 const showModal = ref(false)
 const modalType = ref('')
@@ -283,15 +364,19 @@ const categories = ref([])
 const referees = ref([])
 const users = ref([])
 const loading = reactive({ categories: false, referees: false, users: false })
+const ruleItemsLoading = computed(() => leagueRuleItemStore.loading && !leagueRuleItemStore.items.length)
 
 // ── Helpers ──────────────────────────────────────────────────
 const modalTitle = computed(() => {
-  const map = { category: 'Categoría', referee: 'Árbitro', user: 'Usuario' }
-  return `${isEditing.value ? 'Editar' : 'Nuevo'} ${map[modalType.value] ?? ''}`
+  if (modalType.value === 'rules') return 'Editar Reglas del Campeonato'
+  const map = { ruleItem: 'Regla', category: 'Categoría', referee: 'Árbitro', user: 'Usuario' }
+  return `${isEditing.value ? 'Editar' : 'Nueva'} ${map[modalType.value] ?? ''}`
 })
 
 const modalAccent = computed(() => {
   const map = {
+    rules: 'via-cyan-500',
+    ruleItem: 'via-cyan-500',
     category: 'via-purple-500',
     referee: 'via-orange-500',
     user: 'via-emerald-500',
@@ -304,6 +389,7 @@ const storeRefMap = computed(() => ({ category: categories, referee: referees, u
 const loadingKeyMap = { category: 'categories', referee: 'referees', user: 'users' }
 
 const defaultForms = {
+  ruleItem: () => ({ title: '', description: '' }),
   category: () => ({ name: '', minAge: null, maxAge: null }),
   referee: () => ({ name: '', license: '', phone: '', email: '' }),
   user: () => ({ email: '', password: '', role: 'DIRIGENTE' }),
@@ -333,12 +419,22 @@ async function fetchAll() {
   const tasks = [
     loadSection('/categories', categories, 'categories'),
     loadSection('/referees', referees, 'referees'),
+    leagueRulesStore.fetchRules(),
+    leagueRuleItemStore.fetchItems(),
   ]
   if (authStore.isSuperAdmin) tasks.push(loadSection('/users', users, 'users'))
   await Promise.all(tasks)
 }
 
 // ── Modal ─────────────────────────────────────────────────────
+function openRulesModal() {
+  modalType.value = 'rules'
+  isEditing.value = true
+  editingId.value = null
+  modalForm.value = { ...leagueRulesStore.rules }
+  showModal.value = true
+}
+
 function openModal(type) {
   modalType.value = type
   isEditing.value = false
@@ -359,6 +455,42 @@ function closeModal() { showModal.value = false }
 
 async function handleModalSubmit() {
   formLoading.value = true
+
+  if (modalType.value === 'rules') {
+    const payload = {
+      maxForeignPlayersOnField: Number(modalForm.value.maxForeignPlayersOnField),
+      suspensionRules: modalForm.value.suspensionRules || null,
+      format: modalForm.value.format || null,
+    }
+    const res = await leagueRulesStore.updateRules(payload)
+    if (res.success) {
+      notify(res.message)
+      closeModal()
+    } else {
+      notify(res.message, 'error')
+    }
+    formLoading.value = false
+    return
+  }
+
+  if (modalType.value === 'ruleItem') {
+    const payload = {
+      title: modalForm.value.title,
+      description: modalForm.value.description || null,
+    }
+    const res = isEditing.value
+      ? await leagueRuleItemStore.updateItem(editingId.value, payload)
+      : await leagueRuleItemStore.createItem(payload)
+    if (res.success) {
+      notify(res.message)
+      closeModal()
+    } else {
+      notify(res.message, 'error')
+    }
+    formLoading.value = false
+    return
+  }
+
   const endpoint = endpointMap[modalType.value]
   const storeRef = storeRefMap.value[modalType.value]
   const key = loadingKeyMap[modalType.value]
@@ -386,7 +518,14 @@ async function handleModalSubmit() {
 }
 
 async function handleDelete(type, item) {
-  if (!confirm(`¿Eliminar "${item.name || item.email}"? Esta acción no se puede deshacer.`)) return
+  if (!confirm(`¿Eliminar "${item.name || item.title || item.email}"? Esta acción no se puede deshacer.`)) return
+
+  if (type === 'ruleItem') {
+    const res = await leagueRuleItemStore.deleteItem(item.id)
+    notify(res.message, res.success ? 'success' : 'error')
+    return
+  }
+
   const endpoint = endpointMap[type]
   const storeRef = storeRefMap.value[type]
   const key = loadingKeyMap[type]

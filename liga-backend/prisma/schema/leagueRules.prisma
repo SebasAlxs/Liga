@@ -1,0 +1,13 @@
+model LeagueRules {
+  id                       String   @id @default(uuid())
+  maxForeignPlayersOnField Int      @default(4)
+  updatedAt                DateTime @updatedAt
+}
+
+model LeagueRuleItem {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

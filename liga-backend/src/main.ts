@@ -14,6 +14,8 @@ import { MatchLineupHandlers } from "./infrastructure/handlers/MatchLineup/src";
 import { RefereeHandlers } from "./infrastructure/handlers/Referee/src";
 import { UserHandlers } from "./infrastructure/handlers/User/src";
 import { ModuleAccessHandlers } from "./infrastructure/handlers/ModuleAccess/src";
+import { LeagueRulesHandlers } from "./infrastructure/handlers/LeagueRules/src";
+import { LeagueRuleItemHandlers } from "./infrastructure/handlers/LeagueRuleItem/src";
 import { verifyToken, hasRole } from "./infrastructure/middlewares/auth.middleware";
 
 dotenv.config();
@@ -54,6 +56,16 @@ router.get("/users", ...superAdminOnly, UserHandlers.getAllUsers);
 router.post("/users", ...superAdminOnly, UserHandlers.createUser);
 router.put("/users/:id", ...superAdminOnly, UserHandlers.updateUser);
 router.delete("/users/:id", ...superAdminOnly, UserHandlers.deleteUser);
+
+// League Rules Routes (reglas globales del campeonato: GET público, editar solo Admin)
+router.get("/league-rules", LeagueRulesHandlers.getLeagueRules);
+router.put("/league-rules", ...adminOnly, LeagueRulesHandlers.updateLeagueRules);
+
+// League Rule Items (lista libre de reglas: GET público, CRUD solo Admin)
+router.get("/league-rule-items", LeagueRuleItemHandlers.getAllLeagueRuleItems);
+router.post("/league-rule-items", ...adminOnly, LeagueRuleItemHandlers.createLeagueRuleItem);
+router.put("/league-rule-items/:id", ...adminOnly, LeagueRuleItemHandlers.updateLeagueRuleItem);
+router.delete("/league-rule-items/:id", ...adminOnly, LeagueRuleItemHandlers.deleteLeagueRuleItem);
 
 // Module Access Routes (qué módulos ve cada rol en el menú)
 router.get("/module-access/me", verifyToken, ModuleAccessHandlers.getMyModules);
