@@ -863,7 +863,12 @@ function getAge(birthDate) {
 onMounted(async () => {
   await Promise.all([teamStore.fetchTeams(), playerStore.fetchPlayers()])
   await v.loadMatches()
-  if (v.selectedMatchId.value) selectedId.value = v.selectedMatchId.value
+  if (v.selectedMatchId.value) {
+    selectedId.value = v.selectedMatchId.value
+    // loadMatches() solo detecta y guarda el id del partido en vivo, pero no
+    // carga su nómina/eventos: hay que pasar por selectMatch() para eso.
+    await v.selectMatch(v.selectedMatchId.value)
+  }
 })
 
 // ── Handlers ───────────────────────────────────────────────────
