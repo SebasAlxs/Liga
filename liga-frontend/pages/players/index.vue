@@ -116,7 +116,10 @@
 
               <!-- Name + Photo -->
               <td class="px-6 py-4">
-                <div class="flex items-center gap-3">
+                <div
+                  class="flex items-center gap-3 cursor-pointer w-fit"
+                  @click="openDetailModal(player)"
+                >
                   <div class="w-10 h-10 rounded-xl overflow-hidden bg-surface-hover border border-border/10 flex-shrink-0">
                     <img
                       v-if="player.picture"
@@ -342,6 +345,85 @@
         </form>
       </div>
     </div>
+
+    <!-- Modal Detalle de Jugador -->
+    <div v-if="showDetailModal && detailPlayer" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-background backdrop-blur-md" @click="closeDetailModal"></div>
+
+      <div class="glass-card w-full max-w-lg rounded-3xl border border-border/10 p-8 shadow-2xl relative animate-in fade-in zoom-in duration-300 overflow-hidden overflow-y-auto max-h-[90vh]">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent"></div>
+
+        <header class="flex justify-between items-start mb-8">
+          <h2 class="text-2xl font-bold text-content">Información del Jugador</h2>
+          <button @click="closeDetailModal" class="p-2 hover:bg-surface/5 rounded-xl text-content-muted hover:text-content transition-colors">
+            <Icon name="lucide:x" class="w-6 h-6" />
+          </button>
+        </header>
+
+        <!-- Foto + Nombre + Dorsal -->
+        <div class="flex flex-col items-center text-center mb-8">
+          <div class="w-24 h-24 rounded-3xl overflow-hidden bg-surface-hover border border-border/10 flex-shrink-0 mb-4">
+            <img
+              v-if="detailPlayer.picture"
+              :src="detailPlayer.picture"
+              class="w-full h-full object-cover"
+              alt="Foto jugador"
+            />
+            <div v-else class="w-full h-full flex items-center justify-center">
+              <Icon name="lucide:user" class="w-10 h-10 text-content-muted" />
+            </div>
+          </div>
+          <h3 class="text-xl font-bold text-content">{{ detailPlayer.firstName }} {{ detailPlayer.lastName }}</h3>
+          <span class="mt-2 w-9 h-9 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-emerald-400 font-bold text-sm font-mono">
+            {{ detailPlayer.number }}
+          </span>
+        </div>
+
+        <!-- Info Grid -->
+        <div class="grid grid-cols-2 gap-4 mb-8">
+          <div class="bg-surface-hover border border-border/10 rounded-xl p-4">
+            <p class="text-xs font-bold text-content-muted uppercase tracking-widest mb-1">Dorsal</p>
+            <p class="text-content font-mono">{{ detailPlayer.number }}</p>
+          </div>
+          <div class="bg-surface-hover border border-border/10 rounded-xl p-4">
+            <p class="text-xs font-bold text-content-muted uppercase tracking-widest mb-1">Cédula</p>
+            <p class="text-content font-mono">{{ detailPlayer.dni || '—' }}</p>
+          </div>
+          <div class="bg-surface-hover border border-border/10 rounded-xl p-4">
+            <p class="text-xs font-bold text-content-muted uppercase tracking-widest mb-1">Equipo</p>
+            <p class="text-content">{{ getTeamName(detailPlayer.teamId) }}</p>
+          </div>
+          <div class="bg-surface-hover border border-border/10 rounded-xl p-4">
+            <p class="text-xs font-bold text-content-muted uppercase tracking-widest mb-1">Edad</p>
+            <p class="text-content">{{ detailPlayer.birthDate ? calculateAge(detailPlayer.birthDate) + ' años' : '—' }}</p>
+          </div>
+          <div class="bg-surface-hover border border-border/10 rounded-xl p-4">
+            <p class="text-xs font-bold text-content-muted uppercase tracking-widest mb-1">Tipo</p>
+            <span :class="`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold ${detailPlayer.isLocal ? 'bg-primary/10 text-emerald-400 border border-primary/30' : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'}`">
+              <span :class="`w-1.5 h-1.5 rounded-full ${detailPlayer.isLocal ? 'bg-primary-hover' : 'bg-amber-400'}`"></span>
+              {{ detailPlayer.isLocal ? 'Local' : 'Foráneo' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div v-if="authStore.canManageTeams" class="flex gap-3">
+          <button
+            @click="closeDetailModal"
+            class="flex-1 px-4 py-4 rounded-2xl border border-border/10 text-content hover:bg-surface/5 transition-all font-bold text-sm"
+          >
+            Cerrar
+          </button>
+          <button
+            @click="editFromDetailModal"
+            class="flex-1 px-4 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-obsidian-950 hover:from-emerald-400 hover:to-teal-400 transition-all font-bold text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
+          >
+            <Icon name="lucide:edit-2" class="w-4 h-4" />
+            Editar
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -358,6 +440,8 @@ const isEditing = ref(false)
 const loading = ref(false)
 const notification = ref(null)
 const editingId = ref(null)
+const showDetailModal = ref(false)
+const detailPlayer = ref(null)
 
 const form = ref({
   firstName: '',
@@ -447,6 +531,22 @@ function openEditModal(player) {
 
 function closeModal() {
   showModal.value = false
+}
+
+function openDetailModal(player) {
+  detailPlayer.value = player
+  showDetailModal.value = true
+}
+
+function closeDetailModal() {
+  showDetailModal.value = false
+  detailPlayer.value = null
+}
+
+function editFromDetailModal() {
+  const player = detailPlayer.value
+  closeDetailModal()
+  openEditModal(player)
 }
 
 async function handleSubmit() {
