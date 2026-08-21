@@ -11,7 +11,7 @@
         <!-- Filter by team -->
         <select
           v-model="selectedTeamId"
-          class="bg-surface-hover border border-border/10 rounded-xl px-4 py-2 text-content focus:outline-none focus:border-primary/50 transition-all"
+          class="select-arrow bg-surface-hover border border-border/10 rounded-xl px-4 py-2 text-content focus:outline-none focus:border-primary/50 transition-all"
           @change="onTeamFilterChange"
         >
           <option value="">Todos los equipos</option>
@@ -32,7 +32,7 @@
         </div>
 
         <button
-          v-if="authStore.isAdmin"
+          v-if="authStore.canManageTeams"
           id="btn-add-player"
           @click="openAddModal"
           class="flex items-center justify-center gap-2 bg-primary hover:bg-emerald-600 text-obsidian-950 px-5 py-2 rounded-xl font-bold transition-all shadow-lg shadow-emerald-500/20 active:scale-95 whitespace-nowrap"
@@ -161,7 +161,7 @@
 
               <!-- Actions -->
               <td class="px-6 py-4 text-right">
-                <div v-if="authStore.isAdmin" class="flex items-center justify-end gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
+                <div v-if="authStore.canManageTeams" class="flex items-center justify-end gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
                   <button
                     @click="openEditModal(player)"
                     class="p-2 hover:bg-primary/20 rounded-lg text-content-muted hover:text-emerald-400 transition-colors"
@@ -170,6 +170,7 @@
                     <Icon name="lucide:edit-2" class="w-4 h-4" />
                   </button>
                   <button
+                    v-if="authStore.isAdmin"
                     @click="handleDeletePlayer(player)"
                     class="p-2 hover:bg-rose-500/20 rounded-lg text-content-muted hover:text-rose-400 transition-colors"
                     title="Eliminar"

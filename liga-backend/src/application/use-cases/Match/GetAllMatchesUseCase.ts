@@ -1,12 +1,13 @@
 import { MatchResponse } from "../../../adapters/http/dto/MatchResponse";
 import { MatchRepository } from "../../../domain/repositories/MatchRepository";
+import { PaginationParams } from "../../../domain/repositories/Pagination";
 
 export class GetAllMatchesUseCase {
     constructor(private matchRepository: MatchRepository) { }
 
-    async execute(): Promise<MatchResponse[]> {
-        const matches = await this.matchRepository.findAll();
-        return matches.map(m => {
+    async execute(pagination?: PaginationParams): Promise<{ items: MatchResponse[]; total: number }> {
+        const { items: matches, total } = await this.matchRepository.findAll(pagination);
+        const items = matches.map(m => {
             return {
                 _id: m.id,
                 homeTeamId: m.homeTeamId,
@@ -32,5 +33,6 @@ export class GetAllMatchesUseCase {
                 fourthReferee: m.fourthReferee
             };
         });
+        return { items, total };
     }
 }

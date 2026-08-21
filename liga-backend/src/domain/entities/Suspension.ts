@@ -1,5 +1,4 @@
-import { SuspensionStatus } from "@prisma/client";
-export { SuspensionStatus };
+export type SuspensionStatus = "ACTIVE" | "SERVED" | "APPEALED";
 
 export class Suspension {
     constructor(

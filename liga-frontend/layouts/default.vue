@@ -19,15 +19,17 @@ watchEffect(() => {
   }
 })
 
-const menuItems = [
+const allMenuItems = [
   { label: 'Dashboard', icon: 'lucide:layout-dashboard', link: '/' },
   { label: 'Partidos', icon: 'lucide:calendar-check', link: '/matches' },
   { label: 'Equipos', icon: 'lucide:users-2', link: '/teams' },
   { label: 'Jugadores', icon: 'lucide:user-check', link: '/players' },
   { label: 'Posiciones', icon: 'lucide:list-ordered', link: '/standings' },
-  { label: 'Vocalía', icon: 'lucide:clipboard-list', link: '/vocalia' },
+  { label: 'Vocalía', icon: 'lucide:clipboard-list', link: '/vocalia', hideFor: ['DIRIGENTE'] },
   { label: 'Configuración', icon: 'lucide:settings-2', link: '/settings' },
 ]
+
+const menuItems = computed(() => allMenuItems.filter(item => !item.hideFor?.includes(authStore.user?.role)))
 
 const handleLogout = () => {
   authStore.logout()
@@ -110,10 +112,7 @@ const handleLogout = () => {
       </aside>
 
       <!-- Main Content Container -->
-      <div 
-        class="transition-all duration-300 min-h-screen" 
-        :class="!authStore.isLoggedIn ? '' : (isMobile ? 'ml-0' : (isSidebarOpen ? 'ml-72' : 'ml-20'))"
-      >
+      <div class="transition-all duration-300 min-h-screen">
         <!-- Public Header -->
         <header 
           v-if="!authStore.isLoggedIn"

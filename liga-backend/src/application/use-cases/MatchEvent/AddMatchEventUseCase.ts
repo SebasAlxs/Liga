@@ -1,7 +1,6 @@
 import crypto from "crypto";
-import { EventType } from "@prisma/client";
 import { LineupStatus } from "../../../domain/entities/MatchLineup";
-import { MatchEvent } from "../../../domain/entities/MatchEvent";
+import { MatchEvent, EventType } from "../../../domain/entities/MatchEvent";
 import { Suspension } from "../../../domain/entities/Suspension";
 import { MatchEventRepository } from "../../../domain/repositories/MatchEventRepository";
 import { SuspensionRepository } from "../../../domain/repositories/SuspensionRepository";
@@ -65,6 +64,15 @@ export class AddMatchEventUseCase {
             if (inLineup) {
                 inLineup.status = LineupStatus.STARTER;
                 await this.lineupRepository.update(inLineup);
+            }
+        }
+
+        // --- Ingreso directo de un suplente a cancha (sin sustitución formal) ---
+        if (request.type === "PLAYER_ENTRY") {
+            const lineup = await this.lineupRepository.findByMatchAndPlayer(request.matchId, request.playerId);
+            if (lineup) {
+                lineup.status = LineupStatus.STARTER;
+                await this.lineupRepository.update(lineup);
             }
         }
 

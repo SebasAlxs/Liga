@@ -98,7 +98,7 @@
               <Icon name="lucide:users" class="w-6 h-6 text-primary" />
               Plantilla de Jugadores
             </h3>
-            <button v-if="authStore.isAdmin" class="flex items-center gap-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-content px-4 py-2 rounded-xl font-bold transition-all border border-primary/50">
+            <button v-if="authStore.canManageTeams" class="flex items-center gap-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-content px-4 py-2 rounded-xl font-bold transition-all border border-primary/50">
               <Icon name="lucide:user-plus" class="w-5 h-5" />
               Inscribir Jugador
             </button>
@@ -125,7 +125,7 @@
                   <th class="pb-4 text-xs font-bold text-content-muted uppercase tracking-widest">Jugador</th>
                   <th class="pb-4 text-xs font-bold text-content-muted uppercase tracking-widest hidden md:table-cell">Cédula</th>
                   <th class="pb-4 text-xs font-bold text-content-muted uppercase tracking-widest text-center">Local</th>
-                  <th v-if="authStore.isAdmin" class="pb-4 text-xs font-bold text-content-muted uppercase tracking-widest text-right pr-4">Acciones</th>
+                  <th v-if="authStore.canManageTeams" class="pb-4 text-xs font-bold text-content-muted uppercase tracking-widest text-right pr-4">Acciones</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
@@ -155,7 +155,7 @@
                       {{ player.isLocal ? 'Local' : 'Visitante' }}
                     </span>
                   </td>
-                  <td v-if="authStore.isAdmin" class="py-4 text-right pr-4">
+                  <td v-if="authStore.canManageTeams" class="py-4 text-right pr-4">
                     <div class="flex items-center justify-end gap-1 opacity-100 lg:opacity-0 group-hover/row:opacity-100 transition-opacity">
                       <button class="p-2 hover:bg-emerald-100 rounded-lg text-content-muted hover:text-primary">
                         <Icon name="lucide:edit-2" class="w-4 h-4" />
@@ -188,13 +188,12 @@ const loadingPlayers = computed(() => playerStore.loading)
 
 onMounted(async () => {
   loading.value = true
-  const res = await teamStore.fetchTeamById(route.params.id)
-  team.value = res
+  const [teamRes] = await Promise.all([
+    teamStore.fetchTeamById(route.params.id),
+    playerStore.fetchPlayersByTeam(route.params.id),
+  ])
+  team.value = teamRes
   loading.value = false
-  
-  if (team.value) {
-    await playerStore.fetchPlayersByTeam(route.params.id)
-  }
 })
 </script>
 

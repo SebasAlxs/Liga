@@ -1,6 +1,7 @@
 import prisma from "../PrismaClient";
 import { Team } from "../../../../domain/entities/Team";
 import { TeamRepository } from "../../../../domain/repositories/TeamRepository";
+import { PaginatedResult, PaginationParams } from "../../../../domain/repositories/Pagination";
 
 export class PrismaTeamRepository implements TeamRepository {
     private prisma = prisma;
@@ -81,14 +82,20 @@ export class PrismaTeamRepository implements TeamRepository {
         );
     }
 
-    async findAll(): Promise<Team[]> {
-        const teams = await this.prisma.team.findMany();
-        return teams.map(
-            (t) => new Team(
-                t.id, t.name, t.logo, t.foundedYear, t.championshipsWon ?? undefined, t.categoryId ?? undefined, t.tournamentId ?? undefined,
-                t.points, t.matchesPlayed, t.matchesWon, t.matchesDrawn, t.matchesLost, t.goalsFor, t.goalsAgainst, t.goalDifference
-            )
-        );
+    async findAll(pagination?: PaginationParams): Promise<PaginatedResult<Team>> {
+        const [teams, total] = await Promise.all([
+            this.prisma.team.findMany({ skip: pagination?.skip, take: pagination?.take }),
+            this.prisma.team.count(),
+        ]);
+        return {
+            items: teams.map(
+                (t) => new Team(
+                    t.id, t.name, t.logo, t.foundedYear, t.championshipsWon ?? undefined, t.categoryId ?? undefined, t.tournamentId ?? undefined,
+                    t.points, t.matchesPlayed, t.matchesWon, t.matchesDrawn, t.matchesLost, t.goalsFor, t.goalsAgainst, t.goalDifference
+                )
+            ),
+            total,
+        };
     }
 
     async getStandings(tournamentId: string): Promise<Team[]> {

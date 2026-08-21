@@ -2,6 +2,7 @@ import { MatchStatus as PrismaMatchStatus } from "@prisma/client";
 import prisma from "../PrismaClient";
 import { Match, MatchStatus } from "../../../../domain/entities/Match";
 import { MatchRepository } from "../../../../domain/repositories/MatchRepository";
+import { PaginatedResult, PaginationParams } from "../../../../domain/repositories/Pagination";
 
 export class PrismaMatchRepository implements MatchRepository {
     private prisma = prisma;
@@ -93,14 +94,67 @@ export class PrismaMatchRepository implements MatchRepository {
         );
     }
 
-    async findAll(): Promise<Match[]> {
+    async findAll(pagination?: PaginationParams): Promise<PaginatedResult<Match>> {
+        const [matches, total] = await Promise.all([
+            this.prisma.match.findMany({
+                skip: pagination?.skip,
+                take: pagination?.take,
+                orderBy: { matchDate: "desc" },
+                include: {
+                    primaryReferee: true,
+                    assistant1: true,
+                    assistant2: true,
+                    fourthReferee: true
+                }
+            }),
+            this.prisma.match.count(),
+        ]);
+        return {
+            items: matches.map(
+                (m) => new Match(
+                    m.id,
+                    m.homeTeamId,
+                    m.awayTeamId,
+                    m.homeScore,
+                    m.awayScore,
+                    m.matchDate,
+                    m.tournamentId,
+                    m.categoryId,
+                    m.status as MatchStatus,
+                    m.refereeId,
+                    m.assistant1Id,
+                    m.assistant2Id,
+                    m.fourthRefereeId,
+                    m.primaryReferee,
+                    m.assistant1,
+                    m.assistant2,
+                    m.fourthReferee,
+                    m.firstHalfStartedAt,
+                    m.firstHalfEndedAt,
+                    m.secondHalfStartedAt
+                )
+            ),
+            total,
+        };
+    }
+
+    async findFinishedByTeam(teamId: string): Promise<Match[]> {
         const matches = await this.prisma.match.findMany({
-            include: {
-                primaryReferee: true,
-                assistant1: true,
-                assistant2: true,
-                fourthReferee: true
-            }
+            where: {
+                status: "FINISHED",
+                OR: [{ homeTeamId: teamId }, { awayTeamId: teamId }],
+            },
+            select: {
+                id: true,
+                homeTeamId: true,
+                awayTeamId: true,
+                homeScore: true,
+                awayScore: true,
+                matchDate: true,
+                tournamentId: true,
+                categoryId: true,
+                status: true,
+            },
         });
         return matches.map(
             (m) => new Match(
@@ -112,18 +166,7 @@ export class PrismaMatchRepository implements MatchRepository {
                 m.matchDate,
                 m.tournamentId,
                 m.categoryId,
-                m.status as MatchStatus,
-                m.refereeId,
-                m.assistant1Id,
-                m.assistant2Id,
-                m.fourthRefereeId,
-                m.primaryReferee,
-                m.assistant1,
-                m.assistant2,
-                m.fourthReferee,
-                m.firstHalfStartedAt,
-                m.firstHalfEndedAt,
-                m.secondHalfStartedAt
+                m.status as MatchStatus
             )
         );
     }

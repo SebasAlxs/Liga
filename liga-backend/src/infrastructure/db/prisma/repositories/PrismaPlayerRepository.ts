@@ -1,6 +1,7 @@
 import prisma from "../PrismaClient";
 import { Player } from "../../../../domain/entities/Player";
 import { PlayerRepository } from "../../../../domain/repositories/PlayerRepository";
+import { PaginatedResult, PaginationParams } from "../../../../domain/repositories/Pagination";
 
 export class PrismaPlayerRepository implements PlayerRepository {
     private prisma = prisma;
@@ -71,11 +72,27 @@ export class PrismaPlayerRepository implements PlayerRepository {
         );
     }
 
-    async findAll(): Promise<Player[]> {
-        const players = await this.prisma.player.findMany();
-        return players.map(
-            (p) => new Player(p.id, p.firstName, p.lastName, p.number, p.teamId, p.dni ?? undefined, p.birthDate ?? undefined, p.isLocal, p.picture || undefined, p.createdAt, p.updatedAt)
-        );
+    async findAll(pagination?: PaginationParams, options?: { includePicture?: boolean }): Promise<PaginatedResult<Player>> {
+        const [players, total] = await Promise.all([
+            this.prisma.player.findMany({
+                skip: pagination?.skip,
+                take: pagination?.take,
+                select: {
+                    id: true, firstName: true, lastName: true, number: true, teamId: true,
+                    dni: true, birthDate: true, isLocal: true, createdAt: true, updatedAt: true,
+                    // Se excluye del SELECT (no solo de la respuesta) cuando no se pide,
+                    // para no transferir el blob base64 de cada jugador innecesariamente.
+                    picture: options?.includePicture ? true : false,
+                },
+            }),
+            this.prisma.player.count(),
+        ]);
+        return {
+            items: players.map(
+                (p) => new Player(p.id, p.firstName, p.lastName, p.number, p.teamId, p.dni ?? undefined, p.birthDate ?? undefined, p.isLocal, (p as any).picture || undefined, p.createdAt, p.updatedAt)
+            ),
+            total,
+        };
     }
 
     async update(player: Player): Promise<Player> {

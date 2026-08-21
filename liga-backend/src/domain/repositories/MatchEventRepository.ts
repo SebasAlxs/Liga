@@ -1,4 +1,3 @@
-import { EventType } from "@prisma/client";
 import { MatchEvent } from "../entities/MatchEvent";
 
 export interface MatchEventRepository {
