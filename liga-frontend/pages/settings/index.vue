@@ -121,57 +121,6 @@
       </div>
 
       <!-- ══════════════════════════════════ -->
-      <!-- SEDES                              -->
-      <!-- ══════════════════════════════════ -->
-      <div class="config-section">
-        <div class="section-header">
-          <div class="flex items-center gap-3">
-            <div class="section-icon bg-blue-500/10 border-blue-500/20">
-              <Icon name="lucide:map-pin" class="w-5 h-5 text-blue-400" />
-            </div>
-            <div>
-              <h2 class="text-base font-bold text-content">Sedes</h2>
-              <p class="text-xs text-content-muted">{{ headquarters.length }} registrada{{ headquarters.length !== 1 ? 's' : '' }}</p>
-            </div>
-          </div>
-          <button v-if="authStore.isAdmin" @click="openModal('headquarters')" class="add-btn">
-            <Icon name="lucide:plus" class="w-4 h-4" /> Nueva
-          </button>
-        </div>
-
-        <div class="section-body">
-          <div v-if="loading.headquarters" class="py-8 flex justify-center">
-            <div class="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
-          </div>
-          <div v-else-if="!headquarters.length" class="py-8 text-center">
-            <Icon name="lucide:map-pin" class="w-8 h-8 text-content-muted mx-auto mb-2" />
-            <p class="text-sm text-content-muted">Sin sedes registradas</p>
-          </div>
-          <div v-else class="space-y-2">
-            <div v-for="item in headquarters" :key="item.id" class="item-row group">
-              <div class="flex-1 min-w-0">
-                <p class="font-semibold text-content text-sm truncate">{{ item.name }}</p>
-                <p class="text-xs text-content-muted truncate">{{ [item.city, item.address].filter(Boolean).join(' · ') || 'Sin dirección' }}</p>
-              </div>
-              <div class="flex items-center gap-2 flex-shrink-0">
-                <span :class="`status-badge ${item.active ? 'badge-active' : 'badge-inactive'}`">
-                  {{ item.active ? 'Activa' : 'Inactiva' }}
-                </span>
-                <div v-if="authStore.isAdmin" class="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                  <button @click="openEditModal('headquarters', item)" class="action-btn hover:text-emerald-400 hover:bg-primary/10" title="Editar">
-                    <Icon name="lucide:edit-2" class="w-3.5 h-3.5" />
-                  </button>
-                  <button @click="handleDelete('headquarters', item)" class="action-btn hover:text-rose-400 hover:bg-rose-500/10" title="Eliminar">
-                    <Icon name="lucide:trash-2" class="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ══════════════════════════════════ -->
       <!-- ÁRBITROS                           -->
       <!-- ══════════════════════════════════ -->
       <div class="config-section">
@@ -343,33 +292,6 @@
             <p class="text-xs text-content-muted">Deja vacío si no hay restricción de edad.</p>
           </template>
 
-          <!-- HEADQUARTERS -->
-          <template v-else-if="modalType === 'headquarters'">
-            <div>
-              <label class="field-label">Nombre de la Sede *</label>
-              <input v-model="modalForm.name" type="text" required class="field-input" placeholder="Ej. Estadio Municipal" />
-            </div>
-            <div>
-              <label class="field-label">Ciudad</label>
-              <input v-model="modalForm.city" type="text" class="field-input" placeholder="Ej. Guayaquil" />
-            </div>
-            <div>
-              <label class="field-label">Dirección</label>
-              <input v-model="modalForm.address" type="text" class="field-input" placeholder="Ej. Av. 9 de Octubre 123" />
-            </div>
-            <div>
-              <label class="field-label">Estado</label>
-              <div class="grid grid-cols-2 gap-2">
-                <button type="button" @click="modalForm.active = true" :class="`toggle-btn ${modalForm.active ? 'toggle-on' : 'toggle-off'}`">
-                  <Icon name="lucide:check-circle" class="w-4 h-4" /> Activa
-                </button>
-                <button type="button" @click="modalForm.active = false" :class="`toggle-btn ${!modalForm.active ? 'toggle-off-red' : 'toggle-off'}`">
-                  <Icon name="lucide:pause-circle" class="w-4 h-4" /> Inactiva
-                </button>
-              </div>
-            </div>
-          </template>
-
           <!-- REFEREE -->
           <template v-else-if="modalType === 'referee'">
             <div>
@@ -441,16 +363,20 @@ const editingId = ref(null)
 const formLoading = ref(false)
 const modalForm = ref({})
 
+const headquartersStore = useHeadquartersStore()
+// La gestión de sedes (crear/editar/eliminar) vive en /venues; aquí solo se
+// lee la lista para poblar el selector de sede del formulario de Torneo.
+const headquarters = computed(() => headquartersStore.headquarters)
+
 const tournaments = ref([])
 const categories = ref([])
-const headquarters = ref([])
 const referees = ref([])
 const users = ref([])
-const loading = reactive({ tournaments: false, categories: false, headquarters: false, referees: false, users: false })
+const loading = reactive({ tournaments: false, categories: false, referees: false, users: false })
 
 // ── Helpers ──────────────────────────────────────────────────
 const modalTitle = computed(() => {
-  const map = { tournament: 'Torneo', category: 'Categoría', headquarters: 'Sede', referee: 'Árbitro', user: 'Usuario' }
+  const map = { tournament: 'Torneo', category: 'Categoría', referee: 'Árbitro', user: 'Usuario' }
   return `${isEditing.value ? 'Editar' : 'Nuevo'} ${map[modalType.value] ?? ''}`
 })
 
@@ -458,21 +384,19 @@ const modalAccent = computed(() => {
   const map = {
     tournament: 'via-amber-500',
     category: 'via-purple-500',
-    headquarters: 'via-blue-500',
     referee: 'via-orange-500',
     user: 'via-emerald-500',
   }
   return map[modalType.value] ?? 'via-emerald-500'
 })
 
-const endpointMap = { tournament: '/tournaments', category: '/categories', headquarters: '/headquarters', referee: '/referees', user: '/users' }
-const storeRefMap = computed(() => ({ tournament: tournaments, category: categories, headquarters: headquarters, referee: referees, user: users }))
-const loadingKeyMap = { tournament: 'tournaments', category: 'categories', headquarters: 'headquarters', referee: 'referees', user: 'users' }
+const endpointMap = { tournament: '/tournaments', category: '/categories', referee: '/referees', user: '/users' }
+const storeRefMap = computed(() => ({ tournament: tournaments, category: categories, referee: referees, user: users }))
+const loadingKeyMap = { tournament: 'tournaments', category: 'categories', referee: 'referees', user: 'users' }
 
 const defaultForms = {
   tournament: () => ({ name: '', maxYellowCardsForSuspension: 3, active: true, headquartersId: '' }),
   category: () => ({ name: '', minAge: null, maxAge: null }),
-  headquarters: () => ({ name: '', city: '', address: '', active: true }),
   referee: () => ({ name: '', license: '', phone: '', email: '' }),
   user: () => ({ email: '', password: '', role: 'DIRIGENTE' }),
 }
@@ -501,8 +425,8 @@ async function fetchAll() {
   const tasks = [
     loadSection('/tournaments', tournaments, 'tournaments'),
     loadSection('/categories', categories, 'categories'),
-    loadSection('/headquarters', headquarters, 'headquarters'),
     loadSection('/referees', referees, 'referees'),
+    headquartersStore.fetchHeadquarters(),
   ]
   if (authStore.isSuperAdmin) tasks.push(loadSection('/users', users, 'users'))
   await Promise.all(tasks)
