@@ -19,59 +19,6 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
       <!-- ══════════════════════════════════ -->
-      <!-- TORNEOS                            -->
-      <!-- ══════════════════════════════════ -->
-      <div class="config-section">
-        <div class="section-header">
-          <div class="flex items-center gap-3">
-            <div class="section-icon bg-amber-500/10 border-amber-500/20">
-              <Icon name="lucide:trophy" class="w-5 h-5 text-amber-400" />
-            </div>
-            <div>
-              <h2 class="text-base font-bold text-content">Torneos</h2>
-              <p class="text-xs text-content-muted">{{ tournaments.length }} registrado{{ tournaments.length !== 1 ? 's' : '' }}</p>
-            </div>
-          </div>
-          <button v-if="authStore.isAdmin" @click="openModal('tournament')" class="add-btn">
-            <Icon name="lucide:plus" class="w-4 h-4" /> Nuevo
-          </button>
-        </div>
-
-        <div class="section-body">
-          <div v-if="loading.tournaments" class="py-8 flex justify-center">
-            <div class="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-amber-500"></div>
-          </div>
-          <div v-else-if="!tournaments.length" class="py-8 text-center">
-            <Icon name="lucide:trophy" class="w-8 h-8 text-content-muted mx-auto mb-2" />
-            <p class="text-sm text-content-muted">Sin torneos creados</p>
-          </div>
-          <div v-else class="space-y-2">
-            <div v-for="item in tournaments" :key="item.id" class="item-row group">
-              <div class="flex items-center gap-3 flex-1 min-w-0">
-                <div class="min-w-0">
-                  <p class="font-semibold text-content text-sm truncate">{{ item.name }}</p>
-                  <p class="text-xs text-content-muted">{{ item.maxYellowCardsForSuspension }} 🟡 = suspensión</p>
-                </div>
-              </div>
-              <div class="flex items-center gap-2 flex-shrink-0">
-                <span :class="`status-badge ${item.active ? 'badge-active' : 'badge-inactive'}`">
-                  {{ item.active ? 'Activo' : 'Inactivo' }}
-                </span>
-                <div v-if="authStore.isAdmin" class="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                  <button @click="openEditModal('tournament', item)" class="action-btn hover:text-emerald-400 hover:bg-primary/10" title="Editar">
-                    <Icon name="lucide:edit-2" class="w-3.5 h-3.5" />
-                  </button>
-                  <button @click="handleDelete('tournament', item)" class="action-btn hover:text-rose-400 hover:bg-rose-500/10" title="Eliminar">
-                    <Icon name="lucide:trash-2" class="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ══════════════════════════════════ -->
       <!-- CATEGORÍAS                         -->
       <!-- ══════════════════════════════════ -->
       <div class="config-section">
@@ -242,39 +189,8 @@
 
         <form @submit.prevent="handleModalSubmit" class="space-y-5">
 
-          <!-- TOURNAMENT -->
-          <template v-if="modalType === 'tournament'">
-            <div>
-              <label class="field-label">Nombre del Torneo *</label>
-              <input v-model="modalForm.name" type="text" required class="field-input" placeholder="Ej. Torneo Apertura 2025" />
-            </div>
-            <div>
-              <label class="field-label">Amarillas para suspensión *</label>
-              <input v-model.number="modalForm.maxYellowCardsForSuspension" type="number" min="1" max="10" required class="field-input" placeholder="3" />
-              <p class="text-xs text-content-muted mt-1.5">Número de tarjetas acumuladas que generan una suspensión automática.</p>
-            </div>
-            <div>
-              <label class="field-label">Sede del torneo (opcional)</label>
-              <select v-model="modalForm.headquartersId" class="field-input">
-                <option value="">Sin sede asignada</option>
-                <option v-for="h in headquarters" :key="h.id" :value="h.id">{{ h.name }}</option>
-              </select>
-            </div>
-            <div>
-              <label class="field-label">Estado</label>
-              <div class="grid grid-cols-2 gap-2">
-                <button type="button" @click="modalForm.active = true" :class="`toggle-btn ${modalForm.active ? 'toggle-on' : 'toggle-off'}`">
-                  <Icon name="lucide:check-circle" class="w-4 h-4" /> Activo
-                </button>
-                <button type="button" @click="modalForm.active = false" :class="`toggle-btn ${!modalForm.active ? 'toggle-off-red' : 'toggle-off'}`">
-                  <Icon name="lucide:pause-circle" class="w-4 h-4" /> Inactivo
-                </button>
-              </div>
-            </div>
-          </template>
-
           <!-- CATEGORY -->
-          <template v-else-if="modalType === 'category'">
+          <template v-if="modalType === 'category'">
             <div>
               <label class="field-label">Nombre de la Categoría *</label>
               <input v-model="modalForm.name" type="text" required class="field-input" placeholder="Ej. Sub-20, Mayores, Masters" />
@@ -363,26 +279,19 @@ const editingId = ref(null)
 const formLoading = ref(false)
 const modalForm = ref({})
 
-const headquartersStore = useHeadquartersStore()
-// La gestión de sedes (crear/editar/eliminar) vive en /venues; aquí solo se
-// lee la lista para poblar el selector de sede del formulario de Torneo.
-const headquarters = computed(() => headquartersStore.headquarters)
-
-const tournaments = ref([])
 const categories = ref([])
 const referees = ref([])
 const users = ref([])
-const loading = reactive({ tournaments: false, categories: false, referees: false, users: false })
+const loading = reactive({ categories: false, referees: false, users: false })
 
 // ── Helpers ──────────────────────────────────────────────────
 const modalTitle = computed(() => {
-  const map = { tournament: 'Torneo', category: 'Categoría', referee: 'Árbitro', user: 'Usuario' }
+  const map = { category: 'Categoría', referee: 'Árbitro', user: 'Usuario' }
   return `${isEditing.value ? 'Editar' : 'Nuevo'} ${map[modalType.value] ?? ''}`
 })
 
 const modalAccent = computed(() => {
   const map = {
-    tournament: 'via-amber-500',
     category: 'via-purple-500',
     referee: 'via-orange-500',
     user: 'via-emerald-500',
@@ -390,12 +299,11 @@ const modalAccent = computed(() => {
   return map[modalType.value] ?? 'via-emerald-500'
 })
 
-const endpointMap = { tournament: '/tournaments', category: '/categories', referee: '/referees', user: '/users' }
-const storeRefMap = computed(() => ({ tournament: tournaments, category: categories, referee: referees, user: users }))
-const loadingKeyMap = { tournament: 'tournaments', category: 'categories', referee: 'referees', user: 'users' }
+const endpointMap = { category: '/categories', referee: '/referees', user: '/users' }
+const storeRefMap = computed(() => ({ category: categories, referee: referees, user: users }))
+const loadingKeyMap = { category: 'categories', referee: 'referees', user: 'users' }
 
 const defaultForms = {
-  tournament: () => ({ name: '', maxYellowCardsForSuspension: 3, active: true, headquartersId: '' }),
   category: () => ({ name: '', minAge: null, maxAge: null }),
   referee: () => ({ name: '', license: '', phone: '', email: '' }),
   user: () => ({ email: '', password: '', role: 'DIRIGENTE' }),
@@ -423,10 +331,8 @@ async function loadSection(endpoint, storeRef, key) {
 
 async function fetchAll() {
   const tasks = [
-    loadSection('/tournaments', tournaments, 'tournaments'),
     loadSection('/categories', categories, 'categories'),
     loadSection('/referees', referees, 'referees'),
-    headquartersStore.fetchHeadquarters(),
   ]
   if (authStore.isSuperAdmin) tasks.push(loadSection('/users', users, 'users'))
   await Promise.all(tasks)
@@ -460,7 +366,6 @@ async function handleModalSubmit() {
   const payload = { ...modalForm.value }
   if (payload.minAge === null || payload.minAge === '') delete payload.minAge
   if (payload.maxAge === null || payload.maxAge === '') delete payload.maxAge
-  if (payload.headquartersId === '') delete payload.headquartersId
   if (modalType.value === 'user' && isEditing.value && !payload.password) delete payload.password
 
   try {
