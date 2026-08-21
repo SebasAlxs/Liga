@@ -1,1 +1,1 @@
-export { default } from "file:///Users/alexis/Documents/Magdata/Liga/liga-frontend/node_modules/@nuxt/vite-builder/dist/vite-node-runner.mjs"
+export { default } from "file:///Users/alexandercatagna/Documents/GitHub/Liga/liga-frontend/node_modules/@nuxt/vite-builder/dist/vite-node-runner.mjs"

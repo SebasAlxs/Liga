@@ -1,6 +1,5 @@
 import { TeamRepository } from "../../../domain/repositories/TeamRepository";
 import { MatchRepository } from "../../../domain/repositories/MatchRepository";
-import { MatchStatus } from "../../../domain/entities/Match";
 
 export class RecalculateTeamStatsUseCase {
     constructor(
@@ -22,16 +21,7 @@ export class RecalculateTeamStatsUseCase {
         team.goalsAgainst = 0;
         team.goalDifference = 0;
 
-        // Fetch all Matches for this team (needs all matches, then we manually filter or we could add a repository method to get team matches)
-        // For simplicity, fetch all and filter, or create a specific method. Let's fetch all (since it's a Proof of Concept).
-        // A better approach would be to update the MatchRepository to search by TeamId. 
-        // We will fetch all here and filter.
-
-        const allMatches = await this.matchRepository.findAll();
-
-        const myMatches = allMatches.filter(
-            m => (m.homeTeamId === teamId || m.awayTeamId === teamId) && m.status === MatchStatus.FINISHED
-        );
+        const myMatches = await this.matchRepository.findFinishedByTeam(teamId);
 
         for (const match of myMatches) {
             team.matchesPlayed++;

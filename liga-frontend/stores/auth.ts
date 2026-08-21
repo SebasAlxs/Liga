@@ -15,13 +15,19 @@ export const useAuthStore = defineStore('auth', () => {
     sameSite: 'lax'
   })
 
-  const user = ref<any>(userCookie.value)
+  // computed (no ref) para que siempre refleje el cookie actual, incluso si
+  // otro composable (useAuth) lo modifica directamente sin pasar por este store
+  const user = computed(() => userCookie.value)
   const loading = ref(false)
 
   const token = computed(() => tokenCookie.value)
   const isLoggedIn = computed(() => !!tokenCookie.value)
-  const isAdmin = computed(() => user.value?.role === 'SUPERADMIN')
+  const isSuperAdmin = computed(() => user.value?.role === 'SUPERADMIN')
+  const isAdmin = computed(() => ['SUPERADMIN', 'ADMIN'].includes(user.value?.role))
   const isVocal = computed(() => user.value?.role === 'VOCAL')
+  const isDirigente = computed(() => user.value?.role === 'DIRIGENTE')
+  // Puede crear/editar equipos y jugadores: admins + dirigentes
+  const canManageTeams = computed(() => ['SUPERADMIN', 'ADMIN', 'DIRIGENTE'].includes(user.value?.role))
 
   // En el cliente, sincronizar si hay un cambio o si existe en localStorage
   if (import.meta.client) {
@@ -30,9 +36,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     const savedUser = localStorage.getItem('auth_user')
     if (savedUser && !userCookie.value) {
-      const parsed = JSON.parse(savedUser)
-      userCookie.value = parsed
-      user.value = parsed
+      userCookie.value = JSON.parse(savedUser)
     }
   }
 
@@ -50,7 +54,6 @@ export const useAuthStore = defineStore('auth', () => {
       // Guardar token en cookie (SSR) y localStorage (fallback para $api client-side)
       tokenCookie.value = result.token
       userCookie.value = result.user
-      user.value = result.user
 
       if (import.meta.client) {
         localStorage.setItem('auth_token', result.token)
@@ -69,7 +72,6 @@ export const useAuthStore = defineStore('auth', () => {
   function logout() {
     tokenCookie.value = null
     userCookie.value = null
-    user.value = null
     if (import.meta.client) {
       localStorage.removeItem('auth_token')
       localStorage.removeItem('auth_user')
@@ -82,8 +84,11 @@ export const useAuthStore = defineStore('auth', () => {
     token,
     loading,
     isLoggedIn,
+    isSuperAdmin,
     isAdmin,
     isVocal,
+    isDirigente,
+    canManageTeams,
     login,
     logout
   }

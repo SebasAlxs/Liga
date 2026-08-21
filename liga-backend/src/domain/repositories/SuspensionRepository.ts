@@ -1,5 +1,4 @@
-import { SuspensionStatus } from "@prisma/client";
-import { Suspension } from "../entities/Suspension";
+import { Suspension, SuspensionStatus } from "../entities/Suspension";
 
 export interface SuspensionRepository {
     create(suspension: Suspension): Promise<Suspension>;

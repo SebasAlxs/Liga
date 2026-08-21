@@ -8,7 +8,7 @@ export class Player {
         public dni?: string,
         public birthDate?: Date,
         public isLocal: boolean = true,
-        public picture?: Buffer | Uint8Array,
+        public picture?: string,
         public createdAt?: Date,
         public updatedAt?: Date
     ) {

@@ -25,4 +25,5 @@ model Team {
   tournament       Tournament?   @relation(fields: [tournamentId], references: [id])
 
   @@index([name])
+  @@index([tournamentId])
 }

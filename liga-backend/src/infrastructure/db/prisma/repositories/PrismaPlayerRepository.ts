@@ -1,6 +1,7 @@
 import prisma from "../PrismaClient";
 import { Player } from "../../../../domain/entities/Player";
 import { PlayerRepository } from "../../../../domain/repositories/PlayerRepository";
+import { PaginatedResult, PaginationParams } from "../../../../domain/repositories/Pagination";
 
 export class PrismaPlayerRepository implements PlayerRepository {
     private prisma = prisma;
@@ -16,7 +17,7 @@ export class PrismaPlayerRepository implements PlayerRepository {
                 dni: player.dni,
                 birthDate: player.birthDate,
                 isLocal: player.isLocal,
-                picture: player.picture ? (Buffer.from(player.picture) as any) : null,
+                picture: player.picture || null,
             },
         });
 
@@ -29,7 +30,7 @@ export class PrismaPlayerRepository implements PlayerRepository {
             created.dni ?? undefined,
             created.birthDate ?? undefined,
             created.isLocal,
-            created.picture ? Buffer.from(created.picture) : undefined,
+            created.picture || undefined,
             created.createdAt,
             created.updatedAt
         );
@@ -47,7 +48,7 @@ export class PrismaPlayerRepository implements PlayerRepository {
             p.dni ?? undefined,
             p.birthDate ?? undefined,
             p.isLocal,
-            p.picture ? Buffer.from(p.picture) : undefined,
+            p.picture || undefined,
             p.createdAt,
             p.updatedAt
         );
@@ -65,17 +66,33 @@ export class PrismaPlayerRepository implements PlayerRepository {
             player.dni ?? undefined,
             player.birthDate ?? undefined,
             player.isLocal,
-            player.picture ? Buffer.from(player.picture) : undefined,
+            player.picture || undefined,
             player.createdAt,
             player.updatedAt
         );
     }
 
-    async findAll(): Promise<Player[]> {
-        const players = await this.prisma.player.findMany();
-        return players.map(
-            (p) => new Player(p.id, p.firstName, p.lastName, p.number, p.teamId, p.dni ?? undefined, p.birthDate ?? undefined, p.isLocal, p.picture ? Buffer.from(p.picture) : undefined, p.createdAt, p.updatedAt)
-        );
+    async findAll(pagination?: PaginationParams, options?: { includePicture?: boolean }): Promise<PaginatedResult<Player>> {
+        const [players, total] = await Promise.all([
+            this.prisma.player.findMany({
+                skip: pagination?.skip,
+                take: pagination?.take,
+                select: {
+                    id: true, firstName: true, lastName: true, number: true, teamId: true,
+                    dni: true, birthDate: true, isLocal: true, createdAt: true, updatedAt: true,
+                    // Se excluye del SELECT (no solo de la respuesta) cuando no se pide,
+                    // para no transferir el blob base64 de cada jugador innecesariamente.
+                    picture: options?.includePicture ? true : false,
+                },
+            }),
+            this.prisma.player.count(),
+        ]);
+        return {
+            items: players.map(
+                (p) => new Player(p.id, p.firstName, p.lastName, p.number, p.teamId, p.dni ?? undefined, p.birthDate ?? undefined, p.isLocal, (p as any).picture || undefined, p.createdAt, p.updatedAt)
+            ),
+            total,
+        };
     }
 
     async update(player: Player): Promise<Player> {
@@ -89,7 +106,7 @@ export class PrismaPlayerRepository implements PlayerRepository {
                 dni: player.dni,
                 birthDate: player.birthDate,
                 isLocal: player.isLocal,
-                picture: player.picture ? (Buffer.from(player.picture) as any) : null,
+                picture: player.picture || null,
             },
         });
         return new Player(
@@ -101,7 +118,7 @@ export class PrismaPlayerRepository implements PlayerRepository {
             updated.dni ?? undefined,
             updated.birthDate ?? undefined,
             updated.isLocal,
-            updated.picture ? Buffer.from(updated.picture) : undefined,
+            updated.picture || undefined,
             updated.createdAt,
             updated.updatedAt
         );
@@ -114,7 +131,7 @@ export class PrismaPlayerRepository implements PlayerRepository {
     async findByTeamId(teamId: string): Promise<Player[]> {
         const players = await this.prisma.player.findMany({ where: { teamId } });
         return players.map(
-            (p) => new Player(p.id, p.firstName, p.lastName, p.number, p.teamId, p.dni ?? undefined, p.birthDate ?? undefined, p.isLocal, p.picture ? Buffer.from(p.picture) : undefined, p.createdAt, p.updatedAt)
+            (p) => new Player(p.id, p.firstName, p.lastName, p.number, p.teamId, p.dni ?? undefined, p.birthDate ?? undefined, p.isLocal, p.picture || undefined, p.createdAt, p.updatedAt)
         );
     }
 }

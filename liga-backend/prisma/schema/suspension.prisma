@@ -15,6 +15,7 @@ model Suspension {
   @@index([playerId])
   @@index([tournamentId])
   @@index([status])
+  @@index([matchId])
 }
 
 enum SuspensionStatus {

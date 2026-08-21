@@ -12,7 +12,8 @@ export const useTeamStore = defineStore('team', () => {
   const teams = ref<Team[]>([])
   const loading = ref(false)
 
-  async function fetchTeams() {
+  async function fetchTeams(force = false) {
+    if (!force && teams.value.length) return
     loading.value = true
     try {
       const res: any = await $api('/teams')
@@ -56,7 +57,7 @@ export const useTeamStore = defineStore('team', () => {
         method: 'POST',
         body: teamData
       })
-      await fetchTeams()
+      await fetchTeams(true)
       return { success: true, message: 'Equipo creado correctamente' }
     } catch (err: any) {
       console.error('Failed to create team:', err)
@@ -70,7 +71,7 @@ export const useTeamStore = defineStore('team', () => {
         method: 'PUT',
         body: teamData
       })
-      await fetchTeams()
+      await fetchTeams(true)
       return { success: true, message: 'Equipo actualizado correctamente' }
     } catch (err: any) {
       console.error('Failed to update team:', err)
@@ -83,7 +84,7 @@ export const useTeamStore = defineStore('team', () => {
       await $api(`/teams/${id}`, {
         method: 'DELETE'
       })
-      await fetchTeams()
+      await fetchTeams(true)
       return { success: true, message: 'Equipo eliminado correctamente' }
     } catch (err: any) {
       console.error('Failed to delete team:', err)
