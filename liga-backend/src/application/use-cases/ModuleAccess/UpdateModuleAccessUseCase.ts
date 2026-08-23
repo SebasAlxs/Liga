@@ -1,3 +1,4 @@
+import { DomainError } from "../../../domain/exceptions/DomainError";
 import { ModuleAccessResponse, UpdateModuleAccessRequest } from "../../../adapters/http/dto/ModuleAccessResponse";
 import { ModuleAccessRepository } from "../../../domain/repositories/ModuleAccessRepository";
 
@@ -9,14 +10,14 @@ export class UpdateModuleAccessUseCase {
     async execute(request: UpdateModuleAccessRequest): Promise<ModuleAccessResponse[]> {
         const items = request?.items || [];
         if (!items.length) {
-            throw new Error("No se enviaron cambios para actualizar.");
+            throw new DomainError("No se enviaron cambios para actualizar.");
         }
         for (const item of items) {
             if (!VALID_ROLES.includes(item.role)) {
-                throw new Error(`Rol inválido: ${item.role}`);
+                throw new DomainError(`Rol inválido: ${item.role}`);
             }
             if (!item.module || typeof item.module !== "string") {
-                throw new Error("Módulo inválido.");
+                throw new DomainError("Módulo inválido.");
             }
         }
 

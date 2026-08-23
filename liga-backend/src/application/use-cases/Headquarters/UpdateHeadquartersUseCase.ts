@@ -1,3 +1,4 @@
+import { NotFoundError } from "../../../domain/exceptions/NotFoundError";
 import { UpdateHeadquartersRequest, HeadquartersResponse } from "../../../adapters/http/dto/HeadquartersResponse";
 import { HeadquartersRepository } from "../../../domain/repositories/HeadquartersRepository";
 
@@ -7,7 +8,7 @@ export class UpdateHeadquartersUseCase {
     async execute(id: string, request: UpdateHeadquartersRequest): Promise<HeadquartersResponse> {
         const existing = await this.hqRepository.findById(id);
         if (!existing) {
-            throw new Error("Sede no encontrada");
+            throw new NotFoundError("Sede no encontrada");
         }
 
         if (request.name !== undefined) existing.name = request.name;

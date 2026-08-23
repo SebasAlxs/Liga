@@ -1,3 +1,4 @@
+import { NotFoundError } from "../../../domain/exceptions/NotFoundError";
 import { CategoryResponse, UpdateCategoryRequest } from "../../../adapters/http/dto/CategoryResponse";
 import { CategoryRepository } from "../../../domain/repositories/CategoryRepository";
 
@@ -7,7 +8,7 @@ export class UpdateCategoryUseCase {
     async execute(id: string, request: UpdateCategoryRequest): Promise<CategoryResponse> {
         const existingCategory = await this.categoryRepository.findById(id);
         if (!existingCategory) {
-            throw new Error("Category not found");
+            throw new NotFoundError("Category not found");
         }
 
         if (request.name !== undefined) existingCategory.name = request.name;

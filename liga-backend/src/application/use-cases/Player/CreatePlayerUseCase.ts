@@ -1,3 +1,4 @@
+import { DomainError } from "../../../domain/exceptions/DomainError";
 import crypto from "crypto";
 import { PlayerResponse, CreatePlayerRequest } from "../../../adapters/http/dto/PlayerResponse";
 import { Player } from "../../../domain/entities/Player";
@@ -27,7 +28,7 @@ export class CreatePlayerUseCase {
         if (request.dni) {
             const existingPlayer = await this.playerRepository.findByDni(request.dni);
             if (existingPlayer) {
-                throw new Error(`Ya existe un jugador registrado con la cédula ${request.dni}`);
+                throw new DomainError(`Ya existe un jugador registrado con la cédula ${request.dni}`);
             }
         }
 
@@ -41,10 +42,10 @@ export class CreatePlayerUseCase {
                     const age = this.calculateAge(birthDate);
 
                     if (category.minAge && age < category.minAge) {
-                        throw new Error(`El jugador no cumple con la edad mínima (${category.minAge} años) para la categoría ${category.name}. El jugador tiene ${age} años.`);
+                        throw new DomainError(`El jugador no cumple con la edad mínima (${category.minAge} años) para la categoría ${category.name}. El jugador tiene ${age} años.`);
                     }
                     if (category.maxAge && age > category.maxAge) {
-                        throw new Error(`El jugador supera la edad máxima (${category.maxAge} años) para la categoría ${category.name}. El jugador tiene ${age} años.`);
+                        throw new DomainError(`El jugador supera la edad máxima (${category.maxAge} años) para la categoría ${category.name}. El jugador tiene ${age} años.`);
                     }
                 }
             }

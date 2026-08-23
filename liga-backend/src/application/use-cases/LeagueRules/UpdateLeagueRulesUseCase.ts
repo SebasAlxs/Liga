@@ -1,3 +1,4 @@
+import { DomainError } from "../../../domain/exceptions/DomainError";
 import { LeagueRulesResponse, UpdateLeagueRulesRequest } from "../../../adapters/http/dto/LeagueRulesResponse";
 import { LeagueRulesRepository } from "../../../domain/repositories/LeagueRulesRepository";
 
@@ -6,7 +7,7 @@ export class UpdateLeagueRulesUseCase {
 
     async execute(request: UpdateLeagueRulesRequest): Promise<LeagueRulesResponse> {
         if (request.maxForeignPlayersOnField !== undefined && request.maxForeignPlayersOnField < 0) {
-            throw new Error("El máximo de foráneos en cancha no puede ser negativo.");
+            throw new DomainError("El máximo de foráneos en cancha no puede ser negativo.");
         }
 
         const r = await this.leagueRulesRepository.update(request);

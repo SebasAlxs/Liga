@@ -23,8 +23,8 @@ export class GetStandingsUseCase {
             goalsFor: team.goalsFor,
             goalsAgainst: team.goalsAgainst,
             goalDifference: team.goalDifference,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            createdAt: team.createdAt?.toISOString() || new Date().toISOString(),
+            updatedAt: team.updatedAt?.toISOString() || new Date().toISOString()
         }));
     }
 }

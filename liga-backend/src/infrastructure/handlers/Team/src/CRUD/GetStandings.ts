@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { GetStandingsUseCase } from "../../../../../application/use-cases/Stats/GetStandingsUseCase";
 import { PrismaTeamRepository } from "../../../../db/prisma/repositories/PrismaTeamRepository";
-import { successResponse, errorResponse } from "../../../../libs/api-gateway";
+import { successResponse, errorResponse , handleErrorResponse } from "../../../../libs/api-gateway";
 
 export const handler = async (req: Request, res: Response) => {
     try {
@@ -16,6 +16,6 @@ export const handler = async (req: Request, res: Response) => {
         const standings = await useCase.execute(tournamentId);
         return successResponse(res, standings, 200, "Tabla de posiciones obtenida exitosamente.");
     } catch (error: any) {
-        return errorResponse(res, error.message);
+        return handleErrorResponse(res, error);
     }
 };

@@ -1,3 +1,4 @@
+import { DomainError } from "../exceptions/DomainError";
 export class Tournament {
     constructor(
         public readonly id: string,
@@ -13,7 +14,7 @@ export class Tournament {
 
     private validate() {
         if (!this.name || this.name.length < 3) {
-            throw new Error("Tournament name must be at least 3 characters long");
+            throw new DomainError("Tournament name must be at least 3 characters long");
         }
     }
 }

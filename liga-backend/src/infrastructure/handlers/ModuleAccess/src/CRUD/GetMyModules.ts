@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { GetVisibleModulesForRoleUseCase } from "../../../../../application/use-cases/ModuleAccess/GetVisibleModulesForRoleUseCase";
 import { PrismaModuleAccessRepository } from "../../../../db/prisma/repositories/PrismaModuleAccessRepository";
-import { successResponse, errorResponse } from "../../../../libs/api-gateway";
+import { successResponse, errorResponse , handleErrorResponse } from "../../../../libs/api-gateway";
 
 export const handler = async (req: Request, res: Response) => {
     try {
@@ -14,6 +14,6 @@ export const handler = async (req: Request, res: Response) => {
         const data = await useCase.execute(role);
         return successResponse(res, data, 200, "Módulos visibles recuperados con éxito.");
     } catch (error: any) {
-        return errorResponse(res, error.message);
+        return handleErrorResponse(res, error);
     }
 };

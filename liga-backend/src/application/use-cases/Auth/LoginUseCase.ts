@@ -1,3 +1,4 @@
+import { DomainError } from "../../../domain/exceptions/DomainError";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { UserRepository } from "../../../domain/repositories/UserRepository";
@@ -13,7 +14,7 @@ export class LoginUseCase {
     const user = await this.userRepository.findByEmail(credentials.email);
 
     if (!user || !user.password) {
-      throw new Error("Credenciales inválidas.");
+      throw new DomainError("Credenciales inválidas.");
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -22,7 +23,7 @@ export class LoginUseCase {
     );
 
     if (!isPasswordValid) {
-      throw new Error("Credenciales inválidas.");
+      throw new DomainError("Credenciales inválidas.");
     }
 
     const secret = process.env.JWT_SECRET || "supersecretkey"; // Ideally this is in .env

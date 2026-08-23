@@ -1,3 +1,4 @@
+import { DomainError } from "../exceptions/DomainError";
 export type SuspensionStatus = "ACTIVE" | "SERVED" | "APPEALED";
 
 export class Suspension {
@@ -16,14 +17,14 @@ export class Suspension {
     }
 
     private validate() {
-        if (!this.playerId || this.playerId.trim() === "") throw new Error("La suspensión requiere un playerId válido.");
-        if (!this.tournamentId || this.tournamentId.trim() === "") throw new Error("La suspensión requiere un tournamentId válido.");
-        if (!this.reason || this.reason.trim() === "") throw new Error("La razón de la suspensión es obligatoria.");
-        if (this.matchesSuspended < 1) throw new Error("El número de partidos de suspensión debe ser al menos 1.");
+        if (!this.playerId || this.playerId.trim() === "") throw new DomainError("La suspensión requiere un playerId válido.");
+        if (!this.tournamentId || this.tournamentId.trim() === "") throw new DomainError("La suspensión requiere un tournamentId válido.");
+        if (!this.reason || this.reason.trim() === "") throw new DomainError("La razón de la suspensión es obligatoria.");
+        if (this.matchesSuspended < 1) throw new DomainError("El número de partidos de suspensión debe ser al menos 1.");
 
         const validStatuses = ["ACTIVE", "SERVED", "APPEALED"];
         if (!validStatuses.includes(this.status)) {
-            throw new Error(`Estado de suspensión inválido. Opciones: ${validStatuses.join(", ")}`);
+            throw new DomainError(`Estado de suspensión inválido. Opciones: ${validStatuses.join(", ")}`);
         }
     }
 }

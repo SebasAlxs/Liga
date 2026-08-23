@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { GetCategoryUseCase } from "../../../../../application/use-cases/Category/GetCategoryUseCase";
 import { PrismaCategoryRepository } from "../../../../db/prisma/repositories/PrismaCategoryRepository";
-import { successResponse, errorResponse } from "../../../../libs/api-gateway";
+import { successResponse, errorResponse , handleErrorResponse } from "../../../../libs/api-gateway";
 
 export const handler = async (req: Request, res: Response) => {
     try {
@@ -13,6 +13,6 @@ export const handler = async (req: Request, res: Response) => {
         }
         return successResponse(res, category, 200, "Categoría obtenida con éxito.");
     } catch (error: any) {
-        return errorResponse(res, error.message);
+        return handleErrorResponse(res, error);
     }
 };

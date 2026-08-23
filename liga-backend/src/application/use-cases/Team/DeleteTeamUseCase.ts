@@ -1,3 +1,4 @@
+import { NotFoundError } from "../../../domain/exceptions/NotFoundError";
 import { TeamRepository } from "../../../domain/repositories/TeamRepository";
 
 export class DeleteTeamUseCase {
@@ -6,7 +7,7 @@ export class DeleteTeamUseCase {
     async execute(id: string): Promise<void> {
         const existingTeam = await this.teamRepository.findById(id);
         if (!existingTeam) {
-            throw new Error("Team not found");
+            throw new NotFoundError("Team not found");
         }
         await this.teamRepository.delete(id);
     }

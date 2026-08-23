@@ -1,6 +1,6 @@
+import { DomainError } from "../exceptions/DomainError";
 export class Team {
-  constructor(
-    public readonly id: string,
+  constructor(public readonly id: string,
     public name: string,
     public logo: string,
     public foundedYear: number,
@@ -14,17 +14,18 @@ export class Team {
     public matchesLost: number = 0,
     public goalsFor: number = 0,
     public goalsAgainst: number = 0,
-    public goalDifference: number = 0
-  ) {
+    public goalDifference: number = 0,
+        public createdAt?: Date,
+        public updatedAt?: Date) {
     this.validate();
   }
 
   private validate() {
     if (!this.name || this.name.length < 3) {
-      throw new Error("Team name must be at least 3 characters long");
+      throw new DomainError("Team name must be at least 3 characters long");
     }
     if (this.foundedYear > new Date().getFullYear()) {
-      throw new Error("Founded year cannot be in the future");
+      throw new DomainError("Founded year cannot be in the future");
     }
   }
 

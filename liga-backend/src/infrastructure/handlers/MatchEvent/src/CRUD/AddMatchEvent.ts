@@ -7,7 +7,7 @@ import { PrismaMatchRepository } from "../../../../db/prisma/repositories/Prisma
 import { PrismaTeamRepository } from "../../../../db/prisma/repositories/PrismaTeamRepository";
 import { PrismaMatchLineupRepository } from "../../../../db/prisma/repositories/PrismaMatchLineupRepository";
 import { RecalculateTeamStatsUseCase } from "../../../../../application/use-cases/Stats/RecalculateTeamStatsUseCase";
-import { successResponse, errorResponse } from "../../../../libs/api-gateway";
+import { successResponse, errorResponse , handleErrorResponse } from "../../../../libs/api-gateway";
 
 export const handler = async (req: Request, res: Response) => {
     try {
@@ -35,6 +35,6 @@ export const handler = async (req: Request, res: Response) => {
         const created = await useCase.execute(req.body);
         return successResponse(res, created, 201, "Evento de partido registrado con éxito.");
     } catch (error: any) {
-        return errorResponse(res, error.message);
+        return handleErrorResponse(res, error);
     }
 };

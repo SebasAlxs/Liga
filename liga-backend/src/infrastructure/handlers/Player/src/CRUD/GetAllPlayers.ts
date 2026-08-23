@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { GetAllPlayersUseCase } from "../../../../../application/use-cases/Player/GetAllPlayersUseCase";
 import { PrismaPlayerRepository } from "../../../../db/prisma/repositories/PrismaPlayerRepository";
-import { successResponse, errorResponse, parsePagination, buildPagination } from "../../../../libs/api-gateway";
+import { successResponse, errorResponse, parsePagination, buildPagination , handleErrorResponse } from "../../../../libs/api-gateway";
 
 export const handler = async (req: Request, res: Response) => {
     try {
@@ -12,6 +12,6 @@ export const handler = async (req: Request, res: Response) => {
         const { items, total } = await useCase.execute(includePicture, { skip, take });
         return successResponse(res, items, 200, "Consulta exitosa.", buildPagination(total, page, limit));
     } catch (error: any) {
-        return errorResponse(res, error.message);
+        return handleErrorResponse(res, error);
     }
 };

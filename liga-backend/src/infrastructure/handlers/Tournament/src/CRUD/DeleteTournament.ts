@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { DeleteTournamentUseCase } from "../../../../../application/use-cases/Tournament/DeleteTournamentUseCase";
 import { PrismaTournamentRepository } from "../../../../db/prisma/repositories/PrismaTournamentRepository";
-import { successResponse, errorResponse } from "../../../../libs/api-gateway";
+import { successResponse, errorResponse , handleErrorResponse } from "../../../../libs/api-gateway";
 
 export const handler = async (req: Request, res: Response) => {
     try {
@@ -11,6 +11,6 @@ export const handler = async (req: Request, res: Response) => {
         await useCase.execute(id as string);
         return successResponse(res, null, 200, "Torneo eliminado con éxito.");
     } catch (error: any) {
-        return errorResponse(res, error.message);
+        return handleErrorResponse(res, error);
     }
 };

@@ -1,3 +1,4 @@
+import { NotFoundError } from "../../../domain/exceptions/NotFoundError";
 import { CategoryRepository } from "../../../domain/repositories/CategoryRepository";
 
 export class DeleteCategoryUseCase {
@@ -6,7 +7,7 @@ export class DeleteCategoryUseCase {
     async execute(id: string): Promise<void> {
         const existingCategory = await this.categoryRepository.findById(id);
         if (!existingCategory) {
-            throw new Error("Category not found");
+            throw new NotFoundError("Category not found");
         }
 
         // Additional validation could be added here (e.g., checking for related teams/matches)

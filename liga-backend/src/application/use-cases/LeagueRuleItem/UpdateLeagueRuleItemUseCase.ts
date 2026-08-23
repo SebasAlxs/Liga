@@ -1,3 +1,4 @@
+import { NotFoundError } from "../../../domain/exceptions/NotFoundError";
 import { LeagueRuleItemResponse, UpdateLeagueRuleItemRequest } from "../../../adapters/http/dto/LeagueRuleItemResponse";
 import { LeagueRuleItemRepository } from "../../../domain/repositories/LeagueRuleItemRepository";
 
@@ -7,7 +8,7 @@ export class UpdateLeagueRuleItemUseCase {
     async execute(id: string, request: UpdateLeagueRuleItemRequest): Promise<LeagueRuleItemResponse> {
         const existing = await this.leagueRuleItemRepository.findById(id);
         if (!existing) {
-            throw new Error("Regla no encontrada");
+            throw new NotFoundError("Regla no encontrada");
         }
 
         if (request.title !== undefined) existing.title = request.title;

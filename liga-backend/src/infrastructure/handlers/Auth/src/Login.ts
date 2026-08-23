@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { LoginUseCase } from "../../../../application/use-cases/Auth/LoginUseCase";
 import { PrismaUserRepository } from "../../../db/prisma/repositories/PrismaUserRepository";
-import { successResponse, errorResponse } from "../../../libs/api-gateway";
+import { successResponse, errorResponse , handleErrorResponse } from "../../../libs/api-gateway";
 
 export const handler = async (req: Request, res: Response) => {
   try {
@@ -10,6 +10,6 @@ export const handler = async (req: Request, res: Response) => {
     const result = await useCase.execute(req.body);
     return successResponse(res, result, 200, "Inicio de sesión exitoso.");
   } catch (error: any) {
-    return errorResponse(res, error.message);
+    return handleErrorResponse(res, error);
   }
 };

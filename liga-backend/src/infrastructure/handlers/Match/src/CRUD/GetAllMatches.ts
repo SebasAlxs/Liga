@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { GetAllMatchesUseCase } from "../../../../../application/use-cases/Match/GetAllMatchesUseCase";
 import { PrismaMatchRepository } from "../../../../db/prisma/repositories/PrismaMatchRepository";
-import { successResponse, errorResponse, parsePagination, buildPagination } from "../../../../libs/api-gateway";
+import { successResponse, errorResponse, parsePagination, buildPagination , handleErrorResponse } from "../../../../libs/api-gateway";
 
 export const handler = async (req: Request, res: Response) => {
     try {
@@ -11,6 +11,6 @@ export const handler = async (req: Request, res: Response) => {
         const { items, total } = await useCase.execute({ skip, take });
         return successResponse(res, items, 200, "Partidos obtenidos con éxito.", buildPagination(total, page, limit));
     } catch (error: any) {
-        return errorResponse(res, error.message);
+        return handleErrorResponse(res, error);
     }
 };

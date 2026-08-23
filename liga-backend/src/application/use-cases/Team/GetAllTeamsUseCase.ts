@@ -24,8 +24,8 @@ export class GetAllTeamsUseCase {
                 goalsFor: t.goalsFor,
                 goalsAgainst: t.goalsAgainst,
                 goalDifference: t.goalDifference,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
+                createdAt: t.createdAt?.toISOString() || new Date().toISOString(),
+                updatedAt: t.updatedAt?.toISOString() || new Date().toISOString()
             })
         );
         return { items, total };

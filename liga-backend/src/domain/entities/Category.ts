@@ -1,3 +1,4 @@
+import { DomainError } from "../exceptions/DomainError";
 export class Category {
     constructor(
         public readonly id: string,
@@ -12,7 +13,7 @@ export class Category {
 
     private validate() {
         if (!this.name || this.name.length < 2) {
-            throw new Error("Category name must be at least 2 characters long");
+            throw new DomainError("Category name must be at least 2 characters long");
         }
     }
 }

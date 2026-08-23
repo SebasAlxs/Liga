@@ -1,3 +1,5 @@
+import { DomainError } from "../../domain/exceptions/DomainError";
+import { NotFoundError } from "../../domain/exceptions/NotFoundError";
 import { Response } from "express";
 import { Prisma } from "@prisma/client";
 import { Pagination } from "../../adapters/http/dto/BaseResponse";
@@ -73,6 +75,13 @@ export const handleErrorResponse = (
     error: any,
     friendlyMessages: Record<string, string> = {}
 ) => {
+    
+    if (error instanceof DomainError) {
+        return errorResponse(res, error.message, 400);
+    }
+    if (error instanceof NotFoundError) {
+        return errorResponse(res, error.message, 404);
+    }
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2002") {
             const target = Array.isArray(error.meta?.target) ? (error.meta.target as string[]).join(",") : String(error.meta?.target ?? "");

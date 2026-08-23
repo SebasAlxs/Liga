@@ -4,13 +4,13 @@ export enum LineupStatus {
 }
 
 export class MatchLineup {
-    constructor(
-        public readonly id: string,
+    constructor(public readonly id: string,
         public readonly matchId: string,
         public readonly playerId: string,
         public readonly teamId: string,
         public status: LineupStatus = LineupStatus.SUBSTITUTE,
         public checkedIn: boolean = false,
-        public number?: number | null
-    ) { }
+        public number?: number | null,
+        public createdAt?: Date,
+        public updatedAt?: Date) { }
 }

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { GetHeadquartersUseCase } from "../../../../../application/use-cases/Headquarters/GetHeadquartersUseCase";
 import { PrismaHeadquartersRepository } from "../../../../db/prisma/repositories/PrismaHeadquartersRepository";
-import { successResponse, errorResponse } from "../../../../libs/api-gateway";
+import { successResponse, errorResponse , handleErrorResponse } from "../../../../libs/api-gateway";
 
 export const handler = async (req: Request, res: Response) => {
     try {
@@ -10,6 +10,6 @@ export const handler = async (req: Request, res: Response) => {
         const hqs = await useCase.execute();
         return successResponse(res, hqs, 200, "Sedes obtenidas con éxito.");
     } catch (error: any) {
-        return errorResponse(res, error.message);
+        return handleErrorResponse(res, error);
     }
 };

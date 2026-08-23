@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { GetAllTournamentsUseCase } from "../../../../../application/use-cases/Tournament/GetAllTournamentsUseCase";
 import { PrismaTournamentRepository } from "../../../../db/prisma/repositories/PrismaTournamentRepository";
-import { successResponse, errorResponse } from "../../../../libs/api-gateway";
+import { successResponse, errorResponse , handleErrorResponse } from "../../../../libs/api-gateway";
 
 export const handler = async (req: Request, res: Response) => {
     try {
@@ -10,6 +10,6 @@ export const handler = async (req: Request, res: Response) => {
         const tournaments = await useCase.execute();
         return successResponse(res, tournaments, 200, "Torneos recuperados con éxito.");
     } catch (error: any) {
-        return errorResponse(res, error.message);
+        return handleErrorResponse(res, error);
     }
 };

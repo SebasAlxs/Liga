@@ -1,3 +1,4 @@
+import { DomainError } from "../exceptions/DomainError";
 export type EventType = "YELLOW_CARD" | "RED_CARD" | "GOAL" | "ASSIST" | "SUBSTITUTION" | "PLAYER_ENTRY";
 
 export class MatchEvent {
@@ -16,17 +17,17 @@ export class MatchEvent {
     }
 
     private validate() {
-        if (!this.matchId || this.matchId.trim() === "") throw new Error("MatchEvent require un matchId válido.");
-        if (!this.playerId || this.playerId.trim() === "") throw new Error("MatchEvent require un playerId válido.");
-        if (!this.teamId || this.teamId.trim() === "") throw new Error("MatchEvent require un teamId válido.");
+        if (!this.matchId || this.matchId.trim() === "") throw new DomainError("MatchEvent require un matchId válido.");
+        if (!this.playerId || this.playerId.trim() === "") throw new DomainError("MatchEvent require un playerId válido.");
+        if (!this.teamId || this.teamId.trim() === "") throw new DomainError("MatchEvent require un teamId válido.");
 
         const validTypes = ["YELLOW_CARD", "RED_CARD", "GOAL", "ASSIST", "SUBSTITUTION", "PLAYER_ENTRY"];
         if (!validTypes.includes(this.type)) {
-            throw new Error(`Tipo de evento no válido. Opciones: ${validTypes.join(", ")}`);
+            throw new DomainError(`Tipo de evento no válido. Opciones: ${validTypes.join(", ")}`);
         }
 
         if (this.minute !== undefined && this.minute < 0) {
-            throw new Error("El minuto del evento no puede ser negativo.");
+            throw new DomainError("El minuto del evento no puede ser negativo.");
         }
     }
 }

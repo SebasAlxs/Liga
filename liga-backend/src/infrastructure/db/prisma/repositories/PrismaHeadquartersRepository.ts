@@ -16,18 +16,18 @@ export class PrismaHeadquartersRepository implements HeadquartersRepository {
             },
         });
 
-        return new Headquarters(created.id, created.name, created.city ?? undefined, created.address ?? undefined, created.active);
+        return new Headquarters(created.id, created.name, created.city ?? undefined, created.address ?? undefined, created.active, created.createdAt, created.updatedAt);
     }
 
     async findById(id: string): Promise<Headquarters | null> {
         const hq = await this.prisma.headquarters.findUnique({ where: { id } });
         if (!hq) return null;
-        return new Headquarters(hq.id, hq.name, hq.city ?? undefined, hq.address ?? undefined, hq.active);
+        return new Headquarters(hq.id, hq.name, hq.city ?? undefined, hq.address ?? undefined, hq.active, hq.createdAt, hq.updatedAt);
     }
 
     async findAll(): Promise<Headquarters[]> {
         const hqs = await this.prisma.headquarters.findMany({ orderBy: { createdAt: 'desc' } });
-        return hqs.map((hq) => new Headquarters(hq.id, hq.name, hq.city ?? undefined, hq.address ?? undefined, hq.active));
+        return hqs.map((hq) => new Headquarters(hq.id, hq.name, hq.city ?? undefined, hq.address ?? undefined, hq.active, hq.createdAt, hq.updatedAt));
     }
 
     async update(hq: Headquarters): Promise<Headquarters> {
@@ -41,7 +41,7 @@ export class PrismaHeadquartersRepository implements HeadquartersRepository {
             },
         });
 
-        return new Headquarters(updated.id, updated.name, updated.city ?? undefined, updated.address ?? undefined, updated.active);
+        return new Headquarters(updated.id, updated.name, updated.city ?? undefined, updated.address ?? undefined, updated.active, updated.createdAt, updated.updatedAt);
     }
 
     async delete(id: string): Promise<void> {

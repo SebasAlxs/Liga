@@ -55,7 +55,9 @@ export class PrismaMatchRepository implements MatchRepository {
             created.fourthReferee || undefined,
             created.firstHalfStartedAt,
             created.firstHalfEndedAt,
-            created.secondHalfStartedAt
+            created.secondHalfStartedAt,
+            created.createdAt,
+            created.updatedAt
         );
     }
 
@@ -90,7 +92,9 @@ export class PrismaMatchRepository implements MatchRepository {
             match.fourthReferee,
             match.firstHalfStartedAt,
             match.firstHalfEndedAt,
-            match.secondHalfStartedAt
+            match.secondHalfStartedAt,
+            match.createdAt,
+            match.updatedAt
         );
     }
 
@@ -131,7 +135,9 @@ export class PrismaMatchRepository implements MatchRepository {
                     m.fourthReferee,
                     m.firstHalfStartedAt,
                     m.firstHalfEndedAt,
-                    m.secondHalfStartedAt
+                    m.secondHalfStartedAt,
+                    m.createdAt,
+                    m.updatedAt
                 )
             ),
             total,
@@ -154,6 +160,8 @@ export class PrismaMatchRepository implements MatchRepository {
                 tournamentId: true,
                 categoryId: true,
                 status: true,
+                createdAt: true,
+                updatedAt: true,
             },
         });
         return matches.map(
@@ -166,7 +174,10 @@ export class PrismaMatchRepository implements MatchRepository {
                 m.matchDate,
                 m.tournamentId,
                 m.categoryId,
-                m.status as MatchStatus
+                m.status as MatchStatus,
+                null, null, null, null, undefined, undefined, undefined, undefined, null, null, null,
+                m.createdAt,
+                m.updatedAt
             )
         );
     }
@@ -218,7 +229,9 @@ export class PrismaMatchRepository implements MatchRepository {
             updated.fourthReferee || undefined,
             updated.firstHalfStartedAt,
             updated.firstHalfEndedAt,
-            updated.secondHalfStartedAt
+            updated.secondHalfStartedAt,
+            updated.createdAt,
+            updated.updatedAt
         );
     }
 

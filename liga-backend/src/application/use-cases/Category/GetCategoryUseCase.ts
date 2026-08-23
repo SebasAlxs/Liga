@@ -14,8 +14,8 @@ export class GetCategoryUseCase {
       name: category.name,
       minAge: category.minAge,
       maxAge: category.maxAge,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: category.createdAt?.toISOString() || new Date().toISOString(),
+      updatedAt: category.updatedAt?.toISOString() || new Date().toISOString(),
     };
   }
 }

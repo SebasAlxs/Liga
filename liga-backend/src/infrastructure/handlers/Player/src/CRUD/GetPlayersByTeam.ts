@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { PrismaPlayerRepository } from "../../../../db/prisma/repositories/PrismaPlayerRepository";
 import { GetPlayersByTeamUseCase } from "../../../../../application/use-cases/Player/GetPlayersByTeamUseCase";
-import { successResponse, errorResponse } from "../../../../libs/api-gateway";
+import { successResponse, errorResponse , handleErrorResponse } from "../../../../libs/api-gateway";
 
 export const handler = async (req: Request, res: Response) => {
     try {
@@ -13,6 +13,6 @@ export const handler = async (req: Request, res: Response) => {
         return successResponse(res, players);
     } catch (error: any) {
         console.error("Error in GetPlayersByTeam:", error);
-        return errorResponse(res, error.message);
+        return handleErrorResponse(res, error);
     }
 };

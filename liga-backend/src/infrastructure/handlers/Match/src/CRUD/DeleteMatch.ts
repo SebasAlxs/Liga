@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { DeleteMatchUseCase } from "../../../../../application/use-cases/Match/DeleteMatchUseCase";
 import { PrismaMatchRepository } from "../../../../db/prisma/repositories/PrismaMatchRepository";
-import { successResponse, errorResponse } from "../../../../libs/api-gateway";
+import { successResponse, errorResponse , handleErrorResponse } from "../../../../libs/api-gateway";
 
 export const handler = async (req: Request, res: Response) => {
     try {
@@ -10,6 +10,6 @@ export const handler = async (req: Request, res: Response) => {
         await useCase.execute(req.params.id as string);
         return successResponse(res, null, 200, "Partido eliminado con éxito.");
     } catch (error: any) {
-        return errorResponse(res, error.message);
+        return handleErrorResponse(res, error);
     }
 };

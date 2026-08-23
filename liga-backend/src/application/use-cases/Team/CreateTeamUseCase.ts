@@ -35,8 +35,8 @@ export class CreateTeamUseCase {
             goalsFor: created.goalsFor,
             goalsAgainst: created.goalsAgainst,
             goalDifference: created.goalDifference,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            createdAt: created.createdAt?.toISOString() || new Date().toISOString(),
+            updatedAt: created.updatedAt?.toISOString() || new Date().toISOString()
         };
     }
 }

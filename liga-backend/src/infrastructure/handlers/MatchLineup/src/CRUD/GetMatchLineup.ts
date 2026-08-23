@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { GetMatchLineupUseCase } from "../../../../../application/use-cases/MatchLineup/GetMatchLineupUseCase";
 import { PrismaMatchLineupRepository } from "../../../../db/prisma/repositories/PrismaMatchLineupRepository";
-import { successResponse, errorResponse } from "../../../../libs/api-gateway";
+import { successResponse, errorResponse , handleErrorResponse } from "../../../../libs/api-gateway";
 
 export const handler = async (req: Request, res: Response) => {
     try {
@@ -14,6 +14,6 @@ export const handler = async (req: Request, res: Response) => {
         const result = await useCase.execute(id);
         return successResponse(res, result, 200, "Nómina obtenida con éxito.");
     } catch (error: any) {
-        return errorResponse(res, error.message);
+        return handleErrorResponse(res, error);
     }
 };

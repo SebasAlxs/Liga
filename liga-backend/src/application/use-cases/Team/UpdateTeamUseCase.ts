@@ -1,3 +1,4 @@
+import { NotFoundError } from "../../../domain/exceptions/NotFoundError";
 import { TeamResponse, UpdateTeamRequest } from "../../../adapters/http/dto/TeamResponse";
 import { TeamRepository } from "../../../domain/repositories/TeamRepository";
 
@@ -7,7 +8,7 @@ export class UpdateTeamUseCase {
     async execute(id: string, request: UpdateTeamRequest): Promise<TeamResponse> {
         const existingTeam = await this.teamRepository.findById(id);
         if (!existingTeam) {
-            throw new Error("Team not found");
+            throw new NotFoundError("Team not found");
         }
 
         if (request.name) existingTeam.name = request.name;
@@ -35,8 +36,8 @@ export class UpdateTeamUseCase {
             goalsFor: updated.goalsFor,
             goalsAgainst: updated.goalsAgainst,
             goalDifference: updated.goalDifference,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            createdAt: updated.createdAt?.toISOString() || new Date().toISOString(),
+            updatedAt: updated.updatedAt?.toISOString() || new Date().toISOString()
         };
     }
 }

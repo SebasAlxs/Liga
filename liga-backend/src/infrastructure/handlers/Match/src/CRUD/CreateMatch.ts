@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { CreateMatchUseCase } from "../../../../../application/use-cases/Match/CreateMatchUseCase";
 import { PrismaMatchRepository } from "../../../../db/prisma/repositories/PrismaMatchRepository";
-import { successResponse, errorResponse } from "../../../../libs/api-gateway";
+import { successResponse, errorResponse , handleErrorResponse } from "../../../../libs/api-gateway";
 
 export const handler = async (req: Request, res: Response) => {
     try {
@@ -10,6 +10,6 @@ export const handler = async (req: Request, res: Response) => {
         const match = await useCase.execute(req.body);
         return successResponse(res, match, 201, "Partido creado con éxito.");
     } catch (error: any) {
-        return errorResponse(res, error.message);
+        return handleErrorResponse(res, error);
     }
 };

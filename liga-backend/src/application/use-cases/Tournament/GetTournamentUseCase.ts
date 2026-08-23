@@ -15,8 +15,8 @@ export class GetTournamentUseCase {
       active: tournament.active,
       maxYellowCardsForSuspension: tournament.maxYellowCardsForSuspension,
       headquartersId: tournament.headquartersId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: tournament.createdAt?.toISOString() || new Date().toISOString(),
+      updatedAt: tournament.updatedAt?.toISOString() || new Date().toISOString(),
     };
   }
 }

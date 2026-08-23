@@ -1,3 +1,4 @@
+import { NotFoundError } from "../../../domain/exceptions/NotFoundError";
 import { MatchResponse, UpdateMatchRequest } from "../../../adapters/http/dto/MatchResponse";
 import { MatchRepository } from "../../../domain/repositories/MatchRepository";
 import { RecalculateTeamStatsUseCase } from "../Stats/RecalculateTeamStatsUseCase";
@@ -11,7 +12,7 @@ export class UpdateMatchUseCase {
     async execute(id: string, request: UpdateMatchRequest): Promise<MatchResponse> {
         const existingMatch = await this.matchRepository.findById(id);
         if (!existingMatch) {
-            throw new Error("Match not found");
+            throw new NotFoundError("Match not found");
         }
 
         if (request.homeTeamId) existingMatch.homeTeamId = request.homeTeamId;
@@ -53,8 +54,8 @@ export class UpdateMatchUseCase {
             firstHalfStartedAt: updated.firstHalfStartedAt?.toISOString() || null,
             firstHalfEndedAt: updated.firstHalfEndedAt?.toISOString() || null,
             secondHalfStartedAt: updated.secondHalfStartedAt?.toISOString() || null,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            createdAt: updated.createdAt?.toISOString() || new Date().toISOString(),
+            updatedAt: updated.updatedAt?.toISOString() || new Date().toISOString(),
             refereeId: updated.refereeId,
             assistant1Id: updated.assistant1Id,
             assistant2Id: updated.assistant2Id,

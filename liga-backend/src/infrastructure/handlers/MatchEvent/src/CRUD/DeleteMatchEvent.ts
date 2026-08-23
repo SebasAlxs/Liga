@@ -5,7 +5,7 @@ import { PrismaSuspensionRepository } from "../../../../db/prisma/repositories/P
 import { PrismaMatchRepository } from "../../../../db/prisma/repositories/PrismaMatchRepository";
 import { PrismaTeamRepository } from "../../../../db/prisma/repositories/PrismaTeamRepository";
 import { RecalculateTeamStatsUseCase } from "../../../../../application/use-cases/Stats/RecalculateTeamStatsUseCase";
-import { successResponse, errorResponse } from "../../../../libs/api-gateway";
+import { successResponse, errorResponse , handleErrorResponse } from "../../../../libs/api-gateway";
 
 export const handler = async (req: Request, res: Response) => {
     try {
@@ -25,6 +25,6 @@ export const handler = async (req: Request, res: Response) => {
         await useCase.execute(eventId);
         return successResponse(res, null, 200, "Evento de partido eliminado con éxito.");
     } catch (error: any) {
-        return errorResponse(res, error.message);
+        return handleErrorResponse(res, error);
     }
 };

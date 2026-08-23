@@ -1,3 +1,4 @@
+import { NotFoundError } from "../../../domain/exceptions/NotFoundError";
 import { TournamentRepository } from "../../../domain/repositories/TournamentRepository";
 
 export class DeleteTournamentUseCase {
@@ -6,7 +7,7 @@ export class DeleteTournamentUseCase {
     async execute(id: string): Promise<void> {
         const existingTournament = await this.tournamentRepository.findById(id);
         if (!existingTournament) {
-            throw new Error("Tournament not found");
+            throw new NotFoundError("Tournament not found");
         }
 
         // Additional validation could be added here (e.g., checking for related matches)

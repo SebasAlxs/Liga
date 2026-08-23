@@ -70,7 +70,9 @@ export class PrismaMatchLineupRepository implements MatchLineupRepository {
             data.teamId,
             data.status as LineupStatus,
             data.checkedIn,
-            data.number
+            data.number,
+            data.createdAt,
+            data.updatedAt
         );
     }
 }

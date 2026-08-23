@@ -1,3 +1,5 @@
+import { NotFoundError } from "../../../domain/exceptions/NotFoundError";
+import { DomainError } from "../../../domain/exceptions/DomainError";
 import bcrypt from "bcryptjs";
 import { UserResponse, UpdateUserRequest } from "../../../adapters/http/dto/UserResponse";
 import { UserRepository } from "../../../domain/repositories/UserRepository";
@@ -10,25 +12,25 @@ export class UpdateUserUseCase {
     async execute(id: string, request: UpdateUserRequest): Promise<UserResponse> {
         const existingUser = await this.userRepository.findById(id);
         if (!existingUser) {
-            throw new Error("Usuario no encontrado.");
+            throw new NotFoundError("Usuario no encontrado.");
         }
 
         if (request.role && !VALID_ROLES.includes(request.role)) {
-            throw new Error(`Rol inválido. Debe ser uno de: ${VALID_ROLES.join(", ")}.`);
+            throw new DomainError(`Rol inválido. Debe ser uno de: ${VALID_ROLES.join(", ")}.`);
         }
 
         if (request.role && request.role !== "SUPERADMIN" && existingUser.role === "SUPERADMIN") {
             const allUsers = await this.userRepository.findAll();
             const superAdminCount = allUsers.filter((u) => u.role === "SUPERADMIN").length;
             if (superAdminCount <= 1) {
-                throw new Error("No se puede quitar el rol SUPERADMIN al único administrador principal.");
+                throw new DomainError("No se puede quitar el rol SUPERADMIN al único administrador principal.");
             }
         }
 
         if (request.email && request.email !== existingUser.email) {
             const emailOwner = await this.userRepository.findByEmail(request.email);
             if (emailOwner) {
-                throw new Error("El correo electrónico ya está en uso.");
+                throw new DomainError("El correo electrónico ya está en uso.");
             }
             existingUser.email = request.email;
         }

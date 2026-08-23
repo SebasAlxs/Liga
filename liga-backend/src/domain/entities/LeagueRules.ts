@@ -1,7 +1,6 @@
 export class LeagueRules {
-    constructor(
-        public readonly id: string,
+    constructor(public readonly id: string,
         public maxForeignPlayersOnField: number,
-        public readonly updatedAt?: Date
-    ) { }
+        public readonly createdAt?: Date,
+        public readonly updatedAt?: Date) { }
 }

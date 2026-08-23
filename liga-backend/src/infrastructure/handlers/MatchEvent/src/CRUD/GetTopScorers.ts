@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { GetTopScorersUseCase } from "../../../../../application/use-cases/MatchEvent/GetTopScorersUseCase";
 import { PrismaMatchEventRepository } from "../../../../db/prisma/repositories/PrismaMatchEventRepository";
-import { successResponse, errorResponse } from "../../../../libs/api-gateway";
+import { successResponse, errorResponse , handleErrorResponse } from "../../../../libs/api-gateway";
 
 export const handler = async (req: Request, res: Response) => {
     try {
@@ -19,6 +19,6 @@ export const handler = async (req: Request, res: Response) => {
         const stats = await useCase.execute(tournamentId, limit);
         return successResponse(res, stats, 200, "Goleadores obtenidos exitosamente.");
     } catch (error: any) {
-        return errorResponse(res, error.message);
+        return handleErrorResponse(res, error);
     }
 };

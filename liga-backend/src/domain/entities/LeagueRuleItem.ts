@@ -1,3 +1,4 @@
+import { DomainError } from "../exceptions/DomainError";
 export class LeagueRuleItem {
     constructor(
         public readonly id: string,
@@ -11,7 +12,7 @@ export class LeagueRuleItem {
 
     private validate() {
         if (!this.title || this.title.length < 2) {
-            throw new Error("El título de la regla debe tener al menos 2 caracteres");
+            throw new DomainError("El título de la regla debe tener al menos 2 caracteres");
         }
     }
 }

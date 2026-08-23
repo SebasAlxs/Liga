@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { DeleteTeamUseCase } from "../../../../../application/use-cases/Team/DeleteTeamUseCase";
 import { PrismaTeamRepository } from "../../../../db/prisma/repositories/PrismaTeamRepository";
-import { successResponse, errorResponse } from "../../../../libs/api-gateway";
+import { successResponse, errorResponse , handleErrorResponse } from "../../../../libs/api-gateway";
 
 export const handler = async (req: Request, res: Response) => {
     try {
@@ -10,6 +10,6 @@ export const handler = async (req: Request, res: Response) => {
         await useCase.execute(req.params.id as string);
         return successResponse(res, null, 200, "Equipo eliminado con éxito.");
     } catch (error: any) {
-        return errorResponse(res, error.message);
+        return handleErrorResponse(res, error);
     }
 };

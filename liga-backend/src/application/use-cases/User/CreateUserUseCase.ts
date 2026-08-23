@@ -1,3 +1,4 @@
+import { DomainError } from "../../../domain/exceptions/DomainError";
 import bcrypt from "bcryptjs";
 import { UserResponse, CreateUserRequest } from "../../../adapters/http/dto/UserResponse";
 import { UserRepository } from "../../../domain/repositories/UserRepository";
@@ -9,16 +10,16 @@ export class CreateUserUseCase {
 
     async execute(request: CreateUserRequest): Promise<UserResponse> {
         if (!request.email || !request.password || !request.role) {
-            throw new Error("Email, contraseña y rol son obligatorios.");
+            throw new DomainError("Email, contraseña y rol son obligatorios.");
         }
 
         if (!VALID_ROLES.includes(request.role)) {
-            throw new Error(`Rol inválido. Debe ser uno de: ${VALID_ROLES.join(", ")}.`);
+            throw new DomainError(`Rol inválido. Debe ser uno de: ${VALID_ROLES.join(", ")}.`);
         }
 
         const existingUser = await this.userRepository.findByEmail(request.email);
         if (existingUser) {
-            throw new Error("El correo electrónico ya está en uso.");
+            throw new DomainError("El correo electrónico ya está en uso.");
         }
 
         const hashedPassword = await bcrypt.hash(request.password, 10);

@@ -1,3 +1,5 @@
+import { NotFoundError } from "../../../domain/exceptions/NotFoundError";
+import { DomainError } from "../../../domain/exceptions/DomainError";
 import { PlayerResponse, UpdatePlayerRequest } from "../../../adapters/http/dto/PlayerResponse";
 import { PlayerRepository } from "../../../domain/repositories/PlayerRepository";
 import { TeamRepository } from "../../../domain/repositories/TeamRepository";
@@ -23,7 +25,7 @@ export class UpdatePlayerUseCase {
     async execute(id: string, request: UpdatePlayerRequest): Promise<PlayerResponse> {
         const existingPlayer = await this.playerRepository.findById(id);
         if (!existingPlayer) {
-            throw new Error("Player not found");
+            throw new NotFoundError("Player not found");
         }
 
         if (request.firstName) existingPlayer.firstName = request.firstName;
@@ -34,7 +36,7 @@ export class UpdatePlayerUseCase {
         if (request.dni && request.dni !== existingPlayer.dni) {
             const playerWithDni = await this.playerRepository.findByDni(request.dni);
             if (playerWithDni) {
-                throw new Error(`Ya existe un jugador registrado con la cédula ${request.dni}`);
+                throw new DomainError(`Ya existe un jugador registrado con la cédula ${request.dni}`);
             }
             existingPlayer.dni = request.dni;
         }
@@ -50,10 +52,10 @@ export class UpdatePlayerUseCase {
                 if (category) {
                     const age = this.calculateAge(newBirthDate);
                     if (category.minAge && age < category.minAge) {
-                        throw new Error(`El jugador no cumple con la edad mínima (${category.minAge} años) para la categoría ${category.name}. El jugador tiene ${age} años.`);
+                        throw new DomainError(`El jugador no cumple con la edad mínima (${category.minAge} años) para la categoría ${category.name}. El jugador tiene ${age} años.`);
                     }
                     if (category.maxAge && age > category.maxAge) {
-                        throw new Error(`El jugador supera la edad máxima (${category.maxAge} años) para la categoría ${category.name}. El jugador tiene ${age} años.`);
+                        throw new DomainError(`El jugador supera la edad máxima (${category.maxAge} años) para la categoría ${category.name}. El jugador tiene ${age} años.`);
                     }
                 }
             }

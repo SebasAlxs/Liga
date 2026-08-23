@@ -1,3 +1,4 @@
+import { NotFoundError } from "../../../domain/exceptions/NotFoundError";
 import { TournamentResponse, UpdateTournamentRequest } from "../../../adapters/http/dto/TournamentResponse";
 import { TournamentRepository } from "../../../domain/repositories/TournamentRepository";
 
@@ -7,7 +8,7 @@ export class UpdateTournamentUseCase {
     async execute(id: string, request: UpdateTournamentRequest): Promise<TournamentResponse> {
         const existingTournament = await this.tournamentRepository.findById(id);
         if (!existingTournament) {
-            throw new Error("Tournament not found");
+            throw new NotFoundError("Tournament not found");
         }
 
         if (request.name !== undefined) existingTournament.name = request.name;

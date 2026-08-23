@@ -17,6 +17,14 @@ import { ModuleAccessHandlers } from "./infrastructure/handlers/ModuleAccess/src
 import { LeagueRulesHandlers } from "./infrastructure/handlers/LeagueRules/src";
 import { LeagueRuleItemHandlers } from "./infrastructure/handlers/LeagueRuleItem/src";
 import { verifyToken, hasRole } from "./infrastructure/middlewares/auth.middleware";
+import { globalErrorHandler } from "./infrastructure/middlewares/error.middleware";
+import { validateRequest } from "./infrastructure/middlewares/validate.middleware";
+import { AuthValidator } from "./adapters/http/validators/AuthValidator";
+import { UserValidator } from "./adapters/http/validators/UserValidator";
+import { TeamValidator } from "./adapters/http/validators/TeamValidator";
+import { PlayerValidator } from "./adapters/http/validators/PlayerValidator";
+
+import { logger } from "./infrastructure/libs/logger";
 
 dotenv.config();
 
@@ -24,7 +32,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 app.use((req, res, next) => {
-  // console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url} - Origin: ${req.headers.origin}`);
+  logger.info(`${req.method} ${req.url} - Origin: ${req.headers.origin || "Unknown"}`);
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
@@ -49,12 +57,12 @@ const vocalOrAdmin = [verifyToken, hasRole(["VOCAL", "SUPERADMIN", "ADMIN"])];
 const router = express.Router();
 
 // Auth Routes
-router.post("/auth/login", AuthHandlers.login);
+router.post("/auth/login", validateRequest(AuthValidator.login), AuthHandlers.login);
 
 // User Management Routes (SUPERADMIN only)
 router.get("/users", ...superAdminOnly, UserHandlers.getAllUsers);
-router.post("/users", ...superAdminOnly, UserHandlers.createUser);
-router.put("/users/:id", ...superAdminOnly, UserHandlers.updateUser);
+router.post("/users", ...superAdminOnly, validateRequest(UserValidator.create), UserHandlers.createUser);
+router.put("/users/:id", ...superAdminOnly, validateRequest(UserValidator.update), UserHandlers.updateUser);
 router.delete("/users/:id", ...superAdminOnly, UserHandlers.deleteUser);
 
 // League Rules Routes (reglas globales del campeonato: GET público, editar solo Admin)
@@ -75,16 +83,16 @@ router.put("/module-access", ...superAdminOnly, ModuleAccessHandlers.updateModul
 // Team Routes (GET Public, Create/Edit: Admin/Dirigente, Delete: Admin)
 router.get("/teams", TeamHandlers.getAllTeams);
 router.get("/teams/:id", TeamHandlers.getTeam);
-router.post("/teams", ...teamManagers, TeamHandlers.createTeam);
-router.put("/teams/:id", ...teamManagers, TeamHandlers.updateTeam);
+router.post("/teams", ...teamManagers, validateRequest(TeamValidator.create), TeamHandlers.createTeam);
+router.put("/teams/:id", ...teamManagers, validateRequest(TeamValidator.update), TeamHandlers.updateTeam);
 router.delete("/teams/:id", ...adminOnly, TeamHandlers.deleteTeam);
 
 // Player Routes (GET Public, Create/Edit: Admin/Dirigente, Delete: Admin)
 router.get("/players", PlayerHandlers.getAllPlayers);
 router.get("/players/team/:teamId", PlayerHandlers.getPlayersByTeam);
 router.get("/players/:id", PlayerHandlers.getPlayer);
-router.post("/players", ...teamManagers, PlayerHandlers.createPlayer);
-router.put("/players/:id", ...teamManagers, PlayerHandlers.updatePlayer);
+router.post("/players", ...teamManagers, validateRequest(PlayerValidator.create), PlayerHandlers.createPlayer);
+router.put("/players/:id", ...teamManagers, validateRequest(PlayerValidator.update), PlayerHandlers.updatePlayer);
 router.delete("/players/:id", ...adminOnly, PlayerHandlers.deletePlayer);
 
 // Match Routes (GET Public, Modify Vocal/Admin)
@@ -148,6 +156,8 @@ router.get("/", (_req, res) => {
 
 app.use("/api", router);
 
+app.use(globalErrorHandler);
+
 app.listen(Number(port), "0.0.0.0", () => {
-  console.log(`Server running at http://localhost:${port}`);
+  logger.info(`Server running at http://localhost:${port}`);
 });

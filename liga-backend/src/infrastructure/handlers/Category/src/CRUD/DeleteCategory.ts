@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { DeleteCategoryUseCase } from "../../../../../application/use-cases/Category/DeleteCategoryUseCase";
 import { PrismaCategoryRepository } from "../../../../db/prisma/repositories/PrismaCategoryRepository";
-import { successResponse, errorResponse } from "../../../../libs/api-gateway";
+import { successResponse, errorResponse , handleErrorResponse } from "../../../../libs/api-gateway";
 
 export const handler = async (req: Request, res: Response) => {
     try {
@@ -11,6 +11,6 @@ export const handler = async (req: Request, res: Response) => {
         await useCase.execute(id as string);
         return successResponse(res, null, 200, "Categoría eliminada con éxito.");
     } catch (error: any) {
-        return errorResponse(res, error.message);
+        return handleErrorResponse(res, error);
     }
 };

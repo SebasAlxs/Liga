@@ -1,3 +1,4 @@
+import { DomainError } from "../../../domain/exceptions/DomainError";
 import crypto from "crypto";
 import { LineupStatus } from "../../../domain/entities/MatchLineup";
 import { MatchEvent, EventType } from "../../../domain/entities/MatchEvent";
@@ -36,7 +37,7 @@ export class AddMatchEventUseCase {
         const yellowCountInMatch = await this.eventRepository.countYellowCardsInMatch(request.playerId, request.matchId);
 
         if (hasRed || yellowCountInMatch >= 2) {
-            throw new Error("El jugador ya ha sido expulsado de este partido y no puede recibir más eventos.");
+            throw new DomainError("El jugador ya ha sido expulsado de este partido y no puede recibir más eventos.");
         }
 
         const event = new MatchEvent(

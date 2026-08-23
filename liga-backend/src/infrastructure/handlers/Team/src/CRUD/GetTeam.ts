@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { GetTeamByIdUseCase } from "../../../../../application/use-cases/Team/GetTeamByIdUseCase";
 import { PrismaTeamRepository } from "../../../../db/prisma/repositories/PrismaTeamRepository";
-import { successResponse, errorResponse } from "../../../../libs/api-gateway";
+import { successResponse, errorResponse , handleErrorResponse } from "../../../../libs/api-gateway";
 
 export const handler = async (req: Request, res: Response) => {
     try {
@@ -13,6 +13,6 @@ export const handler = async (req: Request, res: Response) => {
         }
         return successResponse(res, team, 200, "Equipo obtenido con éxito.");
     } catch (error: any) {
-        return errorResponse(res, error.message);
+        return handleErrorResponse(res, error);
     }
 };

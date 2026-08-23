@@ -34,7 +34,9 @@ export class PrismaTeamRepository implements TeamRepository {
             created.matchesLost,
             created.goalsFor,
             created.goalsAgainst,
-            created.goalDifference
+            created.goalDifference,
+            created.createdAt,
+            created.updatedAt
         );
     }
 
@@ -56,7 +58,9 @@ export class PrismaTeamRepository implements TeamRepository {
             team.matchesLost,
             team.goalsFor,
             team.goalsAgainst,
-            team.goalDifference
+            team.goalDifference,
+            team.createdAt,
+            team.updatedAt
         );
     }
 
@@ -78,7 +82,9 @@ export class PrismaTeamRepository implements TeamRepository {
             team.matchesLost,
             team.goalsFor,
             team.goalsAgainst,
-            team.goalDifference
+            team.goalDifference,
+            team.createdAt,
+            team.updatedAt
         );
     }
 
@@ -91,7 +97,7 @@ export class PrismaTeamRepository implements TeamRepository {
             items: teams.map(
                 (t) => new Team(
                     t.id, t.name, t.logo, t.foundedYear, t.championshipsWon ?? undefined, t.categoryId ?? undefined, t.tournamentId ?? undefined,
-                    t.points, t.matchesPlayed, t.matchesWon, t.matchesDrawn, t.matchesLost, t.goalsFor, t.goalsAgainst, t.goalDifference
+                    t.points, t.matchesPlayed, t.matchesWon, t.matchesDrawn, t.matchesLost, t.goalsFor, t.goalsAgainst, t.goalDifference, t.createdAt, t.updatedAt
                 )
             ),
             total,
@@ -112,7 +118,7 @@ export class PrismaTeamRepository implements TeamRepository {
         return teams.map(
             (t) => new Team(
                 t.id, t.name, t.logo, t.foundedYear, t.championshipsWon ?? undefined, t.categoryId ?? undefined, t.tournamentId ?? undefined,
-                t.points, t.matchesPlayed, t.matchesWon, t.matchesDrawn, t.matchesLost, t.goalsFor, t.goalsAgainst, t.goalDifference
+                t.points, t.matchesPlayed, t.matchesWon, t.matchesDrawn, t.matchesLost, t.goalsFor, t.goalsAgainst, t.goalDifference, t.createdAt, t.updatedAt
             )
         );
     }
@@ -152,7 +158,9 @@ export class PrismaTeamRepository implements TeamRepository {
             updated.matchesLost,
             updated.goalsFor,
             updated.goalsAgainst,
-            updated.goalDifference
+            updated.goalDifference,
+            updated.createdAt,
+            updated.updatedAt
         );
     }
 

@@ -1,3 +1,4 @@
+import { DomainError } from "../exceptions/DomainError";
 export class Player {
     constructor(
         public readonly id: string,
@@ -17,10 +18,10 @@ export class Player {
 
     private validate() {
         if (!this.firstName || this.firstName.length < 2) {
-            throw new Error("First name must be at least 2 characters long");
+            throw new DomainError("First name must be at least 2 characters long");
         }
         if (!this.lastName || this.lastName.length < 2) {
-            throw new Error("Last name must be at least 2 characters long");
+            throw new DomainError("Last name must be at least 2 characters long");
         }
     }
 }

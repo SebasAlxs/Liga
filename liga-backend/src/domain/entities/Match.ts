@@ -1,3 +1,4 @@
+import { DomainError } from "../exceptions/DomainError";
 export enum MatchStatus {
     SCHEDULED = "SCHEDULED",
     IN_PROGRESS = "IN_PROGRESS",
@@ -6,8 +7,7 @@ export enum MatchStatus {
 }
 
 export class Match {
-    constructor(
-        public readonly id: string,
+    constructor(public readonly id: string,
         public homeTeamId: string,
         public awayTeamId: string,
         public homeScore: number | null,
@@ -26,17 +26,18 @@ export class Match {
         public fourthReferee?: any,
         public firstHalfStartedAt?: Date | null,
         public firstHalfEndedAt?: Date | null,
-        public secondHalfStartedAt?: Date | null
-    ) {
+        public secondHalfStartedAt?: Date | null,
+        public createdAt?: Date,
+        public updatedAt?: Date) {
         this.validate();
     }
 
     private validate() {
         if (this.homeTeamId === this.awayTeamId) {
-            throw new Error("A team cannot play against itself");
+            throw new DomainError("A team cannot play against itself");
         }
         if ((this.homeScore !== null && this.homeScore < 0) || (this.awayScore !== null && this.awayScore < 0)) {
-            throw new Error("Scores cannot be negative");
+            throw new DomainError("Scores cannot be negative");
         }
     }
 }

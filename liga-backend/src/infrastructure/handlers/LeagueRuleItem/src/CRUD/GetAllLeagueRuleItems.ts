@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { GetAllLeagueRuleItemsUseCase } from "../../../../../application/use-cases/LeagueRuleItem/GetAllLeagueRuleItemsUseCase";
 import { PrismaLeagueRuleItemRepository } from "../../../../db/prisma/repositories/PrismaLeagueRuleItemRepository";
-import { successResponse, errorResponse } from "../../../../libs/api-gateway";
+import { successResponse, errorResponse , handleErrorResponse } from "../../../../libs/api-gateway";
 
 export const handler = async (req: Request, res: Response) => {
     try {
@@ -10,6 +10,6 @@ export const handler = async (req: Request, res: Response) => {
         const data = await useCase.execute();
         return successResponse(res, data, 200, "Reglas recuperadas con éxito.");
     } catch (error: any) {
-        return errorResponse(res, error.message);
+        return handleErrorResponse(res, error);
     }
 };

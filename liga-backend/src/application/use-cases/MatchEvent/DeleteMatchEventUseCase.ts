@@ -1,3 +1,4 @@
+import { NotFoundError } from "../../../domain/exceptions/NotFoundError";
 import { MatchEventRepository } from "../../../domain/repositories/MatchEventRepository";
 import { SuspensionRepository } from "../../../domain/repositories/SuspensionRepository";
 import { MatchRepository } from "../../../domain/repositories/MatchRepository";
@@ -14,12 +15,12 @@ export class DeleteMatchEventUseCase {
     async execute(id: string): Promise<void> {
         const event = await this.eventRepository.findById(id);
         if (!event) {
-            throw new Error("Evento no encontrado.");
+            throw new NotFoundError("Evento no encontrado.");
         }
 
         const match = await this.matchRepository.findById(event.matchId);
         if (!match) {
-            throw new Error("Partido no encontrado para este evento.");
+            throw new NotFoundError("Partido no encontrado para este evento.");
         }
 
         // Side Effects based on event type
