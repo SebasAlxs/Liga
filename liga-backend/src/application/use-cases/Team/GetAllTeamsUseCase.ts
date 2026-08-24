@@ -5,8 +5,8 @@ import { PaginationParams } from "../../../domain/repositories/Pagination";
 export class GetAllTeamsUseCase {
     constructor(private teamRepository: TeamRepository) { }
 
-    async execute(pagination?: PaginationParams): Promise<{ items: TeamResponse[]; total: number }> {
-        const { items: teams, total } = await this.teamRepository.findAll(pagination);
+    async execute(pagination?: PaginationParams, managerId?: string): Promise<{ items: TeamResponse[]; total: number }> {
+        const { items: teams, total } = await this.teamRepository.findAll(pagination, { managerId });
         const items = teams.map(
             (t) => ({
                 id: t.id,
@@ -25,7 +25,8 @@ export class GetAllTeamsUseCase {
                 goalsAgainst: t.goalsAgainst,
                 goalDifference: t.goalDifference,
                 createdAt: t.createdAt?.toISOString() || new Date().toISOString(),
-                updatedAt: t.updatedAt?.toISOString() || new Date().toISOString()
+                updatedAt: t.updatedAt?.toISOString() || new Date().toISOString(),
+                managerId: t.managerId
             })
         );
         return { items, total };

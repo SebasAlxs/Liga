@@ -17,7 +17,11 @@ export const handler = async (req: Request, res: Response) => {
             req.body.logo = await storageService.uploadImage(req.body.logo, filename, 'logos');
         }
         
-        const team = await useCase.execute(req.body);
+        const payload = {
+            ...req.body,
+            managerId: req.user?.role === 'DIRIGENTE' ? req.user.id : undefined
+        };
+        const team = await useCase.execute(payload);
         return successResponse(res, team, 201, "Equipo creado con éxito.");
     } catch (error: any) {
         return handleErrorResponse(res, error);

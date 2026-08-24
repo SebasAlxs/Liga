@@ -14,9 +14,10 @@ export const validateRequest = (schema: ZodObject<any>) => {
         } catch (error) {
             if (error instanceof ZodError) {
                 const fieldValidations: Record<string, string[]> = {};
+                const validationErrors = (error as any).errors || (error as any).issues || [];
                 
-                (error as any).errors.forEach((err: any) => {
-                    const path = err.path.length > 1 ? err.path[1].toString() : err.path[0]?.toString() || 'unknown';
+                validationErrors.forEach((err: any) => {
+                    const path = err.path && err.path.length > 1 ? err.path[1].toString() : (err.path && err.path[0]?.toString()) || 'unknown';
                     if (!fieldValidations[path]) {
                         fieldValidations[path] = [];
                     }

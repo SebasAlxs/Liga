@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { $api, useApi } from '~/composables/useApi'
+import { useAuthStore } from './auth'
 
 export interface Player {
   id: string
@@ -31,11 +32,14 @@ export const usePlayerStore = defineStore('player', () => {
     return { ...p, id: p._id || p.id }
   }
 
-  async function fetchPlayers(force = false) {
-    if (!force && allPlayersLoaded.value) return
+  async function fetchPlayers(force = false, managedByMe = false) {
+    const authStore = useAuthStore()
+    const isManaged = managedByMe || authStore.isDirigente
+    if (!force && allPlayersLoaded.value && !isManaged) return
     loading.value = true
     try {
-      const res: any = await $api('/players')
+      const url = isManaged ? '/players?managedByMe=true' : '/players'
+      const res: any = await $api(url)
       const raw = res?.data || []
       players.value = raw.map(normalize)
       allPlayersLoaded.value = true

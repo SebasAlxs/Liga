@@ -17,7 +17,7 @@ export const handler = async (req: Request, res: Response) => {
             req.body.logo = await storageService.uploadImage(req.body.logo, filename, 'logos');
         }
         
-        const team = await useCase.execute(req.params.id as string, req.body);
+        const team = await useCase.execute(req.params.id as string, req.body, req.user);
         return successResponse(res, team, 200, "Equipo actualizado con éxito.");
     } catch (error: any) {
         return handleErrorResponse(res, error);

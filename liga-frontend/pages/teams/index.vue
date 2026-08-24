@@ -16,6 +16,7 @@
             class="bg-surface/80 border border-border rounded-xl pl-10 pr-4 py-2 text-content focus:outline-none focus:border-primary transition-all w-full sm:w-64"
           >
         </div>
+
         <button 
           v-if="authStore.canManageTeams"
           @click="openAddModal"
@@ -65,11 +66,11 @@
               <img v-if="team.logo" :src="team.logo" class="w-full h-full object-cover" />
               <Icon v-else name="lucide:shield" class="w-10 h-10 text-emerald-300" />
             </div>
-            <div v-if="authStore.canManageTeams" class="flex gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
+            <div v-if="canManageTeam(team)" class="flex gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
               <button @click.stop="openEditModal(team)" class="p-2 hover:bg-emerald-100 rounded-lg text-content-muted hover:text-primary transition-colors" title="Editar">
                 <Icon name="lucide:edit-2" class="w-4 h-4" />
               </button>
-              <button v-if="authStore.isAdmin" @click.stop="handleDeleteTeam(team)" class="p-2 hover:bg-rose-100 rounded-lg text-content-muted hover:text-rose-600 transition-colors" title="Eliminar">
+              <button @click.stop="handleDeleteTeam(team)" class="p-2 hover:bg-rose-100 rounded-lg text-content-muted hover:text-rose-600 transition-colors" title="Eliminar">
                 <Icon name="lucide:trash-2" class="w-4 h-4" />
               </button>
             </div>
@@ -199,6 +200,7 @@ const teamStore = useTeamStore()
 
 // State
 const searchQuery = ref('')
+const managedByMe = ref(true) // Default true for Dirigentes
 const showModal = ref(false)
 const isEditing = ref(false)
 const loading = ref(false)
@@ -220,11 +222,21 @@ const filteredTeams = computed(() => {
 })
 
 // Hooks
-onMounted(() => {
-  teamStore.fetchTeams()
+onMounted(async () => {
+  await teamStore.fetchTeams(false, managedByMe.value)
 })
 
 // Methods
+async function toggleManagedByMe() {
+  managedByMe.value = !managedByMe.value
+  await teamStore.fetchTeams(true, managedByMe.value)
+}
+function canManageTeam(team) {
+  if (authStore.isSuperAdmin) return true
+  if (authStore.isDirigente && team.managerId === authStore.user?.id) return true
+  return false
+}
+
 function notify(message, type = 'success') {
   notification.value = { message, type }
   setTimeout(() => notification.value = null, 3000)

@@ -10,8 +10,8 @@ model Referee {
   updatedAt DateTime @updatedAt
 
   // Relations as various roles in matches
-  primaryMatches   Match[] @relation("PrimaryReferee")
+  primaryMatches    Match[] @relation("PrimaryReferee")
   assistant1Matches Match[] @relation("Assistant1")
   assistant2Matches Match[] @relation("Assistant2")
-  fourthMatches    Match[] @relation("FourthReferee")
+  fourthMatches     Match[] @relation("FourthReferee")
 }

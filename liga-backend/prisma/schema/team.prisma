@@ -16,13 +16,16 @@ model Team {
   matchesWon       Int           @default(0)
   points           Int           @default(0)
   tournamentId     String?
+  managerId        String?
   awayMatches      Match[]       @relation("AwayMatches")
   homeMatches      Match[]       @relation("HomeMatches")
   events           MatchEvent[]
   lineup           MatchLineup[]
   players          Player[]
+  fines            Fine[]        @relation("TeamFines")
   category         Category?     @relation(fields: [categoryId], references: [id])
   tournament       Tournament?   @relation(fields: [tournamentId], references: [id])
+  manager          User?         @relation(fields: [managerId], references: [id])
 
   @@index([name])
   @@index([tournamentId])

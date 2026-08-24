@@ -1,4 +1,6 @@
 import { defineStore } from 'pinia'
+import { useAuthStore } from './auth'
+import { $api } from '~/composables/useApi'
 
 export interface Team {
   id: string
@@ -12,11 +14,14 @@ export const useTeamStore = defineStore('team', () => {
   const teams = ref<Team[]>([])
   const loading = ref(false)
 
-  async function fetchTeams(force = false) {
-    if (!force && teams.value.length) return
+  async function fetchTeams(force = false, managedByMe = false) {
+    const authStore = useAuthStore()
+    const isManaged = managedByMe || authStore.isDirigente
+    if (!force && teams.value.length && !isManaged) return
     loading.value = true
     try {
-      const res: any = await $api('/teams')
+      const url = isManaged ? '/teams?managedByMe=true' : '/teams'
+      const res: any = await $api(url)
       
       // Backend returns _id instead of id, normalize it here
       const rawTeams = res?.data || []

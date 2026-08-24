@@ -98,10 +98,10 @@
               <Icon name="lucide:users" class="w-6 h-6 text-primary" />
               Plantilla de Jugadores
             </h3>
-            <button v-if="authStore.canManageTeams" class="flex items-center gap-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-content px-4 py-2 rounded-xl font-bold transition-all border border-primary/50">
+            <NuxtLink v-if="authStore.canManageTeams" to="/players" class="flex items-center gap-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-content px-4 py-2 rounded-xl font-bold transition-all border border-primary/50">
               <Icon name="lucide:user-plus" class="w-5 h-5" />
-              Inscribir Jugador
-            </button>
+              Gestión de Jugadores
+            </NuxtLink>
           </div>
 
           <!-- Players Table Placeholder -->
@@ -125,7 +125,6 @@
                   <th class="pb-4 text-xs font-bold text-content-muted uppercase tracking-widest">Jugador</th>
                   <th class="pb-4 text-xs font-bold text-content-muted uppercase tracking-widest hidden md:table-cell">Cédula</th>
                   <th class="pb-4 text-xs font-bold text-content-muted uppercase tracking-widest text-center">Local</th>
-                  <th v-if="authStore.canManageTeams" class="pb-4 text-xs font-bold text-content-muted uppercase tracking-widest text-right pr-4">Acciones</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
@@ -154,16 +153,6 @@
                     <span :class="`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter ${player.isLocal ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`">
                       {{ player.isLocal ? 'Local' : 'Visitante' }}
                     </span>
-                  </td>
-                  <td v-if="authStore.canManageTeams" class="py-4 text-right pr-4">
-                    <div class="flex items-center justify-end gap-1 opacity-100 lg:opacity-0 group-hover/row:opacity-100 transition-opacity">
-                      <button class="p-2 hover:bg-emerald-100 rounded-lg text-content-muted hover:text-primary">
-                        <Icon name="lucide:edit-2" class="w-4 h-4" />
-                      </button>
-                      <button class="p-2 hover:bg-rose-100 rounded-lg text-content-muted hover:text-rose-600">
-                        <Icon name="lucide:trash-2" class="w-4 h-4" />
-                      </button>
-                    </div>
                   </td>
                 </tr>
               </tbody>

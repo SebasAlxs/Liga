@@ -20,6 +20,7 @@
           <option value="FINISHED">Finalizados</option>
           <option value="CANCELLED">Cancelados</option>
         </select>
+
         <button v-if="authStore.isAdmin" id="btn-add-match" @click="openAddModal" class="flex items-center justify-center gap-2 bg-primary hover:bg-emerald-600 text-content px-5 py-2 rounded-xl font-bold transition-all shadow-lg shadow-emerald-500/20 active:scale-95 whitespace-nowrap text-sm">
           <Icon name="lucide:calendar-plus" class="w-5 h-5" />
           Nuevo Partido
@@ -290,6 +291,7 @@ const teamStore = useTeamStore()
 
 const filterTournament = ref('')
 const filterStatus = ref('')
+const managedByMe = ref(true)
 const showModal = ref(false)
 const showScoreModal = ref(false)
 const isEditing = ref(false)
@@ -371,13 +373,30 @@ function toLocalInput(isoString) {
 }
 
 onMounted(async () => {
-  await Promise.all([
-    matchStore.fetchMatches(),
-    matchStore.fetchTournaments(),
-    matchStore.fetchCategories(),
-    teamStore.fetchTeams(),
-  ])
+  if (authStore.isDirigente) {
+    await Promise.all([
+      matchStore.fetchMatches(managedByMe.value),
+      matchStore.fetchTournaments(),
+      matchStore.fetchCategories(),
+      teamStore.fetchTeams(false, managedByMe.value),
+    ])
+  } else {
+    await Promise.all([
+      matchStore.fetchMatches(),
+      matchStore.fetchTournaments(),
+      matchStore.fetchCategories(),
+      teamStore.fetchTeams(),
+    ])
+  }
 })
+
+async function toggleManagedByMe() {
+  managedByMe.value = !managedByMe.value
+  await Promise.all([
+    matchStore.fetchMatches(managedByMe.value),
+    teamStore.fetchTeams(true, managedByMe.value)
+  ])
+}
 
 function notify(message, type = 'success') {
   notification.value = { message, type }

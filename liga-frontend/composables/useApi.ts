@@ -27,7 +27,15 @@ export const useApi = <T>(url: string, options: UseFetchOptions<T> = {}) => {
 // Helper para acciones imperativas (POST, PUT, DELETE)
 // Base URL hardcodeada para evitar problemas de contexto fuera de setup.
 export const $api = (url: string, options: any = {}) => {
-  const token = import.meta.client ? localStorage.getItem('auth_token') : null
+  let token = null
+  try {
+    token = useCookie<string | null>('auth_token').value
+  } catch (e) {
+    // Silently ignore if called outside setup context
+  }
+  if (!token && import.meta.client) {
+    token = localStorage.getItem('auth_token')
+  }
   
   let baseURL = '/_backend'
   try {
