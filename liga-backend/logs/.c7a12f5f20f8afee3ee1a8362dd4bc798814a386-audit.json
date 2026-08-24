@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/Users/alexandercatagna/Documents/GitHub/Liga/liga-backend/logs/.c7a12f5f20f8afee3ee1a8362dd4bc798814a386-audit.json",
+    "files": [
+        {
+            "date": 1787584719671,
+            "name": "/Users/alexandercatagna/Documents/GitHub/Liga/liga-backend/logs/combined-2026-08-24.log",
+            "hash": "29558ff844c83149ce0a11b675ded2266f7a203989727d7c050f8fe390296afa"
+        }
+    ],
+    "hashType": "sha256"
+}
