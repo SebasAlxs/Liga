@@ -16,6 +16,7 @@ export interface Fine {
   updatedAt?: string
   player?: any
   match?: any
+  team?: { id: string; name: string }
 }
 
 export const useFineStore = defineStore('fine', () => {
