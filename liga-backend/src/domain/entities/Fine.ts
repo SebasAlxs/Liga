@@ -8,6 +8,7 @@ export interface Fine {
   teamId: string;
   matchId?: string | null;
   playerId?: string | null;
+  matchEventId?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
 }

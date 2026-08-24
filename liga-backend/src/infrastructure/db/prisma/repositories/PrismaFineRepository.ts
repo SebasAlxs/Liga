@@ -58,4 +58,21 @@ export class PrismaFineRepository implements FineRepository {
   async delete(id: string): Promise<void> {
     await prisma.fine.delete({ where: { id } });
   }
+
+  async countByPlayerReasonAndTournament(playerId: string, reason: string, tournamentId: string): Promise<number> {
+    return prisma.fine.count({
+      where: {
+        playerId,
+        reason: { equals: reason, mode: 'insensitive' },
+        OR: [
+          { team: { tournamentId } },
+          { match: { tournamentId } }
+        ]
+      }
+    });
+  }
+
+  async deleteByMatchEventId(matchEventId: string): Promise<void> {
+    await prisma.fine.deleteMany({ where: { matchEventId } });
+  }
 }

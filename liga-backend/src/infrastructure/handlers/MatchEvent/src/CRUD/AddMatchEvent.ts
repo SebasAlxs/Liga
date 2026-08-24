@@ -6,6 +6,8 @@ import { PrismaTournamentRepository } from "../../../../db/prisma/repositories/P
 import { PrismaMatchRepository } from "../../../../db/prisma/repositories/PrismaMatchRepository";
 import { PrismaTeamRepository } from "../../../../db/prisma/repositories/PrismaTeamRepository";
 import { PrismaMatchLineupRepository } from "../../../../db/prisma/repositories/PrismaMatchLineupRepository";
+import { PrismaFineRepository } from "../../../../db/prisma/repositories/PrismaFineRepository";
+import { PrismaFineTypeRepository } from "../../../../db/prisma/repositories/PrismaFineTypeRepository";
 import { RecalculateTeamStatsUseCase } from "../../../../../application/use-cases/Stats/RecalculateTeamStatsUseCase";
 import { successResponse, errorResponse , handleErrorResponse } from "../../../../libs/api-gateway";
 
@@ -17,6 +19,8 @@ export const handler = async (req: Request, res: Response) => {
         const matchRepo = new PrismaMatchRepository();
         const teamRepo = new PrismaTeamRepository();
         const lineupRepo = new PrismaMatchLineupRepository();
+        const fineRepo = new PrismaFineRepository();
+        const fineTypeRepo = new PrismaFineTypeRepository();
         const statsUseCase = new RecalculateTeamStatsUseCase(teamRepo, matchRepo);
         const useCase = new AddMatchEventUseCase(
             eventRepo,
@@ -24,7 +28,9 @@ export const handler = async (req: Request, res: Response) => {
             tournamentRepo,
             matchRepo,
             lineupRepo,
-            statsUseCase
+            statsUseCase,
+            fineRepo,
+            fineTypeRepo
         );
 
         // Validate request body basic fields

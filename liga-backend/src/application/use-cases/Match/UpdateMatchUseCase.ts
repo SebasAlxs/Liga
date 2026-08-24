@@ -2,11 +2,13 @@ import { NotFoundError } from "../../../domain/exceptions/NotFoundError";
 import { MatchResponse, UpdateMatchRequest } from "../../../adapters/http/dto/MatchResponse";
 import { MatchRepository } from "../../../domain/repositories/MatchRepository";
 import { RecalculateTeamStatsUseCase } from "../Stats/RecalculateTeamStatsUseCase";
+import { ServeTeamSuspensionsUseCase } from "../Suspension/ServeTeamSuspensionsUseCase";
 
 export class UpdateMatchUseCase {
     constructor(
         private matchRepository: MatchRepository,
-        private teamStatsUseCase: RecalculateTeamStatsUseCase
+        private teamStatsUseCase: RecalculateTeamStatsUseCase,
+        private serveTeamSuspensionsUseCase?: ServeTeamSuspensionsUseCase
     ) { }
 
     async execute(id: string, request: UpdateMatchRequest): Promise<MatchResponse> {
@@ -39,6 +41,14 @@ export class UpdateMatchUseCase {
         if (updated.status === "FINISHED") {
             await this.teamStatsUseCase.execute(updated.homeTeamId);
             await this.teamStatsUseCase.execute(updated.awayTeamId);
+
+            // Un equipo que termina un partido cumple, para sus sanciones activas emitidas
+            // antes de este partido, un partido de suspensión (asume que los partidos se
+            // finalizan en orden cronológico, vía el flujo real de "Finalizar Partido" en Vocalía).
+            if (this.serveTeamSuspensionsUseCase) {
+                await this.serveTeamSuspensionsUseCase.execute(updated.homeTeamId, updated.tournamentId, updated.id, updated.matchDate);
+                await this.serveTeamSuspensionsUseCase.execute(updated.awayTeamId, updated.tournamentId, updated.id, updated.matchDate);
+            }
         }
 
         return {

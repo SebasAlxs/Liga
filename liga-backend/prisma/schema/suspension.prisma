@@ -2,6 +2,8 @@ model Suspension {
   id               String           @id @default(uuid())
   playerId         String
   matchId          String?
+  teamId           String?
+  fineId           String?          @unique
   tournamentId     String
   reason           String
   matchesSuspended Int              @default(1)
@@ -11,11 +13,13 @@ model Suspension {
   match            Match?           @relation(fields: [matchId], references: [id], onDelete: Cascade)
   player           Player           @relation(fields: [playerId], references: [id], onDelete: Cascade)
   tournament       Tournament       @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  fine             Fine?            @relation(fields: [fineId], references: [id], onDelete: SetNull)
 
   @@index([playerId])
   @@index([tournamentId])
   @@index([status])
   @@index([matchId])
+  @@index([teamId])
 }
 
 enum SuspensionStatus {

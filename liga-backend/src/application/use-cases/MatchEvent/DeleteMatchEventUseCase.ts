@@ -2,6 +2,7 @@ import { NotFoundError } from "../../../domain/exceptions/NotFoundError";
 import { MatchEventRepository } from "../../../domain/repositories/MatchEventRepository";
 import { SuspensionRepository } from "../../../domain/repositories/SuspensionRepository";
 import { MatchRepository } from "../../../domain/repositories/MatchRepository";
+import { FineRepository } from "../../../domain/repositories/FineRepository";
 import { RecalculateTeamStatsUseCase } from "../Stats/RecalculateTeamStatsUseCase";
 
 export class DeleteMatchEventUseCase {
@@ -9,7 +10,8 @@ export class DeleteMatchEventUseCase {
         private eventRepository: MatchEventRepository,
         private suspensionRepository: SuspensionRepository,
         private matchRepository: MatchRepository,
-        private teamStatsUseCase: RecalculateTeamStatsUseCase
+        private teamStatsUseCase: RecalculateTeamStatsUseCase,
+        private fineRepository: FineRepository
     ) { }
 
     async execute(id: string): Promise<void> {
@@ -36,6 +38,8 @@ export class DeleteMatchEventUseCase {
             // For RED_CARD it's direct. For YELLOW_CARD it's only if it was an accumulation one.
             // deleteByMatch handles both if they exist.
             await this.suspensionRepository.deleteByMatch(event.matchId, event.playerId);
+            // Delete the fine that was auto-generated for this specific card event, if any.
+            await this.fineRepository.deleteByMatchEventId(event.id);
         }
 
         // Delete the event

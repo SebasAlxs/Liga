@@ -11,7 +11,9 @@ export class Suspension {
         public status: SuspensionStatus = "ACTIVE",
         public matchId?: string,
         public readonly createdAt?: Date,
-        public readonly updatedAt?: Date
+        public readonly updatedAt?: Date,
+        public teamId?: string,
+        public fineId?: string
     ) {
         this.validate();
     }

@@ -6,4 +6,6 @@ export interface FineRepository {
   create(data: Omit<Fine, 'id' | 'createdAt' | 'updatedAt'>): Promise<Fine>;
   update(id: string, data: Partial<Fine>): Promise<Fine>;
   delete(id: string): Promise<void>;
+  countByPlayerReasonAndTournament(playerId: string, reason: string, tournamentId: string): Promise<number>;
+  deleteByMatchEventId(matchEventId: string): Promise<void>;
 }

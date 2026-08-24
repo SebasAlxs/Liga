@@ -12,13 +12,15 @@ export class PrismaSuspensionRepository implements SuspensionRepository {
                 playerId: suspension.playerId,
                 tournamentId: suspension.tournamentId,
                 matchId: suspension.matchId,
+                teamId: suspension.teamId,
+                fineId: suspension.fineId,
                 reason: suspension.reason,
                 matchesSuspended: suspension.matchesSuspended,
                 status: suspension.status,
             },
         });
 
-        return new Suspension(created.id, created.playerId, created.tournamentId, created.reason, created.matchesSuspended, created.status, created.matchId ?? undefined, created.createdAt, created.updatedAt);
+        return this.toDomain(created);
     }
 
     async findByPlayerInTournament(playerId: string, tournamentId: string): Promise<Suspension[]> {
@@ -27,7 +29,7 @@ export class PrismaSuspensionRepository implements SuspensionRepository {
             orderBy: { createdAt: 'desc' },
         });
 
-        return suspensions.map(s => new Suspension(s.id, s.playerId, s.tournamentId, s.reason, s.matchesSuspended, s.status, s.matchId ?? undefined, s.createdAt, s.updatedAt));
+        return suspensions.map(s => this.toDomain(s));
     }
 
     async updateStatus(id: string, status: SuspensionStatus): Promise<Suspension> {
@@ -36,19 +38,19 @@ export class PrismaSuspensionRepository implements SuspensionRepository {
             data: { status },
         });
 
-        return new Suspension(updated.id, updated.playerId, updated.tournamentId, updated.reason, updated.matchesSuspended, updated.status, updated.matchId ?? undefined, updated.createdAt, updated.updatedAt);
+        return this.toDomain(updated);
     }
 
     async delete(id: string): Promise<void> {
         await this.prisma.suspension.delete({ where: { id } });
     }
-    
+
     async findAll(): Promise<Suspension[]> {
         const suspensions = await this.prisma.suspension.findMany({
             orderBy: { createdAt: 'desc' },
         });
 
-        return suspensions.map(s => new Suspension(s.id, s.playerId, s.tournamentId, s.reason, s.matchesSuspended, s.status, s.matchId ?? undefined, s.createdAt, s.updatedAt));
+        return suspensions.map(s => this.toDomain(s));
     }
 
     async deleteByMatch(matchId: string, playerId: string): Promise<void> {
@@ -58,5 +60,29 @@ export class PrismaSuspensionRepository implements SuspensionRepository {
                 playerId
             }
         });
+    }
+
+    async findActiveByTeamAndTournament(teamId: string, tournamentId: string): Promise<Suspension[]> {
+        const suspensions = await this.prisma.suspension.findMany({
+            where: { teamId, tournamentId, status: 'ACTIVE' },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        return suspensions.map(s => this.toDomain(s));
+    }
+
+    async deleteByFineId(fineId: string): Promise<void> {
+        await this.prisma.suspension.deleteMany({ where: { fineId } });
+    }
+
+    private toDomain(s: {
+        id: string; playerId: string; tournamentId: string; reason: string;
+        matchesSuspended: number; status: SuspensionStatus; matchId: string | null;
+        createdAt: Date; updatedAt: Date; teamId: string | null; fineId: string | null;
+    }): Suspension {
+        return new Suspension(
+            s.id, s.playerId, s.tournamentId, s.reason, s.matchesSuspended, s.status,
+            s.matchId ?? undefined, s.createdAt, s.updatedAt, s.teamId ?? undefined, s.fineId ?? undefined
+        );
     }
 }

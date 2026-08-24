@@ -86,6 +86,13 @@
               <span class="text-sm text-content-muted">Registro</span>
               <span class="font-mono text-xs text-content-muted">{{ player.dni || 'No registrado' }}</span>
             </li>
+            <li v-if="suspensionStore.isPlayerSuspended(player.id)" class="flex justify-between items-center">
+              <span class="text-sm text-content-muted">Estado</span>
+              <span class="px-2 py-1 flex items-center gap-1 rounded-lg text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">
+                <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                🚫 Sancionado
+              </span>
+            </li>
           </ul>
         </div>
       </div>
@@ -151,6 +158,7 @@
 const route = useRoute()
 const playerStore = usePlayerStore()
 const teamStore = useTeamStore()
+const suspensionStore = useSuspensionStore()
 
 const player = ref(null)
 const loading = ref(true)
@@ -237,6 +245,7 @@ onMounted(async () => {
   
   // Fetch player directly
   player.value = await playerStore.fetchPlayerById(route.params.id)
+  await suspensionStore.fetchSuspensions()
   loading.value = false
 })
 </script>

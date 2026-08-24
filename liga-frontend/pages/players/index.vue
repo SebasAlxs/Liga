@@ -135,6 +135,10 @@
                     <p class="font-semibold text-content group-hover:text-emerald-400 transition-colors">
                       {{ player.firstName }} {{ player.lastName }}
                     </p>
+                    <span v-if="suspensionStore.isPlayerSuspended(player.id)" class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">
+                      <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                      🚫 Sancionado
+                    </span>
                   </div>
                 </NuxtLink>
               </td>
@@ -369,6 +373,7 @@
 const authStore = useAuthStore()
 const playerStore = usePlayerStore()
 const teamStore = useTeamStore()
+const suspensionStore = useSuspensionStore()
 
 // State
 const searchQuery = ref('')
@@ -427,7 +432,8 @@ function calculateAge(birthDate) {
 onMounted(async () => {
   await Promise.all([
     playerStore.fetchPlayers(false, managedByMe.value),
-    teamStore.fetchTeams(false, managedByMe.value)
+    teamStore.fetchTeams(false, managedByMe.value),
+    suspensionStore.fetchSuspensions()
   ])
 })
 

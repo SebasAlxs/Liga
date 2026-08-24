@@ -9,6 +9,13 @@ import { TournamentRepository } from "../../../domain/repositories/TournamentRep
 import { MatchRepository } from "../../../domain/repositories/MatchRepository";
 import { MatchLineupRepository } from "../../../domain/repositories/MatchLineupRepository";
 import { RecalculateTeamStatsUseCase } from "../Stats/RecalculateTeamStatsUseCase";
+import { FineRepository } from "../../../domain/repositories/FineRepository";
+import { FineTypeRepository } from "../../../domain/repositories/FineTypeRepository";
+
+const SANCTIONABLE_FINE_REASONS: Record<"RED_CARD" | "YELLOW_CARD", string> = {
+    RED_CARD: "Roja Directa",
+    YELLOW_CARD: "Tarjeta Amarilla"
+};
 
 // Dto
 export interface AddMatchEventRequest {
@@ -28,7 +35,9 @@ export class AddMatchEventUseCase {
         private tournamentRepository: TournamentRepository,
         private matchRepository: MatchRepository,
         private lineupRepository: MatchLineupRepository,
-        private teamStatsUseCase: RecalculateTeamStatsUseCase
+        private teamStatsUseCase: RecalculateTeamStatsUseCase,
+        private fineRepository: FineRepository,
+        private fineTypeRepository: FineTypeRepository
     ) { }
 
     async execute(request: AddMatchEventRequest): Promise<MatchEvent> {
@@ -87,10 +96,15 @@ export class AddMatchEventUseCase {
                 "Roja Directa",
                 1,
                 "ACTIVE",
-                request.matchId
+                request.matchId,
+                undefined,
+                undefined,
+                request.teamId
             );
             await this.suspensionRepository.create(suspension);
+            await this.createFineForCardEvent(request, "RED_CARD", createdEvent.id);
         } else if (request.type === "YELLOW_CARD") {
+            await this.createFineForCardEvent(request, "YELLOW_CARD", createdEvent.id);
             // A. Doble Amarilla en el mismo partido
             if (yellowCountInMatch === 1) { // Este es el segundo que estamos agregando
                 const suspension = new Suspension(
@@ -100,7 +114,10 @@ export class AddMatchEventUseCase {
                     "Doble Tarjeta Amarilla (Expulsión)",
                     1,
                     "ACTIVE",
-                    request.matchId
+                    request.matchId,
+                    undefined,
+                    undefined,
+                    request.teamId
                 );
                 await this.suspensionRepository.create(suspension);
             } else {
@@ -123,7 +140,10 @@ export class AddMatchEventUseCase {
                             `Acumulación de ${limit} Tarjetas Amarillas`,
                             1,
                             "ACTIVE",
-                            request.matchId
+                            request.matchId,
+                            undefined,
+                            undefined,
+                            request.teamId
                         );
                         await this.suspensionRepository.create(suspension);
                     }
@@ -147,5 +167,22 @@ export class AddMatchEventUseCase {
         }
 
         return createdEvent;
+    }
+
+    private async createFineForCardEvent(request: AddMatchEventRequest, type: "RED_CARD" | "YELLOW_CARD", matchEventId: string): Promise<void> {
+        const reason = SANCTIONABLE_FINE_REASONS[type];
+        const fineTypes = await this.fineTypeRepository.findAll({ active: true });
+        const fineType = fineTypes.find(t => t.name.trim().toLowerCase() === reason.toLowerCase());
+        if (!fineType) return; // Sin tipo configurado en el catálogo, no se genera la multa automáticamente.
+
+        await this.fineRepository.create({
+            amount: fineType.defaultAmount,
+            reason,
+            status: "PENDING",
+            teamId: request.teamId,
+            matchId: request.matchId,
+            playerId: request.playerId,
+            matchEventId
+        });
     }
 }
