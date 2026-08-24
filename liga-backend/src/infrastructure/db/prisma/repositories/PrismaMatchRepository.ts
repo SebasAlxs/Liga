@@ -98,9 +98,16 @@ export class PrismaMatchRepository implements MatchRepository {
         );
     }
 
-    async findAll(pagination?: PaginationParams): Promise<PaginatedResult<Match>> {
+    async findAll(pagination?: PaginationParams, filters?: { managerId?: string }): Promise<PaginatedResult<Match>> {
+        const where = filters?.managerId ? { 
+            OR: [
+                { homeTeam: { managerId: filters.managerId } },
+                { awayTeam: { managerId: filters.managerId } }
+            ]
+        } : {};
         const [matches, total] = await Promise.all([
             this.prisma.match.findMany({
+                where,
                 skip: pagination?.skip,
                 take: pagination?.take,
                 orderBy: { matchDate: "desc" },
@@ -111,7 +118,7 @@ export class PrismaMatchRepository implements MatchRepository {
                     fourthReferee: true
                 }
             }),
-            this.prisma.match.count(),
+            this.prisma.match.count({ where }),
         ]);
         return {
             items: matches.map(

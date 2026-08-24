@@ -16,7 +16,7 @@ import { UserHandlers } from "./infrastructure/handlers/User/src";
 import { ModuleAccessHandlers } from "./infrastructure/handlers/ModuleAccess/src";
 import { LeagueRulesHandlers } from "./infrastructure/handlers/LeagueRules/src";
 import { LeagueRuleItemHandlers } from "./infrastructure/handlers/LeagueRuleItem/src";
-import { verifyToken, hasRole } from "./infrastructure/middlewares/auth.middleware";
+import { verifyToken, hasRole, optionalAuth } from "./infrastructure/middlewares/auth.middleware";
 import { globalErrorHandler } from "./infrastructure/middlewares/error.middleware";
 import { validateRequest } from "./infrastructure/middlewares/validate.middleware";
 import { AuthValidator } from "./adapters/http/validators/AuthValidator";
@@ -51,6 +51,7 @@ app.use(compression());
 const adminOnly = [verifyToken, hasRole(["SUPERADMIN", "ADMIN"])];
 const superAdminOnly = [verifyToken, hasRole(["SUPERADMIN"])];
 const teamManagers = [verifyToken, hasRole(["SUPERADMIN", "ADMIN", "DIRIGENTE"])];
+const superAdminAndDirigente = [verifyToken, hasRole(["SUPERADMIN", "DIRIGENTE"])];
 const vocalOrAdmin = [verifyToken, hasRole(["VOCAL", "SUPERADMIN", "ADMIN"])];
 
 // Routes using functional handlers (Cluster Pattern)
@@ -80,15 +81,15 @@ router.get("/module-access/me", verifyToken, ModuleAccessHandlers.getMyModules);
 router.get("/module-access", ...superAdminOnly, ModuleAccessHandlers.getAllModuleAccess);
 router.put("/module-access", ...superAdminOnly, ModuleAccessHandlers.updateModuleAccess);
 
-// Team Routes (GET Public, Create/Edit: Admin/Dirigente, Delete: Admin)
-router.get("/teams", TeamHandlers.getAllTeams);
+// Team Routes (GET Public, Create/Edit: SuperAdmin/Dirigente, Delete: SuperAdmin)
+router.get("/teams", optionalAuth, TeamHandlers.getAllTeams);
 router.get("/teams/:id", TeamHandlers.getTeam);
-router.post("/teams", ...teamManagers, validateRequest(TeamValidator.create), TeamHandlers.createTeam);
-router.put("/teams/:id", ...teamManagers, validateRequest(TeamValidator.update), TeamHandlers.updateTeam);
-router.delete("/teams/:id", ...adminOnly, TeamHandlers.deleteTeam);
+router.post("/teams", ...superAdminAndDirigente, validateRequest(TeamValidator.create), TeamHandlers.createTeam);
+router.put("/teams/:id", ...superAdminAndDirigente, validateRequest(TeamValidator.update), TeamHandlers.updateTeam);
+router.delete("/teams/:id", ...superAdminOnly, TeamHandlers.deleteTeam);
 
 // Player Routes (GET Public, Create/Edit: Admin/Dirigente, Delete: Admin)
-router.get("/players", PlayerHandlers.getAllPlayers);
+router.get("/players", optionalAuth, PlayerHandlers.getAllPlayers);
 router.get("/players/team/:teamId", PlayerHandlers.getPlayersByTeam);
 router.get("/players/:id", PlayerHandlers.getPlayer);
 router.post("/players", ...teamManagers, validateRequest(PlayerValidator.create), PlayerHandlers.createPlayer);
@@ -96,7 +97,7 @@ router.put("/players/:id", ...teamManagers, validateRequest(PlayerValidator.upda
 router.delete("/players/:id", ...adminOnly, PlayerHandlers.deletePlayer);
 
 // Match Routes (GET Public, Modify Vocal/Admin)
-router.get("/matches", MatchHandlers.getAllMatches);
+router.get("/matches", optionalAuth, MatchHandlers.getAllMatches);
 router.get("/matches/:id", MatchHandlers.getMatch);
 router.post("/matches", ...adminOnly, MatchHandlers.createMatch);
 router.put("/matches/:id", ...vocalOrAdmin, MatchHandlers.updateMatch);
@@ -141,6 +142,12 @@ router.delete("/match-lineups/:id", ...vocalOrAdmin, MatchLineupHandlers.deleteP
 
 // Suspensions Routes
 router.get("/suspensions", SuspensionHandlers.getPlayerSuspensions);
+
+// Fines Routes
+import fineRoutes from "./infrastructure/http/routes/fineRoutes";
+import fineTypeRoutes from "./infrastructure/http/routes/fineTypeRoutes";
+router.use("/fines", optionalAuth, fineRoutes);
+router.use("/fine-types", optionalAuth, fineTypeRoutes);
 
 // Stats Routes (Public)
 router.get("/stats/top-scorers/:tournamentId", MatchEventHandlers.getTopScorers);

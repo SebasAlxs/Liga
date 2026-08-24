@@ -66,9 +66,8 @@
         </div>
       </div>
 
-      <!-- Quick Links -->
       <div class="mt-8 flex justify-center gap-6">
-        <NuxtLink to="/vocalia" class="text-xs font-black text-content-muted hover:text-content transition-colors uppercase tracking-widest flex items-center gap-2 group">
+        <NuxtLink to="/" class="text-xs font-black text-content-muted hover:text-content transition-colors uppercase tracking-widest flex items-center gap-2 group">
           <Icon name="lucide:eye" class="w-4 h-4 group-hover:scale-110 transition-transform" />
           Ver como Público
         </NuxtLink>
@@ -97,7 +96,7 @@ async function handleLogin() {
   try {
     const res = await authStore.login({ email: form.email, password: form.password })
     if (res.success) {
-      navigateTo('/vocalia')
+      navigateTo('/')
     } else {
       error.value = res.message
     }

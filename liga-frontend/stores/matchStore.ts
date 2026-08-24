@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { $api, useApi } from '~/composables/useApi'
+import { useAuthStore } from './auth'
 
 export type MatchStatus = 'SCHEDULED' | 'IN_PROGRESS' | 'FINISHED' | 'CANCELLED'
 
@@ -54,10 +55,13 @@ export const useMatchStore = defineStore('match', () => {
   }
 
   // ── Matches ──────────────────────────────────────────
-  async function fetchMatches() {
+  async function fetchMatches(managedByMe = false) {
+    const authStore = useAuthStore()
+    const isManaged = managedByMe || authStore.isDirigente
     loading.value = true
     try {
-      const res: any = await $api('/matches')
+      const url = isManaged ? '/matches?managedByMe=true' : '/matches'
+      const res: any = await $api(url)
       matches.value = (res?.data || []).map(normalize)
     } catch (err) {
       console.error('Failed to fetch matches:', err)

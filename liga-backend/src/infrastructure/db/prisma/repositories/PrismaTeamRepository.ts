@@ -16,6 +16,7 @@ export class PrismaTeamRepository implements TeamRepository {
                 championshipsWon: team.championshipsWon,
                 categoryId: team.categoryId,
                 tournamentId: team.tournamentId,
+                managerId: team.managerId,
             },
         });
 
@@ -36,7 +37,8 @@ export class PrismaTeamRepository implements TeamRepository {
             created.goalsAgainst,
             created.goalDifference,
             created.createdAt,
-            created.updatedAt
+            created.updatedAt,
+            created.managerId || undefined
         );
     }
 
@@ -60,7 +62,8 @@ export class PrismaTeamRepository implements TeamRepository {
             team.goalsAgainst,
             team.goalDifference,
             team.createdAt,
-            team.updatedAt
+            team.updatedAt,
+            team.managerId || undefined
         );
     }
 
@@ -84,20 +87,22 @@ export class PrismaTeamRepository implements TeamRepository {
             team.goalsAgainst,
             team.goalDifference,
             team.createdAt,
-            team.updatedAt
+            team.updatedAt,
+            team.managerId || undefined
         );
     }
 
-    async findAll(pagination?: PaginationParams): Promise<PaginatedResult<Team>> {
+    async findAll(pagination?: PaginationParams, filters?: { managerId?: string }): Promise<PaginatedResult<Team>> {
+        const where = filters?.managerId ? { managerId: filters.managerId } : {};
         const [teams, total] = await Promise.all([
-            this.prisma.team.findMany({ skip: pagination?.skip, take: pagination?.take }),
-            this.prisma.team.count(),
+            this.prisma.team.findMany({ where, skip: pagination?.skip, take: pagination?.take }),
+            this.prisma.team.count({ where }),
         ]);
         return {
             items: teams.map(
                 (t) => new Team(
                     t.id, t.name, t.logo, t.foundedYear, t.championshipsWon ?? undefined, t.categoryId ?? undefined, t.tournamentId ?? undefined,
-                    t.points, t.matchesPlayed, t.matchesWon, t.matchesDrawn, t.matchesLost, t.goalsFor, t.goalsAgainst, t.goalDifference, t.createdAt, t.updatedAt
+                    t.points, t.matchesPlayed, t.matchesWon, t.matchesDrawn, t.matchesLost, t.goalsFor, t.goalsAgainst, t.goalDifference, t.createdAt, t.updatedAt, t.managerId || undefined
                 )
             ),
             total,
@@ -118,8 +123,8 @@ export class PrismaTeamRepository implements TeamRepository {
         return teams.map(
             (t) => new Team(
                 t.id, t.name, t.logo, t.foundedYear, t.championshipsWon ?? undefined, t.categoryId ?? undefined, t.tournamentId ?? undefined,
-                t.points, t.matchesPlayed, t.matchesWon, t.matchesDrawn, t.matchesLost, t.goalsFor, t.goalsAgainst, t.goalDifference, t.createdAt, t.updatedAt
-            )
+                t.points, t.matchesPlayed, t.matchesWon, t.matchesDrawn, t.matchesLost, t.goalsFor, t.goalsAgainst, t.goalDifference, t.createdAt, t.updatedAt, t.managerId || undefined
+                )
         );
     }
 
@@ -133,6 +138,7 @@ export class PrismaTeamRepository implements TeamRepository {
                 championshipsWon: team.championshipsWon,
                 categoryId: team.categoryId,
                 tournamentId: team.tournamentId,
+                managerId: team.managerId,
                 points: team.points,
                 matchesPlayed: team.matchesPlayed,
                 matchesWon: team.matchesWon,
@@ -160,7 +166,8 @@ export class PrismaTeamRepository implements TeamRepository {
             updated.goalsAgainst,
             updated.goalDifference,
             updated.createdAt,
-            updated.updatedAt
+            updated.updatedAt,
+            updated.managerId || undefined
         );
     }
 

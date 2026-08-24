@@ -18,6 +18,7 @@ export const MODULE_CATALOG: ModuleCatalogItem[] = [
   { key: 'standings', label: 'Posiciones', icon: 'lucide:list-ordered', link: '/standings' },
   { key: 'vocalia', label: 'Vocalía', icon: 'lucide:clipboard-list', link: '/vocalia' },
   { key: 'scoring', label: 'Marcador en Vivo', icon: 'lucide:zap', link: '/scoring' },
+  { key: 'fines', label: 'Obligaciones', icon: 'lucide:receipt', link: '/fines' },
   { key: 'tournaments', label: 'Torneos', icon: 'lucide:trophy', link: '/tournaments' },
   { key: 'venues', label: 'Sedes', icon: 'lucide:map-pin', link: '/venues' },
   { key: 'settings', label: 'Configuración', icon: 'lucide:settings-2', link: '/settings' },
@@ -60,8 +61,8 @@ export const useModuleAccessStore = defineStore('moduleAccess', () => {
   }
 
   function isVisible(moduleKey: string) {
-    // Mientras no haya cargado, no ocultar nada para evitar parpadeo/menú vacío
-    if (!loaded.value) return true
+    // Mientras no haya cargado, no mostrar nada para evitar que el usuario haga clic en rutas protegidas
+    if (!loaded.value) return false
     return myModules.value.includes(moduleKey)
   }
 

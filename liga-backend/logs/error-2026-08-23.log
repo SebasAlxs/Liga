@@ -1,0 +1,1 @@
+[2026-08-23 21:20:50] ERROR: [Global Error] POST /api/players: Cannot read properties of undefined (reading 'forEach')

@@ -5,8 +5,8 @@ import { PaginationParams } from "../../../domain/repositories/Pagination";
 export class GetAllMatchesUseCase {
     constructor(private matchRepository: MatchRepository) { }
 
-    async execute(pagination?: PaginationParams): Promise<{ items: MatchResponse[]; total: number }> {
-        const { items: matches, total } = await this.matchRepository.findAll(pagination);
+    async execute(pagination?: PaginationParams, managerId?: string): Promise<{ items: MatchResponse[]; total: number }> {
+        const { items: matches, total } = await this.matchRepository.findAll(pagination, { managerId });
         const items = matches.map(m => {
             return {
                 _id: m.id,

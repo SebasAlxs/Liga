@@ -9,7 +9,12 @@ export const handler = async (req: Request, res: Response) => {
         const useCase = new GetAllPlayersUseCase(repo);
         const includePicture = req.query.includePicture === 'true';
         const { skip, take, page, limit } = parsePagination(req.query);
-        const { items, total } = await useCase.execute(includePicture, { skip, take });
+        const managedByMe = req.query.managedByMe === 'true';
+        let managerIdFilter = undefined;
+        if (managedByMe && (req as any).user && (req as any).user.role === 'DIRIGENTE') {
+            managerIdFilter = (req as any).user.id;
+        }
+        const { items, total } = await useCase.execute(includePicture, { skip, take }, managerIdFilter);
         return successResponse(res, items, 200, "Consulta exitosa.", buildPagination(total, page, limit));
     } catch (error: any) {
         return handleErrorResponse(res, error);

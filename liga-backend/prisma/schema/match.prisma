@@ -1,9 +1,9 @@
 model Match {
-  id           String        @id @default(uuid())
-  homeTeamId   String
-  awayTeamId   String
-  homeScore    Int?          @default(0)
-  awayScore    Int?          @default(0)
+  id                  String        @id @default(uuid())
+  homeTeamId          String
+  awayTeamId          String
+  homeScore           Int?          @default(0)
+  awayScore           Int?          @default(0)
   matchDate           DateTime
   status              MatchStatus   @default(SCHEDULED)
   firstHalfStartedAt  DateTime?
@@ -13,24 +13,25 @@ model Match {
   categoryId          String
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
-  awayTeam     Team          @relation("AwayMatches", fields: [awayTeamId], references: [id])
-  category     Category      @relation(fields: [categoryId], references: [id])
-  homeTeam     Team          @relation("HomeMatches", fields: [homeTeamId], references: [id])
-  tournament   Tournament    @relation(fields: [tournamentId], references: [id])
-  events       MatchEvent[]
-  lineup       MatchLineup[]
-  suspensions  Suspension[]
+  awayTeam            Team          @relation("AwayMatches", fields: [awayTeamId], references: [id])
+  category            Category      @relation(fields: [categoryId], references: [id])
+  homeTeam            Team          @relation("HomeMatches", fields: [homeTeamId], references: [id])
+  tournament          Tournament    @relation(fields: [tournamentId], references: [id])
+  events              MatchEvent[]
+  lineup              MatchLineup[]
+  suspensions         Suspension[]
+  fines               Fine[]
 
   // Referees
   refereeId       String?
   assistant1Id    String?
   assistant2Id    String?
   fourthRefereeId String?
-  
-  primaryReferee   Referee? @relation("PrimaryReferee", fields: [refereeId], references: [id])
-  assistant1       Referee? @relation("Assistant1", fields: [assistant1Id], references: [id])
-  assistant2       Referee? @relation("Assistant2", fields: [assistant2Id], references: [id])
-  fourthReferee    Referee? @relation("FourthReferee", fields: [fourthRefereeId], references: [id])
+
+  primaryReferee Referee? @relation("PrimaryReferee", fields: [refereeId], references: [id])
+  assistant1     Referee? @relation("Assistant1", fields: [assistant1Id], references: [id])
+  assistant2     Referee? @relation("Assistant2", fields: [assistant2Id], references: [id])
+  fourthReferee  Referee? @relation("FourthReferee", fields: [fourthRefereeId], references: [id])
 
   @@index([homeTeamId])
   @@index([awayTeamId])

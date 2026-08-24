@@ -31,6 +31,25 @@ export const verifyToken = (
   }
 };
 
+export const optionalAuth = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.split(" ")[1];
+    try {
+      const secret = process.env.JWT_SECRET || "supersecretkey";
+      const decoded = jwt.verify(token, secret);
+      req.user = decoded;
+    } catch (error) {
+      // Ignorar errores de token en rutas opcionales
+    }
+  }
+  next();
+};
+
 export const hasRole = (roles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user || !roles.includes(req.user.role)) {

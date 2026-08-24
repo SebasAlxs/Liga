@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/Users/alexis/Documents/Magdata/Liga/liga-backend/logs/.bbd6f2c4275c9bad9fe87e6d580088b65f0825f7-audit.json",
+    "files": [
+        {
+            "date": 1787521089840,
+            "name": "/Users/alexis/Documents/Magdata/Liga/liga-backend/logs/error-2026-08-23.log",
+            "hash": "ff95755f94ae37d9b3167bb7feb3e583612d7f958dcfd429ec0f5c8dc4ac6984"
+        }
+    ],
+    "hashType": "sha256"
+}

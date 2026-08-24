@@ -1,3 +1,4 @@
+import { DomainError } from "../../../domain/exceptions/DomainError";
 import { NotFoundError } from "../../../domain/exceptions/NotFoundError";
 import { TeamResponse, UpdateTeamRequest } from "../../../adapters/http/dto/TeamResponse";
 import { TeamRepository } from "../../../domain/repositories/TeamRepository";
@@ -5,10 +6,20 @@ import { TeamRepository } from "../../../domain/repositories/TeamRepository";
 export class UpdateTeamUseCase {
     constructor(private teamRepository: TeamRepository) { }
 
-    async execute(id: string, request: UpdateTeamRequest): Promise<TeamResponse> {
+    async execute(id: string, request: UpdateTeamRequest, user?: { id: string, role: string }): Promise<TeamResponse> {
         const existingTeam = await this.teamRepository.findById(id);
         if (!existingTeam) {
             throw new NotFoundError("Team not found");
+        }
+
+        if (user) {
+            if (user.role === 'DIRIGENTE') {
+                if (existingTeam.managerId !== user.id) {
+                    throw new DomainError("No tienes permisos para editar este equipo.");
+                }
+            } else if (user.role !== 'SUPERADMIN') {
+                throw new DomainError("Solo el SUPERADMIN o el dirigente dueño pueden editar equipos.");
+            }
         }
 
         if (request.name) existingTeam.name = request.name;
@@ -37,7 +48,8 @@ export class UpdateTeamUseCase {
             goalsAgainst: updated.goalsAgainst,
             goalDifference: updated.goalDifference,
             createdAt: updated.createdAt?.toISOString() || new Date().toISOString(),
-            updatedAt: updated.updatedAt?.toISOString() || new Date().toISOString()
+            updatedAt: updated.updatedAt?.toISOString() || new Date().toISOString(),
+            managerId: updated.managerId
         };
     }
 }

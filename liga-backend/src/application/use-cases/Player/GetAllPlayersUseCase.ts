@@ -5,8 +5,8 @@ import { PaginationParams } from "../../../domain/repositories/Pagination";
 export class GetAllPlayersUseCase {
     constructor(private playerRepository: PlayerRepository) { }
 
-    async execute(includePicture: boolean = false, pagination?: PaginationParams): Promise<{ items: PlayerResponse[]; total: number }> {
-        const { items: players, total } = await this.playerRepository.findAll(pagination, { includePicture });
+    async execute(includePicture: boolean = false, pagination?: PaginationParams, managerId?: string): Promise<{ items: PlayerResponse[]; total: number }> {
+        const { items: players, total } = await this.playerRepository.findAll(pagination, { includePicture, managerId });
         const items = players.map(p => {
             return {
                 _id: p.id,

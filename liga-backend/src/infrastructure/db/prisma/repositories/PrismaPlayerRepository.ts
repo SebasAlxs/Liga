@@ -72,9 +72,11 @@ export class PrismaPlayerRepository implements PlayerRepository {
         );
     }
 
-    async findAll(pagination?: PaginationParams, options?: { includePicture?: boolean }): Promise<PaginatedResult<Player>> {
+    async findAll(pagination?: PaginationParams, options?: { includePicture?: boolean; managerId?: string }): Promise<PaginatedResult<Player>> {
+        const where = options?.managerId ? { team: { managerId: options.managerId } } : {};
         const [players, total] = await Promise.all([
             this.prisma.player.findMany({
+                where,
                 skip: pagination?.skip,
                 take: pagination?.take,
                 select: {
@@ -85,7 +87,7 @@ export class PrismaPlayerRepository implements PlayerRepository {
                     picture: options?.includePicture ? true : false,
                 },
             }),
-            this.prisma.player.count(),
+            this.prisma.player.count({ where }),
         ]);
         return {
             items: players.map(

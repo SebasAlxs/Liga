@@ -15,8 +15,9 @@ export class Team {
     public goalsFor: number = 0,
     public goalsAgainst: number = 0,
     public goalDifference: number = 0,
-        public createdAt?: Date,
-        public updatedAt?: Date) {
+    public createdAt?: Date,
+    public updatedAt?: Date,
+    public managerId?: string) {
     this.validate();
   }
 

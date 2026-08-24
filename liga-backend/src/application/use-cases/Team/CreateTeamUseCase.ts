@@ -14,7 +14,11 @@ export class CreateTeamUseCase {
             request.foundedYear,
             request.championshipsWon,
             request.categoryId,
-            request.tournamentId
+            request.tournamentId,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            undefined,
+            undefined,
+            request.managerId
         );
 
         const created = await this.teamRepository.create(team);
@@ -36,7 +40,8 @@ export class CreateTeamUseCase {
             goalsAgainst: created.goalsAgainst,
             goalDifference: created.goalDifference,
             createdAt: created.createdAt?.toISOString() || new Date().toISOString(),
-            updatedAt: created.updatedAt?.toISOString() || new Date().toISOString()
+            updatedAt: created.updatedAt?.toISOString() || new Date().toISOString(),
+            managerId: created.managerId
         };
     }
 }

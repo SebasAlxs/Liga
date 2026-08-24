@@ -151,7 +151,7 @@
 
               <!-- Age -->
               <td class="px-6 py-4 hidden lg:table-cell">
-                <span class="text-sm text-content-muted">{{ player.birthDate ? calculateAge(player.birthDate) + ' años' : '—' }}</span>
+                <span class="text-sm text-content-muted">{{ (player.dateOfBirth || player.birthDate) ? calculateAge(player.dateOfBirth || player.birthDate) + ' años' : '—' }}</span>
               </td>
 
               <!-- Local/Foráneo -->
@@ -227,6 +227,30 @@
             </div>
           </div>
 
+          <!-- Cédula / DNI como primer campo principal -->
+          <div>
+            <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-2">Cédula / DNI</label>
+            <div class="relative">
+              <Icon name="lucide:id-card" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-content-muted" />
+              <input
+                v-model="form.dni"
+                @input="handleDniInput"
+                type="text"
+                maxlength="10"
+                :class="['w-full bg-surface border rounded-xl pl-12 pr-12 py-4 text-content focus:outline-none transition-all font-mono text-lg font-bold shadow-sm', 
+                  cedulaError ? 'border-rose-500/50 focus:border-rose-500' : 
+                  cedulaSuccess ? 'border-emerald-500/50 focus:border-emerald-500' : 
+                  'border-border/10 focus:border-primary'
+                ]"
+                placeholder="Ingresa los 10 dígitos..."
+              >
+              <Icon v-if="loadingDni" name="lucide:loader-2" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary animate-spin" />
+              <Icon v-else-if="cedulaSuccess" name="lucide:check-circle-2" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-500" />
+              <Icon v-else-if="cedulaError" name="lucide:alert-circle" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-rose-500" />
+            </div>
+            <p class="text-[10px] text-content-muted mt-2 ml-1">Ingresa la cédula para autocompletar los datos.</p>
+          </div>
+
           <!-- Nombre y Apellido -->
           <div class="grid grid-cols-2 gap-4">
             <div>
@@ -251,7 +275,7 @@
             </div>
           </div>
 
-          <!-- Dorsal y Cédula -->
+          <!-- Dorsal y Fecha de Nacimiento -->
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-2">Dorsal #</label>
@@ -266,18 +290,21 @@
               >
             </div>
             <div>
-              <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-2">Cédula / DNI</label>
+              <div class="flex justify-between items-center mb-2">
+                <label class="block text-xs font-bold text-content-muted uppercase tracking-widest">Nacimiento</label>
+                <span v-if="form.birthDate" class="text-xs font-bold text-primary">{{ calculateAge(form.birthDate) }} años</span>
+              </div>
               <input
-                v-model="form.dni"
-                type="text"
+                v-model="form.birthDate"
+                type="date"
+                required
                 class="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-content focus:outline-none focus:border-primary transition-all font-mono"
-                placeholder="Opcional"
               >
             </div>
           </div>
 
           <!-- Equipo -->
-          <div>
+          <div v-if="!authStore.isDirigente">
             <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-2">Equipo</label>
             <select
               v-model="form.teamId"
@@ -289,16 +316,6 @@
                 {{ team.name }}
               </option>
             </select>
-          </div>
-
-          <!-- Fecha de Nacimiento -->
-          <div>
-            <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-2">Fecha de Nacimiento</label>
-            <input
-              v-model="form.birthDate"
-              type="date"
-              class="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-content focus:outline-none focus:border-primary transition-all"
-            >
           </div>
 
           <!-- Tipo de Jugador -->
@@ -356,9 +373,13 @@ const teamStore = useTeamStore()
 // State
 const searchQuery = ref('')
 const selectedTeamId = ref('')
+const managedByMe = ref(true)
 const showModal = ref(false)
 const isEditing = ref(false)
 const loading = ref(false)
+const loadingDni = ref(false)
+const cedulaSuccess = ref(false)
+const cedulaError = ref(false)
 const notification = ref(null)
 const editingId = ref(null)
 
@@ -405,25 +426,80 @@ function calculateAge(birthDate) {
 // Hooks
 onMounted(async () => {
   await Promise.all([
-    playerStore.fetchPlayers(),
-    teamStore.fetchTeams()
+    playerStore.fetchPlayers(false, managedByMe.value),
+    teamStore.fetchTeams(false, managedByMe.value)
   ])
 })
 
 // Methods
+async function toggleManagedByMe() {
+  managedByMe.value = !managedByMe.value
+  await Promise.all([
+    playerStore.fetchPlayers(true, managedByMe.value),
+    teamStore.fetchTeams(true, managedByMe.value)
+  ])
+}
 function notify(message, type = 'success') {
   notification.value = { message, type }
   setTimeout(() => notification.value = null, 3500)
 }
 
+async function handleDniInput() {
+  cedulaSuccess.value = false
+  cedulaError.value = false
+  if (form.value.dni && form.value.dni.length === 10) {
+    await fetchCedulaData(form.value.dni)
+  }
+}
+
+async function fetchCedulaData(dni) {
+  loadingDni.value = true
+  cedulaSuccess.value = false
+  cedulaError.value = false
+  try {
+    const data = await $fetch('/api/cedula', { query: { dni } })
+    if (data && data.nombres && data.apellidos) {
+      form.value.firstName = data.nombres
+      form.value.lastName = data.apellidos
+      
+      const rawDate = data.fechaNacimiento || data.fecha_nacimiento || data.fecha_de_nacimiento
+      if (rawDate) {
+        let parsedDate = rawDate
+        if (rawDate.includes('/')) {
+           const parts = rawDate.split('/')
+           if (parts.length === 3) {
+             const [d, m, y] = parts
+             if (y.length === 4) parsedDate = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`
+           }
+        }
+        form.value.birthDate = parsedDate
+      }
+      
+      cedulaSuccess.value = true
+      notify('Datos cargados exitosamente', 'success')
+    }
+  } catch (error) {
+    cedulaError.value = true
+    const msg = error.response?._data?.statusMessage || 'No se pudo obtener datos de la cédula'
+    notify(msg, 'error')
+  } finally {
+    loadingDni.value = false
+  }
+}
+
 function openAddModal() {
   isEditing.value = false
   editingId.value = null
+  
+  const defaultTeam = authStore.isDirigente && teamStore.teams.length > 0 
+    ? teamStore.teams[0].id 
+    : (selectedTeamId.value || '')
+
   form.value = {
     firstName: '',
     lastName: '',
     number: null,
-    teamId: selectedTeamId.value || '',
+    teamId: defaultTeam,
     dni: '',
     birthDate: '',
     isLocal: true,
@@ -441,7 +517,7 @@ function openEditModal(player) {
     number: player.number,
     teamId: player.teamId,
     dni: player.dni || '',
-    birthDate: player.birthDate ? player.birthDate.split('T')[0] : '',
+    birthDate: (player.dateOfBirth || player.birthDate) ? (player.dateOfBirth || player.birthDate).split('T')[0] : '',
     isLocal: player.isLocal,
     picture: player.picture || ''
   }

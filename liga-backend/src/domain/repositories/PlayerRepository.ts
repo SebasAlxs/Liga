@@ -5,7 +5,7 @@ export interface PlayerRepository {
     create(player: Player): Promise<Player>;
     findById(id: string): Promise<Player | null>;
     findByDni(dni: string): Promise<Player | null>;
-    findAll(pagination?: PaginationParams, options?: { includePicture?: boolean }): Promise<PaginatedResult<Player>>;
+    findAll(pagination?: PaginationParams, options?: { includePicture?: boolean; managerId?: string }): Promise<PaginatedResult<Player>>;
     update(player: Player): Promise<Player>;
     delete(id: string): Promise<void>;
     findByTeamId(teamId: string): Promise<Player[]>;

@@ -24,7 +24,8 @@ export class GetTeamByIdUseCase {
             goalsAgainst: team.goalsAgainst,
             goalDifference: team.goalDifference,
             createdAt: team.createdAt?.toISOString() || new Date().toISOString(),
-            updatedAt: team.updatedAt?.toISOString() || new Date().toISOString()
+            updatedAt: team.updatedAt?.toISOString() || new Date().toISOString(),
+            managerId: team.managerId
         };
     }
 }

@@ -5,6 +5,7 @@ export interface CreateTeamRequest {
     championshipsWon?: number;
     categoryId?: string;
     tournamentId?: string;
+    managerId?: string;
 }
 
 export interface UpdateTeamRequest {
@@ -32,6 +33,7 @@ export interface TeamResponse {
     goalsFor: number;
     goalsAgainst: number;
     goalDifference: number;
-    createdAt: string;
-    updatedAt: string;
+    createdAt?: string;
+    updatedAt?: string;
+    managerId?: string;
 }
