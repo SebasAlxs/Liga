@@ -3,6 +3,7 @@ import { PrismaFineRepository } from '../../db/prisma/repositories/PrismaFineRep
 import { GetFines } from '../../../application/use-cases/fines/GetFines';
 import { CreateFine } from '../../../application/use-cases/fines/CreateFine';
 import { UpdateFine } from '../../../application/use-cases/fines/UpdateFine';
+import { DeleteFine } from '../../../application/use-cases/fines/DeleteFine';
 
 const repository = new PrismaFineRepository();
 
@@ -34,6 +35,17 @@ export class FineController {
       const useCase = new UpdateFine(repository);
       const fine = await useCase.execute(id as string, req.body);
       res.json({ data: fine, status: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message, status: false });
+    }
+  }
+
+  static async delete(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const useCase = new DeleteFine(repository);
+      await useCase.execute(id as string);
+      res.json({ status: true });
     } catch (error: any) {
       res.status(500).json({ error: error.message, status: false });
     }

@@ -68,11 +68,23 @@ export const useFineStore = defineStore('fine', () => {
     }
   }
 
+  async function deleteFine(id: string) {
+    try {
+      await $api(`/fines/${id}`, { method: 'DELETE' })
+      fines.value = fines.value.filter(f => f.id !== id)
+      return { success: true, message: 'Multa eliminada.' }
+    } catch (err: any) {
+      console.error('Failed to delete fine:', err)
+      return { success: false, message: err.data?.message || err.message || 'Error al eliminar la multa.' }
+    }
+  }
+
   return {
     fines,
     loading,
     fetchFines,
     createFine,
-    updateFineStatus
+    updateFineStatus,
+    deleteFine
   }
 })

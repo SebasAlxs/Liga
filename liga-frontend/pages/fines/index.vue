@@ -15,7 +15,7 @@
       </div>
 
       <div v-if="authStore.isSuperAdmin" class="flex gap-2">
-        <button @click="showCatalogModal = true" class="btn-primary bg-indigo-600 hover:bg-indigo-700">
+        <button @click="showCatalogModal = true" class="btn-primary">
           <Icon name="lucide:settings" class="w-4 h-4 mr-2" />
           Configurar Catálogo
         </button>
@@ -174,7 +174,7 @@
                   <Icon name="lucide:x" class="w-4 h-4 mr-1" />
                   Rechazar
                 </button>
-                <button @click="approvePayment(fine.id)" class="btn-primary bg-emerald-600 hover:bg-emerald-700 text-xs flex-1 sm:flex-none justify-center">
+                <button @click="openApproveFineModal(fine)" class="btn-primary bg-emerald-600 hover:bg-emerald-700 text-xs flex-1 sm:flex-none justify-center">
                   <Icon name="lucide:check" class="w-4 h-4 mr-1" />
                   Aprobar
                 </button>
@@ -219,7 +219,8 @@
                 <th class="px-4 py-3">Motivo</th>
                 <th class="px-4 py-3">Jugador</th>
                 <th class="px-4 py-3">Monto</th>
-                <th class="px-4 py-3 rounded-tr-lg">Estado</th>
+                <th class="px-4 py-3">Estado</th>
+                <th class="px-4 py-3 rounded-tr-lg"></th>
               </tr>
             </thead>
             <tbody>
@@ -239,6 +240,16 @@
                   >
                     <option v-for="(label, status) in STATUS_LABELS" :key="status" :value="status">{{ label }}</option>
                   </select>
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <button
+                    @click="openDeleteFineModal(fine)"
+                    :disabled="deletingFineId === fine.id"
+                    class="text-content-muted hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-wait"
+                    title="Eliminar multa"
+                  >
+                    <Icon :name="deletingFineId === fine.id ? 'lucide:loader-2' : 'lucide:trash-2'" :class="['w-4 h-4', deletingFineId === fine.id && 'animate-spin']" />
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -479,6 +490,81 @@
       </div>
     </div>
 
+    <!-- Modal: Eliminar Multa (Admin/SuperAdmin) -->
+    <div v-if="showDeleteFineModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="bg-background w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl">
+        <div class="p-5 border-b border-border flex justify-between items-center">
+          <h2 class="text-lg font-display">Eliminar Multa</h2>
+          <button @click="showDeleteFineModal = false" class="text-content-muted hover:text-content">
+            <Icon name="lucide:x" class="w-5 h-5" />
+          </button>
+        </div>
+
+        <div class="p-5 space-y-3">
+          <div class="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
+            <Icon name="lucide:alert-triangle" class="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+            <div class="text-sm text-content">
+              <p>
+                ¿Eliminar la multa <span class="font-bold">"{{ fineToDelete?.reason }}"</span>
+                de <span class="font-bold">{{ fineToDelete?.team?.name || 'este equipo' }}</span>?
+              </p>
+              <p class="text-xs text-content-muted mt-1">Esta acción no se puede deshacer.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-5 border-t border-border flex gap-3 justify-end bg-secondary/20">
+          <button @click="showDeleteFineModal = false" class="btn-secondary" :disabled="deletingFineId === fineToDelete?.id">Cancelar</button>
+          <button
+            @click="confirmDeleteFine"
+            :disabled="deletingFineId === fineToDelete?.id"
+            class="btn-primary bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-wait"
+          >
+            <Icon :name="deletingFineId === fineToDelete?.id ? 'lucide:loader-2' : 'lucide:trash-2'" :class="['w-4 h-4 mr-2', deletingFineId === fineToDelete?.id && 'animate-spin']" />
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Aprobar Pago (Admin/SuperAdmin) -->
+    <div v-if="showApproveFineModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="bg-background w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl">
+        <div class="p-5 border-b border-border flex justify-between items-center">
+          <h2 class="text-lg font-display">Aprobar Pago</h2>
+          <button @click="showApproveFineModal = false" class="text-content-muted hover:text-content">
+            <Icon name="lucide:x" class="w-5 h-5" />
+          </button>
+        </div>
+
+        <div class="p-5 space-y-3">
+          <div class="flex items-start gap-3 bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+            <Icon name="lucide:check-circle" class="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+            <div class="text-sm text-content">
+              <p>
+                ¿Aprobar el pago de <span class="font-bold">"{{ fineToApprove?.reason }}"</span>
+                de <span class="font-bold">{{ fineToApprove?.team?.name || 'este equipo' }}</span>
+                por <span class="font-bold">{{ formatCurrency(fineToApprove?.amount || 0) }}</span>?
+              </p>
+              <p class="text-xs text-content-muted mt-1">La multa se marcará como pagada.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-5 border-t border-border flex gap-3 justify-end bg-secondary/20">
+          <button @click="showApproveFineModal = false" class="btn-secondary" :disabled="approvingFineId === fineToApprove?.id">Cancelar</button>
+          <button
+            @click="confirmApprovePayment"
+            :disabled="approvingFineId === fineToApprove?.id"
+            class="btn-primary bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-wait"
+          >
+            <Icon :name="approvingFineId === fineToApprove?.id ? 'lucide:loader-2' : 'lucide:check'" :class="['w-4 h-4 mr-2', approvingFineId === fineToApprove?.id && 'animate-spin']" />
+            Aprobar
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -513,6 +599,12 @@ const matchStore = useMatchStore()
 const pageLoading = ref(true)
 const isSubmitting = ref(false)
 const updatingFineId = ref<string | null>(null)
+const deletingFineId = ref<string | null>(null)
+const showDeleteFineModal = ref(false)
+const fineToDelete = ref<Fine | null>(null)
+const showApproveFineModal = ref(false)
+const fineToApprove = ref<Fine | null>(null)
+const approvingFineId = ref<string | null>(null)
 const notification = ref<{ message: string; type: 'success' | 'error' } | null>(null)
 
 // Modals
@@ -651,10 +743,20 @@ async function submitFine() {
   isSubmitting.value = false
 }
 
-async function approvePayment(id: string) {
-  if (!confirm('¿Aprobar pago de esta multa?')) return
+function openApproveFineModal(fine: Fine) {
+  fineToApprove.value = fine
+  showApproveFineModal.value = true
+}
+
+async function confirmApprovePayment() {
+  if (!fineToApprove.value) return
+  const id = fineToApprove.value.id
+  approvingFineId.value = id
   const res = await fineStore.updateFineStatus(id, 'PAID')
   notify(res.message, res.success ? 'success' : 'error')
+  approvingFineId.value = null
+  showApproveFineModal.value = false
+  fineToApprove.value = null
 }
 
 async function rejectPayment(id: string) {
@@ -676,6 +778,22 @@ async function changeFineStatus(fine: Fine, newStatus: Fine['status']) {
   const res = await fineStore.updateFineStatus(fine.id, newStatus)
   notify(res.success ? `Estado actualizado a "${STATUS_LABELS[newStatus]}".` : res.message, res.success ? 'success' : 'error')
   updatingFineId.value = null
+}
+
+function openDeleteFineModal(fine: Fine) {
+  fineToDelete.value = fine
+  showDeleteFineModal.value = true
+}
+
+async function confirmDeleteFine() {
+  if (!fineToDelete.value) return
+  const id = fineToDelete.value.id
+  deletingFineId.value = id
+  const res = await fineStore.deleteFine(id)
+  notify(res.success ? 'Multa eliminada.' : res.message, res.success ? 'success' : 'error')
+  deletingFineId.value = null
+  showDeleteFineModal.value = false
+  fineToDelete.value = null
 }
 
 async function addFineType() {
