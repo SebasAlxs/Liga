@@ -5,6 +5,8 @@ export interface MatchLineupRepository {
     findById(id: string): Promise<MatchLineup | null>;
     findByMatchAndPlayer(matchId: string, playerId: string): Promise<MatchLineup | null>;
     findByMatch(matchId: string): Promise<MatchLineup[]>;
+    findByPlayer(playerId: string): Promise<MatchLineup[]>;
     update(lineup: MatchLineup): Promise<MatchLineup>;
     delete(id: string): Promise<void>;
+    countByPlayer(playerId: string): Promise<number>;
 }

@@ -42,6 +42,16 @@ export const useFineStore = defineStore('fine', () => {
     }
   }
 
+  async function fetchFinesByPlayer(playerId: string): Promise<Fine[]> {
+    try {
+      const res: any = await $api(`/fines?playerId=${playerId}`)
+      return res?.data || []
+    } catch (err) {
+      console.error('Failed to fetch fines by player:', err)
+      return []
+    }
+  }
+
   async function createFine(data: Partial<Fine>) {
     try {
       await $api('/fines', { method: 'POST', body: data })
@@ -83,6 +93,7 @@ export const useFineStore = defineStore('fine', () => {
     fines,
     loading,
     fetchFines,
+    fetchFinesByPlayer,
     createFine,
     updateFineStatus,
     deleteFine

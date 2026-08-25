@@ -15,6 +15,7 @@ export class GetMatchByIdUseCase {
             homeScore: match.homeScore,
             awayScore: match.awayScore,
             matchDate: match.matchDate.toISOString(),
+            round: match.round,
             tournamentId: match.tournamentId,
             categoryId: match.categoryId,
             status: match.status,

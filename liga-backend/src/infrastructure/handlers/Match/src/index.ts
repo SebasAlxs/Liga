@@ -4,6 +4,8 @@ import { handler as getAllMatches } from "./CRUD/GetAllMatches";
 import { handler as getMatch } from "./CRUD/GetMatch";
 import { handler as updateMatch } from "./CRUD/UpdateMatch";
 import { handler as getVocaliaSheetPdf } from "./CRUD/GetVocaliaSheetPdf";
+import { handler as generateFixture } from "./CRUD/GenerateFixture";
+import { handler as getFixturePdf } from "./CRUD/GetFixturePdf";
 
 export const MatchHandlers = {
     createMatch,
@@ -11,5 +13,7 @@ export const MatchHandlers = {
     getAllMatches,
     getMatch,
     updateMatch,
-    getVocaliaSheetPdf
+    getVocaliaSheetPdf,
+    generateFixture,
+    getFixturePdf
 };

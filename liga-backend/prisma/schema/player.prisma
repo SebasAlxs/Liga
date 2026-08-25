@@ -15,6 +15,7 @@ model Player {
   team        Team          @relation(fields: [teamId], references: [id], onDelete: Cascade)
   suspensions Suspension[]
   fines       Fine[]
+  teamHistory PlayerTeamHistory[]
 
   @@unique([teamId, number])
   @@index([teamId])

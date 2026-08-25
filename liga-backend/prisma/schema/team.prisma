@@ -23,6 +23,7 @@ model Team {
   lineup           MatchLineup[]
   players          Player[]
   fines            Fine[]        @relation("TeamFines")
+  playerHistory    PlayerTeamHistory[]
   category         Category?     @relation(fields: [categoryId], references: [id])
   tournament       Tournament?   @relation(fields: [tournamentId], references: [id])
   manager          User?         @relation(fields: [managerId], references: [id])

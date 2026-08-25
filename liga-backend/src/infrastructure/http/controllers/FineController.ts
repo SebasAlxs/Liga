@@ -18,9 +18,9 @@ const tournamentRepository = new PrismaTournamentRepository();
 export class FineController {
   static async getAll(req: Request, res: Response) {
     try {
-      const { teamId, status } = req.query;
+      const { teamId, status, playerId } = req.query;
       const useCase = new GetFines(repository);
-      const fines = await useCase.execute({ teamId: teamId as string, status: status as string });
+      const fines = await useCase.execute({ teamId: teamId as string, status: status as string, playerId: playerId as string });
       res.json({ data: fines, status: true });
     } catch (error: any) {
       res.status(500).json({ error: error.message, status: false });

@@ -5,12 +5,14 @@ import { Player } from "../../../domain/entities/Player";
 import { PlayerRepository } from "../../../domain/repositories/PlayerRepository";
 import { TeamRepository } from "../../../domain/repositories/TeamRepository";
 import { CategoryRepository } from "../../../domain/repositories/CategoryRepository";
+import { PlayerTeamHistoryRepository } from "../../../domain/repositories/PlayerTeamHistoryRepository";
 
 export class CreatePlayerUseCase {
     constructor(
         private playerRepository: PlayerRepository,
         private teamRepository: TeamRepository,
-        private categoryRepository: CategoryRepository
+        private categoryRepository: CategoryRepository,
+        private teamHistoryRepository: PlayerTeamHistoryRepository
     ) { }
 
     private calculateAge(birthDate: Date): number {
@@ -64,6 +66,7 @@ export class CreatePlayerUseCase {
         );
 
         const created = await this.playerRepository.create(player);
+        await this.teamHistoryRepository.create(created.id, created.teamId, created.createdAt);
 
         return {
             _id: created.id,

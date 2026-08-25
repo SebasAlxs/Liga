@@ -32,6 +32,7 @@ export class CreateMatchUseCase {
             homeScore: created.homeScore,
             awayScore: created.awayScore,
             matchDate: created.matchDate.toISOString(),
+            round: created.round,
             tournamentId: created.tournamentId,
             categoryId: created.categoryId,
             status: created.status,

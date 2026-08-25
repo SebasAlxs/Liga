@@ -104,7 +104,7 @@
             <Icon name="lucide:bar-chart-3" class="w-5 h-5 text-primary" /> Rendimiento en la Liga
           </h3>
           
-          <div class="grid grid-cols-3 gap-4 mb-8">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
              <div class="p-6 rounded-[2rem] border border-primary/20 bg-primary/5 text-center transition-transform hover:scale-105">
                  <div class="text-3xl mb-2">⚽</div>
                  <div class="text-4xl font-black text-content tabular-nums tracking-tighter">{{ player.stats?.goals || 0 }}</div>
@@ -120,34 +120,110 @@
                  <div class="text-4xl font-black text-content tabular-nums tracking-tighter">{{ player.stats?.redCards || 0 }}</div>
                  <div class="text-[10px] font-bold text-rose-500 uppercase tracking-widest mt-1">Rojas</div>
              </div>
+             <div class="p-6 rounded-[2rem] border border-sky-500/20 bg-sky-500/5 text-center transition-transform hover:scale-105">
+                 <div class="text-3xl mb-2">🏟️</div>
+                 <div class="text-4xl font-black text-content tabular-nums tracking-tighter">{{ player.stats?.matchesPlayed || 0 }}</div>
+                 <div class="text-[10px] font-bold text-sky-500 uppercase tracking-widest mt-1">Partidos</div>
+             </div>
           </div>
 
-          <!-- TODO: datos quemados temporalmente en el front, pendiente de conectar al backend.
-               Agrupados por categoría para poder quitar/ajustar campos según feedback. -->
-          <div class="space-y-6">
-            <div v-for="group in statGroups" :key="group.title">
-              <h4 class="text-xs font-bold text-content-muted uppercase tracking-widest mb-3 flex items-center gap-2">
-                <Icon :name="group.icon" class="w-4 h-4 text-primary" /> {{ group.title }}
-              </h4>
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div
-                  v-for="stat in group.stats"
-                  :key="stat.label"
-                  class="p-4 rounded-2xl border border-border/5 bg-surface/2 text-center"
-                >
-                  <div class="text-2xl font-black text-content tabular-nums tracking-tighter">{{ stat.value }}</div>
-                  <div class="text-[10px] font-bold text-content-muted uppercase tracking-widest mt-1">{{ stat.label }}</div>
-                </div>
+          <h4 class="text-sm font-bold text-content-muted uppercase tracking-widest mb-4 flex items-center gap-2">
+            <Icon name="lucide:history" class="w-4 h-4 text-primary" /> Historial de Partidos
+          </h4>
+
+          <div v-if="matchHistory.length" class="space-y-3">
+            <div v-for="m in matchHistory" :key="m.matchId"
+                 class="p-4 rounded-2xl border border-border/5 bg-surface/2 flex items-center gap-4">
+              <div class="w-16 shrink-0 text-center">
+                <p class="text-xs font-bold text-content-muted">{{ formatDate(m.matchDate) }}</p>
+                <span v-if="m.result" class="inline-block mt-1 px-2 py-0.5 rounded-md text-[10px] font-black"
+                      :class="{
+                        'bg-primary/10 text-emerald-400': m.result === 'W',
+                        'bg-amber-500/10 text-amber-400': m.result === 'D',
+                        'bg-rose-500/10 text-rose-400': m.result === 'L',
+                      }">
+                  {{ m.result === 'W' ? 'Ganó' : m.result === 'D' ? 'Empató' : 'Perdió' }}
+                </span>
+              </div>
+
+              <div class="flex-1 min-w-0 flex items-center justify-center gap-3 text-sm font-bold text-content">
+                <span class="truncate text-right flex-1" :class="{ 'text-emerald-400': m.isHome }">{{ m.homeTeamName }}</span>
+                <span class="shrink-0 tabular-nums px-2 py-1 rounded-lg bg-surface/5">
+                  {{ m.homeScore ?? '-' }} : {{ m.awayScore ?? '-' }}
+                </span>
+                <span class="truncate flex-1" :class="{ 'text-emerald-400': !m.isHome }">{{ m.awayTeamName }}</span>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0 text-xs text-content-muted">
+                <span v-if="m.goals" class="flex items-center gap-1">⚽ {{ m.goals }}</span>
+                <span v-if="m.yellowCards" class="flex items-center gap-1">🟨 {{ m.yellowCards }}</span>
+                <span v-if="m.redCards" class="flex items-center gap-1">🟥 {{ m.redCards }}</span>
               </div>
             </div>
           </div>
 
-          <!-- Actividad Reciente -> Podriamos en el futuro mostrar historial de partidos, pero por ahora mostramos un mensaje placeholder elegante -->
-          <div class="p-8 mt-6 rounded-3xl border border-dashed border-border/10 text-center bg-surface/2">
+          <div v-else class="p-8 mt-2 rounded-3xl border border-dashed border-border/10 text-center bg-surface/2">
             <Icon name="lucide:history" class="w-10 h-10 text-content-muted mx-auto mb-3" />
-            <h4 class="text-content font-bold mb-1">Historial de Partidos</h4>
-            <p class="text-xs text-content-muted">Pronto podrás ver el detalle de los partidos donde el jugador ha participado.</p>
+            <h4 class="text-content font-bold mb-1">Sin partidos registrados</h4>
+            <p class="text-xs text-content-muted">Este jugador todavía no ha participado en ningún partido.</p>
           </div>
+        </div>
+
+        <!-- Sanciones y Multas -->
+        <div v-if="activeSuspension || playerFines.length" class="glass-card p-8 rounded-3xl border border-border/5">
+          <h3 class="text-xl font-bold text-content mb-6 flex items-center gap-2">
+            <Icon name="lucide:shield-alert" class="w-5 h-5 text-primary" /> Sanciones y Multas
+          </h3>
+
+          <div v-if="activeSuspension" class="p-5 mb-6 rounded-2xl border border-rose-500/30 bg-rose-500/5 flex items-start gap-3">
+            <Icon name="lucide:ban" class="w-6 h-6 text-rose-400 shrink-0 mt-0.5" />
+            <div>
+              <p class="text-sm font-bold text-rose-400">Sanción activa · {{ activeSuspension.matchesSuspended }} {{ activeSuspension.matchesSuspended === 1 ? 'partido' : 'partidos' }}</p>
+              <p class="text-xs text-content-muted mt-1">{{ activeSuspension.reason }}</p>
+            </div>
+          </div>
+
+          <div v-if="playerFines.length" class="grid grid-cols-3 gap-4">
+            <div class="p-5 rounded-2xl border border-border/5 bg-surface/2 text-center">
+              <div class="text-2xl font-black text-content tabular-nums">{{ playerFines.length }}</div>
+              <div class="text-[10px] font-bold text-content-muted uppercase tracking-widest mt-1">Multas</div>
+            </div>
+            <div class="p-5 rounded-2xl border border-amber-500/20 bg-amber-500/5 text-center">
+              <div class="text-2xl font-black text-amber-400 tabular-nums">${{ pendingFinesAmount.toFixed(2) }}</div>
+              <div class="text-[10px] font-bold text-amber-500 uppercase tracking-widest mt-1">Pendiente</div>
+            </div>
+            <div class="p-5 rounded-2xl border border-primary/20 bg-primary/5 text-center">
+              <div class="text-2xl font-black text-primary tabular-nums">${{ paidFinesAmount.toFixed(2) }}</div>
+              <div class="text-[10px] font-bold text-primary uppercase tracking-widest mt-1">Pagado</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Historial de Equipos -->
+        <div v-if="teamHistory.length" class="glass-card p-8 rounded-3xl border border-border/5">
+          <h3 class="text-xl font-bold text-content mb-6 flex items-center gap-2">
+            <Icon name="lucide:shirt" class="w-5 h-5 text-primary" /> Historial de Equipos
+          </h3>
+
+          <ul class="space-y-3">
+            <li v-for="entry in teamHistory" :key="entry.id"
+                class="flex items-center gap-4 p-4 rounded-2xl border"
+                :class="entry.current ? 'border-primary/20 bg-primary/5' : 'border-border/5 bg-surface/2'">
+              <div class="w-10 h-10 rounded-xl bg-surface/5 flex items-center justify-center overflow-hidden shrink-0">
+                <img v-if="entry.teamLogo" :src="entry.teamLogo" class="w-full h-full object-cover" />
+                <Icon v-else name="lucide:shield" class="w-5 h-5 text-primary" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-content truncate">{{ entry.teamName }}</p>
+                <p class="text-xs text-content-muted">
+                  {{ formatDate(entry.startDate) }} — {{ entry.current ? 'Actualidad' : formatDate(entry.endDate) }}
+                </p>
+              </div>
+              <span v-if="entry.current" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-primary/10 text-emerald-400 shrink-0">
+                Equipo Actual
+              </span>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -159,60 +235,35 @@ const route = useRoute()
 const playerStore = usePlayerStore()
 const teamStore = useTeamStore()
 const suspensionStore = useSuspensionStore()
+const fineStore = useFineStore()
 
 const player = ref(null)
 const loading = ref(true)
+const playerFines = ref([])
+const teamHistory = ref([])
+const matchHistory = ref([])
 
-// Datos quemados temporalmente para maquetar la vista. Reemplazar por player.stats?.x cuando el backend los provea.
-const statGroups = computed(() => [
-  {
-    title: 'General',
-    icon: 'lucide:activity',
-    stats: [
-      { label: 'Partidos Jugados', value: 12 },
-      { label: 'Titularidades', value: 9 },
-      { label: 'Minutos Jugados', value: 810 }
-    ]
-  },
-  {
-    title: 'Ataque',
-    icon: 'lucide:target',
-    stats: [
-      { label: 'Goles', value: player.value?.stats?.goals || 0 },
-      { label: 'Asistencias', value: 3 },
-      { label: 'Tiros', value: 21 },
-      { label: 'Tiros a Puerta', value: 11 }
-    ]
-  },
-  {
-    title: 'Pases',
-    icon: 'lucide:arrow-right-left',
-    stats: [
-      { label: 'Pases Completados', value: 254 },
-      { label: '% Precisión', value: '82%' }
-    ]
-  },
-  {
-    title: 'Defensa',
-    icon: 'lucide:shield',
-    stats: [
-      { label: 'Duelos Ganados', value: 34 },
-      { label: 'Intercepciones', value: 14 },
-      { label: 'Recuperaciones', value: 22 },
-      { label: 'Balones Perdidos', value: 18 }
-    ]
-  },
-  {
-    title: 'Disciplina',
-    icon: 'lucide:flag',
-    stats: [
-      { label: 'Faltas Cometidas', value: 7 },
-      { label: 'Faltas Recibidas', value: 10 },
-      { label: 'Amarillas', value: player.value?.stats?.yellowCards || 0 },
-      { label: 'Rojas', value: player.value?.stats?.redCards || 0 }
-    ]
-  }
-])
+function formatDate(dateStr) {
+  if (!dateStr) return ''
+  return new Date(dateStr).toLocaleDateString('es-EC', { year: 'numeric', month: 'short' })
+}
+
+const activeSuspension = computed(() => {
+  if (!player.value) return null
+  return suspensionStore.suspensions.find(s => s.playerId === player.value.id && s.status === 'ACTIVE') || null
+})
+
+const pendingFinesAmount = computed(() =>
+  playerFines.value
+    .filter(f => f.status !== 'PAID')
+    .reduce((sum, f) => sum + (f.amount || 0), 0)
+)
+
+const paidFinesAmount = computed(() =>
+  playerFines.value
+    .filter(f => f.status === 'PAID')
+    .reduce((sum, f) => sum + (f.amount || 0), 0)
+)
 
 const teamName = computed(() => {
   if (!player.value) return '—'
@@ -246,6 +297,11 @@ onMounted(async () => {
   // Fetch player directly
   player.value = await playerStore.fetchPlayerById(route.params.id)
   await suspensionStore.fetchSuspensions(true)
+  if (player.value) {
+    playerFines.value = await fineStore.fetchFinesByPlayer(player.value.id)
+    teamHistory.value = await playerStore.fetchPlayerTeamHistory(player.value.id)
+    matchHistory.value = await playerStore.fetchPlayerMatchHistory(player.value.id)
+  }
   loading.value = false
 })
 </script>

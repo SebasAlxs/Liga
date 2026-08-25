@@ -16,9 +16,39 @@ export interface Player {
     goals: number
     yellowCards: number
     redCards: number
+    matchesPlayed: number
   }
   createdAt?: string
   updatedAt?: string
+}
+
+export interface PlayerTeamHistoryEntry {
+  id: string
+  teamId: string
+  teamName: string
+  teamLogo?: string
+  startDate: string
+  endDate?: string
+  current: boolean
+}
+
+export interface PlayerMatchHistoryEntry {
+  matchId: string
+  matchDate: string
+  status: string
+  homeTeamId: string
+  homeTeamName: string
+  homeTeamLogo?: string
+  awayTeamId: string
+  awayTeamName: string
+  awayTeamLogo?: string
+  homeScore: number | null
+  awayScore: number | null
+  isHome: boolean
+  result: 'W' | 'D' | 'L' | null
+  goals: number
+  yellowCards: number
+  redCards: number
 }
 
 export const usePlayerStore = defineStore('player', () => {
@@ -82,6 +112,26 @@ export const usePlayerStore = defineStore('player', () => {
     }
   }
 
+  async function fetchPlayerTeamHistory(id: string): Promise<PlayerTeamHistoryEntry[]> {
+    try {
+      const res: any = await $api(`/players/${id}/team-history`)
+      return res?.data || []
+    } catch (err) {
+      console.error('Failed to fetch player team history:', err)
+      return []
+    }
+  }
+
+  async function fetchPlayerMatchHistory(id: string): Promise<PlayerMatchHistoryEntry[]> {
+    try {
+      const res: any = await $api(`/players/${id}/matches`)
+      return res?.data || []
+    } catch (err) {
+      console.error('Failed to fetch player match history:', err)
+      return []
+    }
+  }
+
   async function createPlayer(playerData: any) {
     try {
       await $api('/players', {
@@ -127,6 +177,8 @@ export const usePlayerStore = defineStore('player', () => {
     fetchPlayers,
     fetchPlayersByTeam,
     fetchPlayerById,
+    fetchPlayerTeamHistory,
+    fetchPlayerMatchHistory,
     createPlayer,
     updatePlayer,
     deletePlayer,

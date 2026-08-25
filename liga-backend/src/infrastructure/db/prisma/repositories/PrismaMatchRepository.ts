@@ -7,34 +7,7 @@ import { PaginatedResult, PaginationParams } from "../../../../domain/repositori
 export class PrismaMatchRepository implements MatchRepository {
     private prisma = prisma;
 
-    async create(match: Match): Promise<Match> {
-        const created = await this.prisma.match.create({
-            data: {
-                id: match.id,
-                homeTeamId: match.homeTeamId,
-                awayTeamId: match.awayTeamId,
-                homeScore: match.homeScore ?? undefined,
-                awayScore: match.awayScore ?? undefined,
-                matchDate: match.matchDate,
-                tournamentId: match.tournamentId,
-                categoryId: match.categoryId,
-                status: match.status as PrismaMatchStatus,
-                firstHalfStartedAt: match.firstHalfStartedAt,
-                firstHalfEndedAt: match.firstHalfEndedAt,
-                secondHalfStartedAt: match.secondHalfStartedAt,
-                refereeId: match.refereeId,
-                assistant1Id: match.assistant1Id,
-                assistant2Id: match.assistant2Id,
-                fourthRefereeId: match.fourthRefereeId,
-            },
-            include: {
-                primaryReferee: true,
-                assistant1: true,
-                assistant2: true,
-                fourthReferee: true
-            }
-        });
-
+    private mapToEntity(created: any): Match {
         return new Match(
             created.id,
             created.homeTeamId,
@@ -57,8 +30,72 @@ export class PrismaMatchRepository implements MatchRepository {
             created.firstHalfEndedAt,
             created.secondHalfStartedAt,
             created.createdAt,
-            created.updatedAt
+            created.updatedAt,
+            created.round
         );
+    }
+
+    async create(match: Match): Promise<Match> {
+        const created = await this.prisma.match.create({
+            data: {
+                id: match.id,
+                homeTeamId: match.homeTeamId,
+                awayTeamId: match.awayTeamId,
+                homeScore: match.homeScore ?? undefined,
+                awayScore: match.awayScore ?? undefined,
+                matchDate: match.matchDate,
+                round: match.round ?? undefined,
+                tournamentId: match.tournamentId,
+                categoryId: match.categoryId,
+                status: match.status as PrismaMatchStatus,
+                firstHalfStartedAt: match.firstHalfStartedAt,
+                firstHalfEndedAt: match.firstHalfEndedAt,
+                secondHalfStartedAt: match.secondHalfStartedAt,
+                refereeId: match.refereeId,
+                assistant1Id: match.assistant1Id,
+                assistant2Id: match.assistant2Id,
+                fourthRefereeId: match.fourthRefereeId,
+            },
+            include: {
+                primaryReferee: true,
+                assistant1: true,
+                assistant2: true,
+                fourthReferee: true
+            }
+        });
+
+        return this.mapToEntity(created);
+    }
+
+    async createMany(matches: Match[]): Promise<Match[]> {
+        const created = await this.prisma.$transaction(
+            matches.map((match) =>
+                this.prisma.match.create({
+                    data: {
+                        id: match.id,
+                        homeTeamId: match.homeTeamId,
+                        awayTeamId: match.awayTeamId,
+                        homeScore: match.homeScore ?? undefined,
+                        awayScore: match.awayScore ?? undefined,
+                        matchDate: match.matchDate,
+                        round: match.round ?? undefined,
+                        tournamentId: match.tournamentId,
+                        categoryId: match.categoryId,
+                        status: match.status as PrismaMatchStatus,
+                    }
+                })
+            )
+        );
+
+        return created.map((m) => this.mapToEntity(m));
+    }
+
+    async findByTournamentAndCategory(tournamentId: string, categoryId: string): Promise<Match[]> {
+        const matches = await this.prisma.match.findMany({
+            where: { tournamentId, categoryId },
+            orderBy: [{ round: "asc" }, { matchDate: "asc" }]
+        });
+        return matches.map((m) => this.mapToEntity(m));
     }
 
     async findById(id: string): Promise<Match | null> {
@@ -72,30 +109,7 @@ export class PrismaMatchRepository implements MatchRepository {
             }
         });
         if (!match) return null;
-        return new Match(
-            match.id,
-            match.homeTeamId,
-            match.awayTeamId,
-            match.homeScore,
-            match.awayScore,
-            match.matchDate,
-            match.tournamentId,
-            match.categoryId,
-            match.status as MatchStatus,
-            match.refereeId,
-            match.assistant1Id,
-            match.assistant2Id,
-            match.fourthRefereeId,
-            match.primaryReferee,
-            match.assistant1,
-            match.assistant2,
-            match.fourthReferee,
-            match.firstHalfStartedAt,
-            match.firstHalfEndedAt,
-            match.secondHalfStartedAt,
-            match.createdAt,
-            match.updatedAt
-        );
+        return this.mapToEntity(match);
     }
 
     async findAll(pagination?: PaginationParams, filters?: { managerId?: string }): Promise<PaginatedResult<Match>> {
@@ -121,32 +135,7 @@ export class PrismaMatchRepository implements MatchRepository {
             this.prisma.match.count({ where }),
         ]);
         return {
-            items: matches.map(
-                (m) => new Match(
-                    m.id,
-                    m.homeTeamId,
-                    m.awayTeamId,
-                    m.homeScore,
-                    m.awayScore,
-                    m.matchDate,
-                    m.tournamentId,
-                    m.categoryId,
-                    m.status as MatchStatus,
-                    m.refereeId,
-                    m.assistant1Id,
-                    m.assistant2Id,
-                    m.fourthRefereeId,
-                    m.primaryReferee,
-                    m.assistant1,
-                    m.assistant2,
-                    m.fourthReferee,
-                    m.firstHalfStartedAt,
-                    m.firstHalfEndedAt,
-                    m.secondHalfStartedAt,
-                    m.createdAt,
-                    m.updatedAt
-                )
-            ),
+            items: matches.map((m) => this.mapToEntity(m)),
             total,
         };
     }
@@ -171,22 +160,7 @@ export class PrismaMatchRepository implements MatchRepository {
                 updatedAt: true,
             },
         });
-        return matches.map(
-            (m) => new Match(
-                m.id,
-                m.homeTeamId,
-                m.awayTeamId,
-                m.homeScore,
-                m.awayScore,
-                m.matchDate,
-                m.tournamentId,
-                m.categoryId,
-                m.status as MatchStatus,
-                null, null, null, null, undefined, undefined, undefined, undefined, null, null, null,
-                m.createdAt,
-                m.updatedAt
-            )
-        );
+        return matches.map((m) => this.mapToEntity(m));
     }
 
     async update(match: Match): Promise<Match> {
@@ -216,30 +190,7 @@ export class PrismaMatchRepository implements MatchRepository {
                 fourthReferee: true
             }
         });
-        return new Match(
-            updated.id,
-            updated.homeTeamId,
-            updated.awayTeamId,
-            updated.homeScore,
-            updated.awayScore,
-            updated.matchDate,
-            updated.tournamentId,
-            updated.categoryId,
-            updated.status as MatchStatus,
-            updated.refereeId,
-            updated.assistant1Id,
-            updated.assistant2Id,
-            updated.fourthRefereeId,
-            updated.primaryReferee || undefined,
-            updated.assistant1 || undefined,
-            updated.assistant2 || undefined,
-            updated.fourthReferee || undefined,
-            updated.firstHalfStartedAt,
-            updated.firstHalfEndedAt,
-            updated.secondHalfStartedAt,
-            updated.createdAt,
-            updated.updatedAt
-        );
+        return this.mapToEntity(updated);
     }
 
     async delete(id: string): Promise<void> {

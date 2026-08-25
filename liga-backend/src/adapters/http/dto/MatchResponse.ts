@@ -40,6 +40,7 @@ export interface MatchResponse {
     homeScore: number | null;
     awayScore: number | null;
     matchDate: string;
+    round?: number | null;
     tournamentId: string;
     categoryId: string;
     status: MatchStatus;

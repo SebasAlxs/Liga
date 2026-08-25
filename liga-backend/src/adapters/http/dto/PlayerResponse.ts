@@ -34,6 +34,7 @@ export interface PlayerResponse {
         goals: number;
         yellowCards: number;
         redCards: number;
+        matchesPlayed: number;
     };
     createdAt: string;
     updatedAt: string;

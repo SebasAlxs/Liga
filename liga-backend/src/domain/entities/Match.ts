@@ -28,7 +28,8 @@ export class Match {
         public firstHalfEndedAt?: Date | null,
         public secondHalfStartedAt?: Date | null,
         public createdAt?: Date,
-        public updatedAt?: Date) {
+        public updatedAt?: Date,
+        public round?: number | null) {
         this.validate();
     }
 

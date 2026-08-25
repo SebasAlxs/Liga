@@ -9,6 +9,7 @@ export class PrismaFineRepository implements FineRepository {
     const where: any = {};
     if (filters?.teamId) where.teamId = filters.teamId;
     if (filters?.status) where.status = filters.status;
+    if (filters?.playerId) where.playerId = filters.playerId;
     
     return prisma.fine.findMany({ 
       where, 

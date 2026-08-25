@@ -92,8 +92,12 @@ export class PrismaTeamRepository implements TeamRepository {
         );
     }
 
-    async findAll(pagination?: PaginationParams, filters?: { managerId?: string }): Promise<PaginatedResult<Team>> {
-        const where = filters?.managerId ? { managerId: filters.managerId } : {};
+    async findAll(pagination?: PaginationParams, filters?: { managerId?: string; tournamentId?: string; categoryId?: string }): Promise<PaginatedResult<Team>> {
+        const where = {
+            ...(filters?.managerId ? { managerId: filters.managerId } : {}),
+            ...(filters?.tournamentId ? { tournamentId: filters.tournamentId } : {}),
+            ...(filters?.categoryId ? { categoryId: filters.categoryId } : {}),
+        };
         const [teams, total] = await Promise.all([
             this.prisma.team.findMany({ where, skip: pagination?.skip, take: pagination?.take }),
             this.prisma.team.count({ where }),

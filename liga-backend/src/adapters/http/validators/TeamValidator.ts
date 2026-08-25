@@ -1,12 +1,15 @@
 import { z } from "zod";
 
+const optionalUrl = (message?: string) =>
+    z.preprocess((val) => (val === "" ? undefined : val), z.string().url(message).optional());
+
 export const TeamValidator = {
     create: z.object({
         body: z.object({
             name: z.string()
                    .min(3, "El nombre del equipo debe tener al menos 3 caracteres.")
                    .max(100, "El nombre no puede exceder 100 caracteres."),
-            logo: z.string().url("El logo debe ser una URL válida.").optional(),
+            logo: optionalUrl("El logo debe ser una URL válida."),
             foundedYear: z.number().int("El año debe ser un número entero.")
                           .max(new Date().getFullYear(), "El año de fundación no puede estar en el futuro.")
                           .optional(),
@@ -18,7 +21,7 @@ export const TeamValidator = {
     update: z.object({
         body: z.object({
             name: z.string().min(3).max(100).optional(),
-            logo: z.string().url().optional(),
+            logo: optionalUrl(),
             foundedYear: z.number().int().max(new Date().getFullYear()).optional(),
             championshipsWon: z.number().int().min(0).optional(),
             categoryId: z.string().uuid().optional(),

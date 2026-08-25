@@ -1,0 +1,14 @@
+model PlayerTeamHistory {
+  id        String    @id @default(uuid())
+  playerId  String
+  teamId    String
+  startDate DateTime  @default(now())
+  endDate   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  player    Player    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  team      Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([playerId])
+  @@index([teamId])
+}

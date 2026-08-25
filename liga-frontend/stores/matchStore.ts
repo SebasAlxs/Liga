@@ -11,6 +11,7 @@ export interface Match {
   homeScore: number | null
   awayScore: number | null
   matchDate: string
+  round?: number | null
   tournamentId: string
   categoryId: string
   status: MatchStatus
@@ -100,6 +101,33 @@ export const useMatchStore = defineStore('match', () => {
     }
   }
 
+  async function generateFixture(tournamentId: string, categoryId: string, doubleRound: boolean) {
+    try {
+      await $api('/matches/fixture/generate', { method: 'POST', body: { tournamentId, categoryId, doubleRound } })
+      await fetchMatches()
+      return { success: true, message: 'Fixture generado correctamente' }
+    } catch (err: any) {
+      return { success: false, message: err.data?.message || err.message || 'Error al generar el fixture' }
+    }
+  }
+
+  async function downloadFixturePdf(tournamentId: string, categoryId: string) {
+    try {
+      const blob: any = await $api(`/matches/fixture/pdf?tournamentId=${tournamentId}&categoryId=${categoryId}`, { responseType: 'blob' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `fixture-${tournamentId}-${categoryId}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+      return { success: true }
+    } catch (err: any) {
+      return { success: false, message: err.data?.message || err.message || 'Error al descargar el fixture' }
+    }
+  }
+
   // ── Tournaments ────────────────────────────────────
   async function fetchTournaments() {
     try {
@@ -124,5 +152,6 @@ export const useMatchStore = defineStore('match', () => {
     matches, tournaments, categories, loading,
     fetchMatches, createMatch, updateMatch, deleteMatch,
     fetchTournaments, fetchCategories,
+    generateFixture, downloadFixturePdf,
   }
 })

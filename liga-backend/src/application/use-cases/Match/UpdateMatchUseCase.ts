@@ -58,6 +58,7 @@ export class UpdateMatchUseCase {
             homeScore: updated.homeScore,
             awayScore: updated.awayScore,
             matchDate: updated.matchDate.toISOString(),
+            round: updated.round,
             tournamentId: updated.tournamentId,
             categoryId: updated.categoryId,
             status: updated.status,

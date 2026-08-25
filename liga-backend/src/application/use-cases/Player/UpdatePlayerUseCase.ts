@@ -4,12 +4,14 @@ import { PlayerResponse, UpdatePlayerRequest } from "../../../adapters/http/dto/
 import { PlayerRepository } from "../../../domain/repositories/PlayerRepository";
 import { TeamRepository } from "../../../domain/repositories/TeamRepository";
 import { CategoryRepository } from "../../../domain/repositories/CategoryRepository";
+import { PlayerTeamHistoryRepository } from "../../../domain/repositories/PlayerTeamHistoryRepository";
 
 export class UpdatePlayerUseCase {
     constructor(
         private playerRepository: PlayerRepository,
         private teamRepository: TeamRepository,
-        private categoryRepository: CategoryRepository
+        private categoryRepository: CategoryRepository,
+        private teamHistoryRepository: PlayerTeamHistoryRepository
     ) { }
 
     private calculateAge(birthDate: Date): number {
@@ -61,6 +63,9 @@ export class UpdatePlayerUseCase {
             }
         }
 
+        const previousTeamId = existingPlayer.teamId;
+        const teamChanged = !!request.teamId && request.teamId !== previousTeamId;
+
         if (request.birthDate) existingPlayer.birthDate = new Date(request.birthDate);
         if (request.teamId) existingPlayer.teamId = request.teamId;
         if (request.isLocal !== undefined) existingPlayer.isLocal = request.isLocal;
@@ -70,6 +75,12 @@ export class UpdatePlayerUseCase {
         }
 
         const updated = await this.playerRepository.update(existingPlayer);
+
+        if (teamChanged) {
+            const now = new Date();
+            await this.teamHistoryRepository.closeOpenEntry(updated.id, now);
+            await this.teamHistoryRepository.create(updated.id, updated.teamId, now);
+        }
 
         return {
             _id: updated.id,

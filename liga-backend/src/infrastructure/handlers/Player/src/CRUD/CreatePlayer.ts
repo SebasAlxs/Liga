@@ -6,6 +6,7 @@ import { CreatePlayerUseCase } from "../../../../../application/use-cases/Player
 import { PrismaPlayerRepository } from "../../../../db/prisma/repositories/PrismaPlayerRepository";
 import { PrismaTeamRepository } from "../../../../db/prisma/repositories/PrismaTeamRepository";
 import { PrismaCategoryRepository } from "../../../../db/prisma/repositories/PrismaCategoryRepository";
+import { PrismaPlayerTeamHistoryRepository } from "../../../../db/prisma/repositories/PrismaPlayerTeamHistoryRepository";
 import { successResponse, handleErrorResponse } from "../../../../libs/api-gateway";
 
 const PLAYER_UNIQUE_MESSAGES = {
@@ -18,7 +19,8 @@ export const handler = async (req: Request, res: Response) => {
         const repo = new PrismaPlayerRepository();
         const teamRepo = new PrismaTeamRepository();
         const categoryRepo = new PrismaCategoryRepository();
-        const useCase = new CreatePlayerUseCase(repo, teamRepo, categoryRepo);
+        const teamHistoryRepo = new PrismaPlayerTeamHistoryRepository();
+        const useCase = new CreatePlayerUseCase(repo, teamRepo, categoryRepo, teamHistoryRepo);
         
         if (req.body.picture && !req.body.picture.startsWith('http')) {
             const storageService = new StorageService();

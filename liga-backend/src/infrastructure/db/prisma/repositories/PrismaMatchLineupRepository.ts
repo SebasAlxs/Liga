@@ -62,6 +62,18 @@ export class PrismaMatchLineupRepository implements MatchLineupRepository {
         await this.prisma.matchLineup.delete({ where: { id } });
     }
 
+    async countByPlayer(playerId: string): Promise<number> {
+        return this.prisma.matchLineup.count({ where: { playerId, checkedIn: true } });
+    }
+
+    async findByPlayer(playerId: string): Promise<MatchLineup[]> {
+        const items = await this.prisma.matchLineup.findMany({
+            where: { playerId, checkedIn: true },
+            orderBy: { match: { matchDate: 'desc' } },
+        });
+        return items.map(item => this.mapToEntity(item));
+    }
+
     private mapToEntity(data: any): MatchLineup {
         return new MatchLineup(
             data.id,
