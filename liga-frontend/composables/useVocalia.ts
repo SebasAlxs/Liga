@@ -370,6 +370,28 @@ export function useVocalia() {
     } finally { isProcessingAction.value = false }
   }
 
+  const downloadingSheet = ref(false)
+
+  async function downloadVocaliaSheetPdf() {
+    if (downloadingSheet.value || !selectedMatchId.value) return
+    downloadingSheet.value = true
+    try {
+      const blob: any = await $api(`/matches/${selectedMatchId.value}/vocalia-sheet/pdf`, { responseType: 'blob' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `hoja-vocalia-${selectedMatchId.value}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error('Failed to download vocalia sheet PDF:', err)
+    } finally {
+      downloadingSheet.value = false
+    }
+  }
+
   async function addEvent(payload: any) {
     if (isProcessingAction.value) return
     isProcessingAction.value = true
@@ -403,5 +425,6 @@ export function useVocalia() {
     addToLineup, removeFromLineup, toggleCheckIn, setLineupStatus,
     saveArbitration, startMatch, endFirstHalf, startSecondHalf, finishMatch, addEvent, deleteEvent,
     lineupForPlayer,
+    downloadingSheet, downloadVocaliaSheetPdf,
   }
 }

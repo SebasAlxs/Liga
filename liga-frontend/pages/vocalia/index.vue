@@ -397,6 +397,17 @@
         </button>
       </div>
 
+      <div v-if="v.activeMatch.value?.status === 'FINISHED'" class="flex items-center justify-center mb-6">
+        <button
+          :disabled="v.downloadingSheet.value"
+          @click="v.downloadVocaliaSheetPdf()"
+          class="flex items-center gap-2 px-6 py-2.5 rounded-xl border border-emerald-500/30 text-emerald-400 text-xs font-black hover:bg-emerald-500/10 transition-all uppercase tracking-widest bg-emerald-500/5 disabled:opacity-50"
+        >
+          <Icon :name="v.downloadingSheet.value ? 'lucide:loader-2' : 'lucide:file-down'" :class="{ 'animate-spin': v.downloadingSheet.value }" class="w-4 h-4" />
+          {{ v.downloadingSheet.value ? 'Generando PDF...' : 'Descargar Hoja de Vocalía' }}
+        </button>
+      </div>
+
       <!-- Live grid: field + timeline -->
       <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
 

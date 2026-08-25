@@ -99,6 +99,7 @@ router.delete("/players/:id", ...adminOnly, PlayerHandlers.deletePlayer);
 // Match Routes (GET Public, Modify Vocal/Admin)
 router.get("/matches", optionalAuth, MatchHandlers.getAllMatches);
 router.get("/matches/:id", MatchHandlers.getMatch);
+router.get("/matches/:id/vocalia-sheet/pdf", ...vocalOrAdmin, MatchHandlers.getVocaliaSheetPdf);
 router.post("/matches", ...adminOnly, MatchHandlers.createMatch);
 router.put("/matches/:id", ...vocalOrAdmin, MatchHandlers.updateMatch);
 router.delete("/matches/:id", ...adminOnly, MatchHandlers.deleteMatch);
