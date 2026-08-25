@@ -148,37 +148,32 @@
     </div>
 
     <!-- ── Modal: Create/Edit ─────────────────── -->
-    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" @click="closeModal"></div>
-      <div class="glass-card w-full max-w-lg rounded-3xl border border-border shadow-2xl relative animate-in fade-in zoom-in duration-300 overflow-y-auto max-h-[90vh]">
-        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent"></div>
-        <header class="flex justify-between items-start mb-8">
-          <div>
-            <h2 class="text-2xl font-bold text-content">{{ isEditing ? 'Editar Partido' : 'Nuevo Partido' }}</h2>
-            <p class="text-sm text-content-muted mt-1">Programa el encuentro entre dos equipos.</p>
-          </div>
-          <button @click="closeModal" class="p-2 hover:bg-surface-hover rounded-xl text-content-muted hover:text-content-muted transition-colors">
-            <Icon name="lucide:x" class="w-6 h-6" />
+    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="bg-background w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
+        <div class="p-5 border-b border-border flex justify-between items-center">
+          <h2 class="text-lg font-display">{{ isEditing ? 'Editar Partido' : 'Nuevo Partido' }}</h2>
+          <button @click="closeModal" class="text-content-muted hover:text-content">
+            <Icon name="lucide:x" class="w-5 h-5" />
           </button>
-        </header>
+        </div>
 
-        <form @submit.prevent="handleSubmit" class="space-y-5">
+        <form @submit.prevent="handleSubmit" class="p-5 overflow-y-auto space-y-4">
           <div>
-            <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-2">Fecha y Hora</label>
-            <input v-model="form.matchDate" type="datetime-local" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-content focus:outline-none focus:border-primary transition-all">
+            <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-1">Fecha y Hora</label>
+            <input v-model="form.matchDate" type="datetime-local" required class="input-base w-full">
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-2">Equipo Local</label>
-              <select v-model="form.homeTeamId" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-content focus:outline-none focus:border-primary transition-all">
+              <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-1">Equipo Local</label>
+              <select v-model="form.homeTeamId" required class="select-arrow input-base w-full">
                 <option value="" disabled>Seleccionar...</option>
                 <option v-for="team in teamStore.teams" :key="team.id" :value="team.id" :disabled="team.id === form.awayTeamId">{{ team.name }}</option>
               </select>
             </div>
             <div>
-              <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-2">Equipo Visitante</label>
-              <select v-model="form.awayTeamId" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-content focus:outline-none focus:border-primary transition-all">
+              <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-1">Equipo Visitante</label>
+              <select v-model="form.awayTeamId" required class="select-arrow input-base w-full">
                 <option value="" disabled>Seleccionar...</option>
                 <option v-for="team in teamStore.teams" :key="team.id" :value="team.id" :disabled="team.id === form.homeTeamId">{{ team.name }}</option>
               </select>
@@ -187,15 +182,15 @@
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-2">Torneo</label>
-              <select v-model="form.tournamentId" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-content focus:outline-none focus:border-primary transition-all">
+              <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-1">Torneo</label>
+              <select v-model="form.tournamentId" required class="select-arrow input-base w-full">
                 <option value="" disabled>Seleccionar...</option>
                 <option v-for="t in matchStore.tournaments" :key="t.id" :value="t.id">{{ t.name }}</option>
               </select>
             </div>
             <div>
-              <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-2">Categoría</label>
-              <select v-model="form.categoryId" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-content focus:outline-none focus:border-primary transition-all">
+              <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-1">Categoría</label>
+              <select v-model="form.categoryId" required class="select-arrow input-base w-full">
                 <option value="" disabled>Seleccionar...</option>
                 <option v-for="c in matchStore.categories" :key="c.id" :value="c.id">{{ c.name }}</option>
               </select>
@@ -204,76 +199,73 @@
 
           <!-- Estado -->
           <div>
-            <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-3">Estado</label>
+            <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-2">Estado</label>
             <div class="grid grid-cols-2 gap-2">
               <button v-for="s in statusOptions" :key="s.value" type="button" @click="form.status = s.value" :class="`px-3 py-2.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-2 ${form.status === s.value ? s.activeClass : 'bg-background border-border text-content-muted hover:border-primary/50'}`">
                 <Icon :name="s.icon" class="w-4 h-4 flex-shrink-0" />{{ s.label }}
               </button>
             </div>
           </div>
-
-          <div class="pt-4 flex gap-3">
-            <button type="button" @click="closeModal" class="flex-1 px-4 py-4 rounded-2xl border border-border text-content hover:bg-surface-hover transition-all font-bold text-sm">Cancelar</button>
-            <button type="submit" :disabled="formLoading" class="flex-1 px-4 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-content hover:from-emerald-400 hover:to-teal-400 transition-all font-bold text-sm shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center justify-center gap-2">
-              <Icon v-if="formLoading" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
-              {{ isEditing ? 'Guardar Cambios' : 'Crear Partido' }}
-            </button>
-          </div>
         </form>
+
+        <div class="p-5 border-t border-border flex gap-3 justify-end bg-secondary/20">
+          <button type="button" @click="closeModal" class="btn-secondary">Cancelar</button>
+          <button type="button" @click="handleSubmit" :disabled="formLoading" class="btn-primary">
+            <Icon v-if="formLoading" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
+            {{ isEditing ? 'Guardar Cambios' : 'Crear Partido' }}
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- ── Modal: Marcador rápido ─────────────── -->
-    <div v-if="showScoreModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" @click="showScoreModal = false"></div>
-      <div class="glass-card w-full max-w-sm rounded-3xl border border-border p-8 shadow-2xl relative animate-in fade-in zoom-in duration-300">
-        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
-        <header class="flex justify-between items-start mb-6">
-          <div>
-            <h2 class="text-xl font-bold text-content">Actualizar Marcador</h2>
-            <p class="text-xs text-content-muted mt-1">Ingresa el resultado del partido.</p>
-          </div>
-          <button @click="showScoreModal = false" class="p-2 hover:bg-surface-hover rounded-xl text-content-muted hover:text-content-muted transition-colors">
+    <div v-if="showScoreModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="bg-background w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl">
+        <div class="p-5 border-b border-border flex justify-between items-center">
+          <h2 class="text-lg font-display">Actualizar Marcador</h2>
+          <button @click="showScoreModal = false" class="text-content-muted hover:text-content">
             <Icon name="lucide:x" class="w-5 h-5" />
           </button>
-        </header>
+        </div>
 
-        <!-- Equipos -->
-        <div class="flex items-center justify-between gap-4 mb-8">
-          <div class="text-center flex-1">
-            <div class="w-14 h-14 rounded-2xl bg-background border border-border flex items-center justify-center mx-auto mb-2 overflow-hidden">
-              <img v-if="getTeamLogo(scoreForm.homeTeamId)" :src="getTeamLogo(scoreForm.homeTeamId)" class="w-full h-full object-cover" />
-              <Icon v-else name="lucide:shield" class="w-7 h-7 text-slate-300" />
+        <div class="p-5 space-y-6">
+          <!-- Equipos -->
+          <div class="flex items-center justify-between gap-4">
+            <div class="text-center flex-1">
+              <div class="w-14 h-14 rounded-2xl bg-surface-hover border border-border flex items-center justify-center mx-auto mb-2 overflow-hidden">
+                <img v-if="getTeamLogo(scoreForm.homeTeamId)" :src="getTeamLogo(scoreForm.homeTeamId)" class="w-full h-full object-cover" />
+                <Icon v-else name="lucide:shield" class="w-7 h-7 text-slate-300" />
+              </div>
+              <p class="text-xs font-bold text-content truncate">{{ getTeamName(scoreForm.homeTeamId) }}</p>
             </div>
-            <p class="text-xs font-bold text-content truncate">{{ getTeamName(scoreForm.homeTeamId) }}</p>
-          </div>
-          <div class="text-content-muted font-black text-lg flex-shrink-0">vs</div>
-          <div class="text-center flex-1">
-            <div class="w-14 h-14 rounded-2xl bg-background border border-border flex items-center justify-center mx-auto mb-2 overflow-hidden">
-              <img v-if="getTeamLogo(scoreForm.awayTeamId)" :src="getTeamLogo(scoreForm.awayTeamId)" class="w-full h-full object-cover" />
-              <Icon v-else name="lucide:shield" class="w-7 h-7 text-slate-300" />
+            <div class="text-content-muted font-black text-lg flex-shrink-0">vs</div>
+            <div class="text-center flex-1">
+              <div class="w-14 h-14 rounded-2xl bg-surface-hover border border-border flex items-center justify-center mx-auto mb-2 overflow-hidden">
+                <img v-if="getTeamLogo(scoreForm.awayTeamId)" :src="getTeamLogo(scoreForm.awayTeamId)" class="w-full h-full object-cover" />
+                <Icon v-else name="lucide:shield" class="w-7 h-7 text-slate-300" />
+              </div>
+              <p class="text-xs font-bold text-content truncate">{{ getTeamName(scoreForm.awayTeamId) }}</p>
             </div>
-            <p class="text-xs font-bold text-content truncate">{{ getTeamName(scoreForm.awayTeamId) }}</p>
+          </div>
+
+          <!-- Inputs de marcador -->
+          <div class="flex items-center gap-4">
+            <input v-model.number="scoreForm.homeScore" type="number" min="0" class="input-base flex-1 text-3xl font-black text-center font-mono py-4">
+            <span class="text-content-muted font-black text-2xl flex-shrink-0">:</span>
+            <input v-model.number="scoreForm.awayScore" type="number" min="0" class="input-base flex-1 text-3xl font-black text-center font-mono py-4">
+          </div>
+
+          <!-- Estado rápido -->
+          <div class="grid grid-cols-2 gap-2">
+            <button v-for="s in statusOptions" :key="s.value" type="button" @click="scoreForm.status = s.value" :class="`px-3 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 justify-center ${scoreForm.status === s.value ? s.activeClass : 'bg-background border-border text-content-muted hover:border-primary/50'}`">
+              <Icon :name="s.icon" class="w-3.5 h-3.5" />{{ s.label }}
+            </button>
           </div>
         </div>
 
-        <!-- Inputs de marcador -->
-        <div class="flex items-center gap-4 mb-6">
-          <input v-model.number="scoreForm.homeScore" type="number" min="0" class="flex-1 bg-surface border border-border rounded-2xl px-4 py-4 text-content text-3xl font-black text-center focus:outline-none focus:border-primary transition-all font-mono">
-          <span class="text-content-muted font-black text-2xl flex-shrink-0">:</span>
-          <input v-model.number="scoreForm.awayScore" type="number" min="0" class="flex-1 bg-surface border border-border rounded-2xl px-4 py-4 text-content text-3xl font-black text-center focus:outline-none focus:border-primary transition-all font-mono">
-        </div>
-
-        <!-- Estado rápido -->
-        <div class="grid grid-cols-2 gap-2 mb-6">
-          <button v-for="s in statusOptions" :key="s.value" type="button" @click="scoreForm.status = s.value" :class="`px-3 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 justify-center ${scoreForm.status === s.value ? s.activeClass : 'bg-background border-border text-content-muted hover:border-primary/50'}`">
-            <Icon :name="s.icon" class="w-3.5 h-3.5" />{{ s.label }}
-          </button>
-        </div>
-
-        <div class="flex gap-3">
-          <button @click="showScoreModal = false" class="flex-1 px-4 py-3 rounded-2xl border border-border text-content hover:bg-surface-hover transition-all font-bold text-sm">Cancelar</button>
-          <button @click="handleScoreUpdate" :disabled="formLoading" class="flex-1 px-4 py-3 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 text-content hover:from-blue-400 hover:to-indigo-400 transition-all font-bold text-sm shadow-lg disabled:opacity-50 flex items-center justify-center gap-2">
+        <div class="p-5 border-t border-border flex gap-3 justify-end bg-secondary/20">
+          <button @click="showScoreModal = false" class="btn-secondary">Cancelar</button>
+          <button @click="handleScoreUpdate" :disabled="formLoading" class="btn-primary">
             <Icon v-if="formLoading" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
             Guardar
           </button>
