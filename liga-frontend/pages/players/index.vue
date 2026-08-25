@@ -433,7 +433,7 @@ onMounted(async () => {
   await Promise.all([
     playerStore.fetchPlayers(false, managedByMe.value),
     teamStore.fetchTeams(false, managedByMe.value),
-    suspensionStore.fetchSuspensions()
+    suspensionStore.fetchSuspensions(true)
   ])
 })
 

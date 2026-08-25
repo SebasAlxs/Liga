@@ -3,17 +3,17 @@ import { FineRepository } from '../../../domain/repositories/FineRepository';
 import { SuspensionRepository } from '../../../domain/repositories/SuspensionRepository';
 import { TeamRepository } from '../../../domain/repositories/TeamRepository';
 import { MatchRepository } from '../../../domain/repositories/MatchRepository';
+import { TournamentRepository } from '../../../domain/repositories/TournamentRepository';
 import { Fine } from '../../../domain/entities/Fine';
 import { Suspension } from '../../../domain/entities/Suspension';
-
-const YELLOW_CARD_LIMIT = 3;
 
 export class CreateFine {
   constructor(
     private fineRepository: FineRepository,
     private suspensionRepository: SuspensionRepository,
     private teamRepository: TeamRepository,
-    private matchRepository: MatchRepository
+    private matchRepository: MatchRepository,
+    private tournamentRepository: TournamentRepository
   ) {}
 
   async execute(data: Omit<Fine, 'id' | 'createdAt' | 'updatedAt'>) {
@@ -50,13 +50,17 @@ export class CreateFine {
     }
 
     if (reason === 'tarjeta amarilla') {
+      const tournament = await this.tournamentRepository.findById(tournamentId);
+      const limit = tournament?.maxYellowCardsForSuspension;
+      if (!limit) return;
+
       const count = await this.fineRepository.countByPlayerReasonAndTournament(fine.playerId as string, fine.reason, tournamentId);
-      if (count > 0 && count % YELLOW_CARD_LIMIT === 0) {
+      if (count > 0 && count % limit === 0) {
         await this.suspensionRepository.create(new Suspension(
           crypto.randomUUID(),
           fine.playerId as string,
           tournamentId,
-          `Acumulación de ${YELLOW_CARD_LIMIT} Tarjetas Amarillas`,
+          `Acumulación de ${limit} Tarjetas Amarillas`,
           1,
           'ACTIVE',
           fine.matchId ?? undefined,

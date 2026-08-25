@@ -9,5 +9,6 @@ export interface SuspensionRepository {
     deleteByMatch(matchId: string, playerId: string): Promise<void>;
     findActiveByTeamAndTournament(teamId: string, tournamentId: string): Promise<Suspension[]>;
     deleteByFineId(fineId: string): Promise<void>;
+    serveByFineId(fineId: string): Promise<void>;
 }
 

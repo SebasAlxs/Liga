@@ -3,6 +3,7 @@ import { PrismaFineRepository } from '../../db/prisma/repositories/PrismaFineRep
 import { PrismaSuspensionRepository } from '../../db/prisma/repositories/PrismaSuspensionRepository';
 import { PrismaTeamRepository } from '../../db/prisma/repositories/PrismaTeamRepository';
 import { PrismaMatchRepository } from '../../db/prisma/repositories/PrismaMatchRepository';
+import { PrismaTournamentRepository } from '../../db/prisma/repositories/PrismaTournamentRepository';
 import { GetFines } from '../../../application/use-cases/fines/GetFines';
 import { CreateFine } from '../../../application/use-cases/fines/CreateFine';
 import { UpdateFine } from '../../../application/use-cases/fines/UpdateFine';
@@ -12,6 +13,7 @@ const repository = new PrismaFineRepository();
 const suspensionRepository = new PrismaSuspensionRepository();
 const teamRepository = new PrismaTeamRepository();
 const matchRepository = new PrismaMatchRepository();
+const tournamentRepository = new PrismaTournamentRepository();
 
 export class FineController {
   static async getAll(req: Request, res: Response) {
@@ -27,7 +29,7 @@ export class FineController {
 
   static async create(req: Request, res: Response) {
     try {
-      const useCase = new CreateFine(repository, suspensionRepository, teamRepository, matchRepository);
+      const useCase = new CreateFine(repository, suspensionRepository, teamRepository, matchRepository, tournamentRepository);
       const fine = await useCase.execute(req.body);
       res.status(201).json({ data: fine, status: true });
     } catch (error: any) {
@@ -38,7 +40,7 @@ export class FineController {
   static async update(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const useCase = new UpdateFine(repository);
+      const useCase = new UpdateFine(repository, suspensionRepository);
       const fine = await useCase.execute(id as string, req.body);
       res.json({ data: fine, status: true });
     } catch (error: any) {

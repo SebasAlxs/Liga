@@ -75,6 +75,13 @@ export class PrismaSuspensionRepository implements SuspensionRepository {
         await this.prisma.suspension.deleteMany({ where: { fineId } });
     }
 
+    async serveByFineId(fineId: string): Promise<void> {
+        await this.prisma.suspension.updateMany({
+            where: { fineId, status: 'ACTIVE' },
+            data: { status: 'SERVED' }
+        });
+    }
+
     private toDomain(s: {
         id: string; playerId: string; tournamentId: string; reason: string;
         matchesSuspended: number; status: SuspensionStatus; matchId: string | null;

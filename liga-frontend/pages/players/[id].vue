@@ -245,7 +245,7 @@ onMounted(async () => {
   
   // Fetch player directly
   player.value = await playerStore.fetchPlayerById(route.params.id)
-  await suspensionStore.fetchSuspensions()
+  await suspensionStore.fetchSuspensions(true)
   loading.value = false
 })
 </script>
