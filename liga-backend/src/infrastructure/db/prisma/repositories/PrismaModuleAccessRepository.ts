@@ -15,6 +15,8 @@ const MODULE_KEYS = [
     "scoring",
     "tournaments",
     "venues",
+    "fines",
+    "sanctions",
 ];
 const ROLES = ["SUPERADMIN", "ADMIN", "VOCAL", "DIRIGENTE"];
 

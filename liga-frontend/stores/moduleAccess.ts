@@ -19,6 +19,7 @@ export const MODULE_CATALOG: ModuleCatalogItem[] = [
   { key: 'vocalia', label: 'Vocalía', icon: 'lucide:clipboard-list', link: '/vocalia' },
   { key: 'scoring', label: 'Marcador en Vivo', icon: 'lucide:zap', link: '/scoring' },
   { key: 'fines', label: 'Obligaciones', icon: 'lucide:receipt', link: '/fines' },
+  { key: 'sanctions', label: 'Sanciones', icon: 'lucide:shield-off', link: '/sanciones' },
   { key: 'tournaments', label: 'Torneos', icon: 'lucide:trophy', link: '/tournaments' },
   { key: 'venues', label: 'Sedes', icon: 'lucide:map-pin', link: '/venues' },
   { key: 'settings', label: 'Configuración', icon: 'lucide:settings-2', link: '/settings' },

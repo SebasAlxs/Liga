@@ -4,8 +4,11 @@ import { ref, computed } from 'vue'
 export interface Suspension {
   id: string
   playerId: string
+  playerName?: string
+  playerNumber?: number
   tournamentId: string
   teamId?: string
+  teamName?: string
   matchId?: string
   fineId?: string
   reason: string
