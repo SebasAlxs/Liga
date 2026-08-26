@@ -421,6 +421,20 @@ export function useVocalia() {
     } finally { isProcessingAction.value = false }
   }
 
+  async function applyWalkover(teamAbsentId: string) {
+    if (isProcessingAction.value) return
+    if (!activeMatch.value) return
+    isProcessingAction.value = true
+    try {
+      await $api(`/matches/${activeMatch.value.id}/walkover`, {
+        method: 'POST',
+        body: { teamAbsentId }
+      })
+      await refreshMatches()
+      updateTimer()
+    } finally { isProcessingAction.value = false }
+  }
+
   const downloadingSheet = ref(false)
 
   async function downloadVocaliaSheetPdf() {
@@ -474,7 +488,7 @@ export function useVocalia() {
     teamName, teamLogo,
     loadMatches, loadMatchById, loadLineup, loadEvents, loadSuspensions, loadFines, loadReferees, selectMatch,
     addToLineup, removeFromLineup, toggleCheckIn, setLineupStatus,
-    saveArbitration, startMatch, endFirstHalf, startSecondHalf, finishMatch, addEvent, deleteEvent,
+    saveArbitration, startMatch, endFirstHalf, startSecondHalf, finishMatch, applyWalkover, addEvent, deleteEvent,
     lineupForPlayer, suspensionForPlayer, finesForPlayer, hasPendingFines, isPlayerBlockedByFines,
     downloadingSheet, downloadVocaliaSheetPdf,
   }

@@ -6,6 +6,7 @@ import { handler as updateMatch } from "./CRUD/UpdateMatch";
 import { handler as getVocaliaSheetPdf } from "./CRUD/GetVocaliaSheetPdf";
 import { handler as generateFixture } from "./CRUD/GenerateFixture";
 import { handler as getFixturePdf } from "./CRUD/GetFixturePdf";
+import { handler as applyWalkover } from "./CRUD/ApplyWalkover";
 
 export const MatchHandlers = {
     createMatch,
@@ -15,5 +16,6 @@ export const MatchHandlers = {
     updateMatch,
     getVocaliaSheetPdf,
     generateFixture,
-    getFixturePdf
+    getFixturePdf,
+    applyWalkover
 };

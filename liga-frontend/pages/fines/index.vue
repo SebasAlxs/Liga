@@ -51,6 +51,23 @@
         </div>
       </div>
 
+      <!-- Estado de Cuenta por Equipo -->
+      <div class="bg-background rounded-2xl border border-border p-5">
+        <h2 class="text-lg font-display mb-4">Estado de Cuenta por Equipo (Pendientes)</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-60 overflow-y-auto pr-2 custom-scroll">
+          <div v-for="debt in teamDebts" :key="debt.team.id" class="p-3 rounded-xl border flex items-center justify-between" :class="debt.amount > 0 ? 'border-red-200 bg-red-50/50' : 'border-emerald-200 bg-emerald-50/50'">
+            <div class="flex items-center gap-2 overflow-hidden">
+              <div class="w-7 h-7 rounded-full overflow-hidden bg-white border border-border flex-shrink-0 flex items-center justify-center">
+                <img v-if="debt.team.logo" :src="debt.team.logo" class="w-full h-full object-cover" />
+                <Icon v-else name="lucide:shield" class="w-4 h-4 text-content-muted" />
+              </div>
+              <p class="font-bold text-xs truncate">{{ debt.team.name }}</p>
+            </div>
+            <p class="font-display font-bold text-sm" :class="debt.amount > 0 ? 'text-red-600' : 'text-emerald-600'">{{ formatCurrency(debt.amount) }}</p>
+          </div>
+        </div>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Generador de Multas -->
         <div class="bg-background rounded-2xl border border-border p-5">
@@ -709,6 +726,15 @@ const filteredHistoryFines = computed(() => {
     .filter(f => !query || f.team?.name?.toLowerCase().includes(query) || f.reason.toLowerCase().includes(query))
     .slice()
     .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+})
+
+const teamDebts = computed(() => {
+  return teamStore.teams.map(team => {
+    const amount = fineStore.fines
+      .filter(f => f.teamId === team.id && f.status === 'PENDING')
+      .reduce((sum, f) => sum + f.amount, 0)
+    return { team, amount }
+  }).sort((a, b) => b.amount - a.amount)
 })
 
 // --- Computed Dirigente ---

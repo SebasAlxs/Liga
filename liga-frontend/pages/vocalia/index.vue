@@ -170,7 +170,13 @@
               <Icon v-else name="lucide:shield" class="w-5 h-5 text-content-muted" />
             </div>
             <div class="flex-1 min-w-0">
-              <p class="font-bold text-content truncate">{{ side.team?.name ?? '—' }}</p>
+              <div class="flex items-center gap-2">
+                <p class="font-bold text-content truncate">{{ side.team?.name ?? '—' }}</p>
+                <div v-if="teamPendingDebt(side.team?.id) > 0" class="flex items-center gap-1 text-[10px] text-yellow-500 font-bold bg-yellow-500/10 px-2 py-0.5 rounded-md w-fit border border-yellow-500/20">
+                  <Icon name="lucide:alert-triangle" class="w-3 h-3" />
+                  Deuda: {{ formatCurrency(teamPendingDebt(side.team?.id)) }}
+                </div>
+              </div>
               <p class="text-xs text-content-muted">
                 {{ side.lineup.filter(l => l.checkedIn).length }} confirmados &middot; {{ side.lineup.length }} en nómina
               </p>
@@ -286,12 +292,19 @@
             <p class="text-xs text-content-muted">Asigna titulares y suplentes para cada equipo.</p>
           </div>
         </div>
-        <button v-if="auth.isLoggedIn" @click="doStartMatch"
-          class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
-          style="background: linear-gradient(to right, #10b981, #14b8a6); color: #0a1a14; box-shadow: 0 4px 16px rgba(16,185,129,0.2)">
-          <Icon name="lucide:play" class="w-4 h-4" />
-          Iniciar Partido
-        </button>
+        <div class="flex items-center gap-2">
+          <button v-if="auth.isLoggedIn" @click="showWalkoverModal = true"
+            class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all border border-rose-500/30 text-rose-400 bg-rose-500/10 hover:bg-rose-500/20">
+            <Icon name="lucide:alert-octagon" class="w-4 h-4" />
+            Declarar W.O.
+          </button>
+          <button v-if="auth.isLoggedIn" @click="doStartMatch"
+            class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+            style="background: linear-gradient(to right, #10b981, #14b8a6); color: #0a1a14; box-shadow: 0 4px 16px rgba(16,185,129,0.2)">
+            <Icon name="lucide:play" class="w-4 h-4" />
+            Iniciar Partido
+          </button>
+        </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -751,15 +764,54 @@
         </div>
       </div>
     </Transition>
+
+    <!-- W.O. Modal -->
+    <Transition name="fade">
+      <div v-if="showWalkoverModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+        <div class="glass rounded-3xl border border-border w-full max-w-md p-6">
+          <div class="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center mb-4">
+            <Icon name="lucide:alert-octagon" class="w-6 h-6" />
+          </div>
+          <h3 class="text-xl font-black mb-2">Declarar No Presentación (W.O.)</h3>
+          <p class="text-sm text-content-muted mb-6">Selecciona el equipo que NO se presentó al partido. Esto finalizará el partido 3-0 a favor del rival y generará una multa automática.</p>
+          
+          <div class="flex flex-col gap-3">
+            <button @click="confirmWalkover(v.activeMatch.value?.homeTeamId)" class="p-4 rounded-xl border border-border hover:border-rose-500 hover:bg-rose-500/10 transition-all flex items-center gap-3">
+              <span class="font-bold flex-1 text-left text-rose-400">Marcar W.O. a {{ homeTeam?.name }}</span>
+            </button>
+            <button @click="confirmWalkover(v.activeMatch.value?.awayTeamId)" class="p-4 rounded-xl border border-border hover:border-rose-500 hover:bg-rose-500/10 transition-all flex items-center gap-3">
+              <span class="font-bold flex-1 text-left text-rose-400">Marcar W.O. a {{ awayTeam?.name }}</span>
+            </button>
+          </div>
+          
+          <div class="mt-6 flex justify-end">
+            <button @click="showWalkoverModal = false" class="px-4 py-2 rounded-xl text-sm font-bold text-content-muted hover:text-content">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup>
-// ── Stores & composable ────────────────────────────────────────
+import { useFineStore } from '~/stores/fineStore'
+
 const teamStore = useTeamStore()
 const playerStore = usePlayerStore()
+const fineStore = useFineStore()
 const v = useVocalia()
 const auth = useAuthStore()
+
+function formatCurrency(amount) {
+  return new Intl.NumberFormat('es-EC', { style: 'currency', currency: 'USD' }).format(amount || 0)
+}
+
+function teamPendingDebt(teamId) {
+  if (!teamId) return 0
+  return fineStore.fines
+    .filter(f => f.teamId === teamId && (f.status === 'PENDING' || f.status === 'PENDING_VERIFICATION'))
+    .reduce((sum, f) => sum + f.amount, 0)
+}
 
 // Handle public view (Phase 3 only)
 watchEffect(() => {
@@ -784,6 +836,8 @@ const isVerifyingForSubstitution = ref(false)
 // Verification modal state
 const showVerifyModal = ref(false)
 const verifyingData = ref(null)    // { player, teamId }
+
+const showWalkoverModal = ref(false)
 
 // ── Phase definitions ──────────────────────────────────────────
 const phases = [
@@ -875,9 +929,8 @@ function getAge(birthDate) {
   return age
 }
 
-// ── Lifecycle ──────────────────────────────────────────────────
 onMounted(async () => {
-  await Promise.all([teamStore.fetchTeams(), playerStore.fetchPlayers()])
+  await Promise.all([teamStore.fetchTeams(), playerStore.fetchPlayers(), fineStore.fetchFines()])
   await v.loadMatches()
   if (v.selectedMatchId.value) {
     selectedId.value = v.selectedMatchId.value
@@ -1049,8 +1102,17 @@ async function doStartSecondHalf() {
 }
 
 async function doFinishMatch() {
-  if (!confirm('¿Finalizar el partido?')) return
-  await v.finishMatch()
+  if (confirm('¿Finalizar el partido? Ya no podrás agregar eventos.')) {
+    await v.finishMatch()
+  }
+}
+
+async function confirmWalkover(teamAbsentId) {
+  if (confirm('¿Estás seguro de declarar W.O.? Esta acción no se puede deshacer.')) {
+    showWalkoverModal.value = false
+    await v.applyWalkover(teamAbsentId)
+    notify('W.O. aplicado exitosamente', 'success')
+  }
 }
 
 function onPlayerClick(lineupItem) {

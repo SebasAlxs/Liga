@@ -113,6 +113,7 @@ router.get("/matches/fixture/pdf", MatchHandlers.getFixturePdf);
 router.post("/matches/fixture/generate", ...adminOnly, MatchHandlers.generateFixture);
 router.post("/matches", ...adminOnly, MatchHandlers.createMatch);
 router.put("/matches/:id", ...vocalOrAdmin, MatchHandlers.updateMatch);
+router.post("/matches/:id/walkover", ...vocalOrAdmin, MatchHandlers.applyWalkover);
 router.delete("/matches/:id", ...adminOnly, MatchHandlers.deleteMatch);
 
 // Tournament Routes (GET Public, others Admin)
