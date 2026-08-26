@@ -16,6 +16,7 @@ export class PrismaSuspensionRepository implements SuspensionRepository {
                 fineId: suspension.fineId,
                 reason: suspension.reason,
                 matchesSuspended: suspension.matchesSuspended,
+                servedMatches: suspension.servedMatches,
                 status: suspension.status,
             },
         });
@@ -36,6 +37,20 @@ export class PrismaSuspensionRepository implements SuspensionRepository {
         const updated = await this.prisma.suspension.update({
             where: { id },
             data: { status },
+        });
+
+        return this.toDomain(updated);
+    }
+
+    async update(suspension: Suspension): Promise<Suspension> {
+        const updated = await this.prisma.suspension.update({
+            where: { id: suspension.id },
+            data: {
+                status: suspension.status,
+                servedMatches: suspension.servedMatches,
+                matchesSuspended: suspension.matchesSuspended,
+                reason: suspension.reason,
+            },
         });
 
         return this.toDomain(updated);
@@ -84,12 +99,12 @@ export class PrismaSuspensionRepository implements SuspensionRepository {
 
     private toDomain(s: {
         id: string; playerId: string; tournamentId: string; reason: string;
-        matchesSuspended: number; status: SuspensionStatus; matchId: string | null;
+        matchesSuspended: number; servedMatches: number; status: SuspensionStatus; matchId: string | null;
         createdAt: Date; updatedAt: Date; teamId: string | null; fineId: string | null;
     }): Suspension {
         return new Suspension(
             s.id, s.playerId, s.tournamentId, s.reason, s.matchesSuspended, s.status,
-            s.matchId ?? undefined, s.createdAt, s.updatedAt, s.teamId ?? undefined, s.fineId ?? undefined
+            s.matchId ?? undefined, s.createdAt, s.updatedAt, s.teamId ?? undefined, s.fineId ?? undefined, s.servedMatches
         );
     }
 }

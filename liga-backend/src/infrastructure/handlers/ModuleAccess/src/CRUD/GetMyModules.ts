@@ -5,7 +5,7 @@ import { successResponse, errorResponse , handleErrorResponse } from "../../../.
 
 export const handler = async (req: Request, res: Response) => {
     try {
-        const role = req.user?.role;
+        const role = (req as any).user?.role;
         if (!role) {
             return errorResponse(res, "No autorizado.", 401);
         }

@@ -13,6 +13,7 @@ export function useVocalia() {
   const lineup = ref<any[]>([])
   const events = ref<any[]>([])
   const suspensions = ref<any[]>([])
+  const fines = ref<any[]>([])
   const referees = ref<any[]>([])
   
   const loadingLineup = ref(false)
@@ -40,6 +41,11 @@ export function useVocalia() {
       return
     }
 
+    const tStore = useTournamentStore()
+    const tournament = tStore.tournaments.find(t => t.id === m.tournamentId)
+    const halfDuration = tournament?.matchHalfDurationMinutes ?? 45
+    const fullDuration = halfDuration * 2
+
     if (m.firstHalfStartedAt && !m.firstHalfEndedAt) {
       const diffMs = (new Date().getTime() + timeOffset.value) - new Date(m.firstHalfStartedAt).getTime()
       let diffSecs = Math.floor(diffMs / 1000)
@@ -47,18 +53,18 @@ export function useVocalia() {
       const mins = Math.floor(diffSecs / 60)
       const secs = diffSecs % 60
       matchMinute.value = mins === 0 ? 1 : mins + 1
-      matchMinuteFormatted.value = mins >= 45 ? `45'+ ${mins - 45}` : `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+      matchMinuteFormatted.value = mins >= halfDuration ? `${halfDuration}'+ ${mins - halfDuration}` : `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
     } else if (m.firstHalfEndedAt && !m.secondHalfStartedAt) {
-      matchMinute.value = 45
+      matchMinute.value = halfDuration
       matchMinuteFormatted.value = "MD"
     } else if (m.secondHalfStartedAt) {
       const diffMs = (new Date().getTime() + timeOffset.value) - new Date(m.secondHalfStartedAt).getTime()
       let diffSecs = Math.floor(diffMs / 1000)
       if (diffSecs < 0) diffSecs = 0
-      const mins = 45 + Math.floor(diffSecs / 60)
+      const mins = halfDuration + Math.floor(diffSecs / 60)
       const secs = diffSecs % 60
       matchMinute.value = mins + 1
-      matchMinuteFormatted.value = mins >= 90 ? `90'+ ${mins - 90}` : `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+      matchMinuteFormatted.value = mins >= fullDuration ? `${fullDuration}'+ ${mins - fullDuration}` : `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
     } else {
        matchMinute.value = 0
        matchMinuteFormatted.value = "00:00"
@@ -183,15 +189,53 @@ export function useVocalia() {
   })
 
   const suspendedPlayerIds = computed(() => suspensions.value.filter((s: any) => s.status === 'ACTIVE').map((s: any) => s.playerId))
+  const suspensionForPlayer = (playerId: string) => suspensions.value.find((s: any) => s.playerId === playerId && s.status === 'ACTIVE')
+  
+  const finesForPlayer = (playerId: string) => fines.value.filter((f: any) => f.playerId === playerId && (f.status === 'PENDING' || f.status === 'PENDING_VERIFICATION'))
+  const hasPendingFines = (playerId: string) => finesForPlayer(playerId).length > 0
+  const isPlayerBlockedByFines = (playerId: string) => {
+    if (!activeMatch.value) return false
+    const tStore = useTournamentStore()
+    const t = tStore.tournaments.find(t => t.id === activeMatch.value?.tournamentId)
+    if (!t?.blockPlayerWithPendingFines) return false
+    return hasPendingFines(playerId)
+  }
+
   const redCardedPlayerIds = computed(() => events.value.filter(e => e.type === 'RED_CARD').map(e => e.playerId))
   const checkedInPlayers = computed(() => lineup.value.filter(l => l.checkedIn))
   const lineupForPlayer = (playerId: string) => lineup.value.find(l => l.playerId === playerId)
 
-  const MIN_PLAYERS = 2
-  const MAX_PLAYERS = 4
-  const homeReady = computed(() => homeActiveLineup.value.length >= MIN_PLAYERS)
-  const awayReady = computed(() => awayActiveLineup.value.length >= MIN_PLAYERS)
-  const matchCanStart = computed(() => homeReady.value && awayReady.value)
+  const MIN_PLAYERS = computed(() => {
+    if (!activeMatch.value) return 7
+    const tStore = useTournamentStore()
+    const t = tStore.tournaments.find(t => t.id === activeMatch.value?.tournamentId)
+    return t?.minPlayersToStartMatch ?? 7
+  })
+  
+  const MAX_PLAYERS = computed(() => {
+    if (!activeMatch.value) return 11
+    const tStore = useTournamentStore()
+    const t = tStore.tournaments.find(t => t.id === activeMatch.value?.tournamentId)
+    return t?.maxPlayersOnField ?? 11
+  })
+
+  const MAX_FOREIGN_PLAYERS = computed(() => {
+    if (!activeMatch.value) return 4
+    const tStore = useTournamentStore()
+    const t = tStore.tournaments.find(t => t.id === activeMatch.value?.tournamentId)
+    return t?.maxForeignPlayersOnField ?? 4
+  })
+
+  const homeReady = computed(() => homeActiveLineup.value.length >= MIN_PLAYERS.value)
+  const awayReady = computed(() => awayActiveLineup.value.length >= MIN_PLAYERS.value)
+
+  const homeForeignCount = computed(() => homeActiveLineup.value.filter(s => s.player?.isLocal === false).length)
+  const awayForeignCount = computed(() => awayActiveLineup.value.filter(s => s.player?.isLocal === false).length)
+
+  const homeValid = computed(() => homeReady.value && homeActiveLineup.value.length <= MAX_PLAYERS.value && homeForeignCount.value <= MAX_FOREIGN_PLAYERS.value)
+  const awayValid = computed(() => awayReady.value && awayActiveLineup.value.length <= MAX_PLAYERS.value && awayForeignCount.value <= MAX_FOREIGN_PLAYERS.value)
+
+  const matchCanStart = computed(() => homeValid.value && awayValid.value)
 
   // ── Data loading ──────────────────────────────────────
   async function loadMatches() {
@@ -244,6 +288,13 @@ export function useVocalia() {
     } catch (e) { console.error('loadSuspensions:', e) }
   }
 
+  async function loadFines() {
+    try {
+      const res: any = await $api('/fines')
+      fines.value = res?.data || []
+    } catch (e) { console.error('loadFines:', e) }
+  }
+
   async function loadReferees() {
     loadingReferees.value = true
     try {
@@ -270,7 +321,7 @@ export function useVocalia() {
     if (m?.status === 'IN_PROGRESS' || m?.status === 'FINISHED') phase.value = 'live'
     else phase.value = 'checkin'
     
-    await Promise.all([loadLineup(), loadSuspensions(), loadReferees()])
+    await Promise.all([loadLineup(), loadSuspensions(), loadFines(), loadReferees()])
     if (phase.value === 'live') await loadEvents()
   }
 
@@ -413,18 +464,18 @@ export function useVocalia() {
   }
 
   return {
-    phase, selectedMatchId, matches, lineup, events, suspensions, referees,
+    phase, selectedMatchId, matches, lineup, events, suspensions, fines, referees,
     loadingLineup, loadingEvents, loadingReferees, isProcessingAction,
     activeMatch,
     homeLineup, awayLineup, homeStarters, homeActiveLineup, awayActiveLineup, homeSubstitutes, awayStarters, awaySubstitutes,
     suspendedPlayerIds, checkedInPlayers, redCardedPlayerIds,
-    homeReady, awayReady, matchCanStart, MIN_PLAYERS, MAX_PLAYERS,
+    homeReady, awayReady, homeValid, awayValid, homeForeignCount, awayForeignCount, matchCanStart, MIN_PLAYERS, MAX_PLAYERS, MAX_FOREIGN_PLAYERS,
     matchMinute, matchMinuteFormatted,
     teamName, teamLogo,
-    loadMatches, loadMatchById, loadLineup, loadEvents, loadSuspensions, loadReferees, selectMatch,
+    loadMatches, loadMatchById, loadLineup, loadEvents, loadSuspensions, loadFines, loadReferees, selectMatch,
     addToLineup, removeFromLineup, toggleCheckIn, setLineupStatus,
     saveArbitration, startMatch, endFirstHalf, startSecondHalf, finishMatch, addEvent, deleteEvent,
-    lineupForPlayer,
+    lineupForPlayer, suspensionForPlayer, finesForPlayer, hasPendingFines, isPlayerBlockedByFines,
     downloadingSheet, downloadVocaliaSheetPdf,
   }
 }

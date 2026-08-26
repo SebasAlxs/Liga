@@ -30,6 +30,7 @@ export class GetAllSuspensionsUseCase {
                 matchId: s.matchId,
                 reason: s.reason,
                 matchesSuspended: s.matchesSuspended,
+                servedMatches: s.servedMatches,
                 status: s.status,
                 createdAt: s.createdAt?.toISOString(),
                 updatedAt: s.updatedAt?.toISOString()

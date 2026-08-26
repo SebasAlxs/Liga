@@ -35,15 +35,26 @@
       </div>
 
       <div class="section-body max-h-none space-y-4">
-        <!-- Foráneos en cancha: campo fijo, siempre visible arriba de la lista -->
         <div class="item-row !cursor-default">
           <div class="flex-1 min-w-0">
             <p class="font-semibold text-content text-sm">Foráneos en cancha</p>
-            <p class="text-xs text-content-muted">Máximo {{ leagueRulesStore.rules.maxForeignPlayersOnField }}, el resto locales</p>
+            <p class="text-xs text-content-muted">Máximo {{ activeTournament?.maxForeignPlayersOnField ?? 4 }}, el resto locales</p>
           </div>
           <button v-if="authStore.isAdmin" @click="openRulesModal" class="action-btn hover:text-emerald-400 hover:bg-primary/10" title="Editar">
             <Icon name="lucide:edit-2" class="w-3.5 h-3.5" />
           </button>
+        </div>
+        <div class="item-row !cursor-default">
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-content text-sm">Jugadores en Cancha</p>
+            <p class="text-xs text-content-muted">{{ activeTournament?.maxPlayersOnField ?? 11 }} jugadores (Mínimo para iniciar: {{ activeTournament?.minPlayersToStartMatch ?? 7 }})</p>
+          </div>
+        </div>
+        <div class="item-row !cursor-default">
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-content text-sm">Duración por Tiempo</p>
+            <p class="text-xs text-content-muted">{{ activeTournament?.matchHalfDurationMinutes ?? 45 }} minutos base</p>
+          </div>
         </div>
 
         <!-- Lista libre de reglas -->
@@ -65,6 +76,57 @@
                 <Icon name="lucide:edit-2" class="w-3.5 h-3.5" />
               </button>
               <button @click="handleDelete('ruleItem', item)" class="action-btn hover:text-rose-400 hover:bg-rose-500/10" title="Eliminar">
+                <Icon name="lucide:trash-2" class="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════ -->
+    <!-- FASES Y MODOS DE JUEGO             -->
+    <!-- ══════════════════════════════════ -->
+    <div class="config-section mb-6">
+      <div class="section-header">
+        <div class="flex items-center gap-3">
+          <div class="section-icon bg-indigo-500/10 border-indigo-500/20">
+            <Icon name="lucide:trophy" class="w-5 h-5 text-indigo-400" />
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-content">Fases del Torneo</h2>
+            <p class="text-xs text-content-muted">Configura los modos de juego (Liga, Grupos, Eliminatorias)</p>
+          </div>
+        </div>
+        <button v-if="authStore.isAdmin" @click="openModal('stage')" class="add-btn">
+          <Icon name="lucide:plus" class="w-4 h-4" /> Nueva Fase
+        </button>
+      </div>
+
+      <div class="section-body max-h-none space-y-2">
+        <div v-if="stagesLoading" class="py-8 flex justify-center">
+          <div class="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-indigo-500"></div>
+        </div>
+        <div v-else-if="!stageStore.items.length" class="py-8 text-center">
+          <Icon name="lucide:trophy" class="w-8 h-8 text-content-muted mx-auto mb-2" />
+          <p class="text-sm text-content-muted">No has definido fases aún</p>
+        </div>
+        <div v-else class="space-y-2">
+          <div v-for="item in stageStore.items" :key="item.id" class="item-row group items-start">
+            <div class="flex-1 min-w-0">
+              <p class="font-semibold text-content text-sm">{{ item.name }}</p>
+              <p class="text-xs text-content-muted mt-0.5">
+                <span class="inline-block px-1.5 py-0.5 bg-surface-hover rounded-md border border-border/50 text-[10px] mr-2">
+                  {{ item.type === 'LEAGUE' ? 'Todos vs Todos' : item.type === 'GROUP_STAGE' ? 'Fase de Grupos' : 'Eliminatoria' }}
+                </span>
+                {{ item.isTwoLegged ? 'Ida y Vuelta' : 'Partido Único' }}
+              </p>
+            </div>
+            <div v-if="authStore.isAdmin" class="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex-shrink-0">
+              <button @click="openEditModal('stage', item)" class="action-btn hover:text-emerald-400 hover:bg-primary/10" title="Editar">
+                <Icon name="lucide:edit-2" class="w-3.5 h-3.5" />
+              </button>
+              <button @click="handleDelete('stage', item)" class="action-btn hover:text-rose-400 hover:bg-rose-500/10" title="Eliminar">
                 <Icon name="lucide:trash-2" class="w-3.5 h-3.5" />
               </button>
             </div>
@@ -247,13 +309,28 @@
 
         <form @submit.prevent="handleModalSubmit" class="space-y-5">
 
-          <!-- LEAGUE RULES (foráneos en cancha) -->
           <template v-if="modalType === 'rules'">
-            <div>
-              <label class="field-label">Máximo de foráneos en cancha *</label>
-              <input v-model.number="modalForm.maxForeignPlayersOnField" type="number" min="0" max="11" required class="field-input" placeholder="4" />
-              <p class="text-xs text-content-muted mt-1.5">El resto de jugadores en cancha deben ser locales.</p>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="field-label">Foráneos en cancha *</label>
+                <input v-model.number="modalForm.maxForeignPlayersOnField" type="number" min="0" max="11" required class="field-input" placeholder="4" />
+              </div>
+              <div>
+                <label class="field-label">Duración por Tiempo (min) *</label>
+                <input v-model.number="modalForm.matchHalfDurationMinutes" type="number" min="1" max="90" required class="field-input" placeholder="45" />
+              </div>
             </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="field-label">Jugadores por Equipo *</label>
+                <input v-model.number="modalForm.maxPlayersOnField" type="number" min="5" max="11" required class="field-input" placeholder="11" />
+              </div>
+              <div>
+                <label class="field-label">Mínimo para Iniciar *</label>
+                <input v-model.number="modalForm.minPlayersToStartMatch" type="number" min="1" max="11" required class="field-input" placeholder="7" />
+              </div>
+            </div>
+            <p class="text-xs text-content-muted mt-1.5">Estas configuraciones se aplican a toda la liga.</p>
           </template>
 
           <!-- RULE ITEM (lista libre de reglas) -->
@@ -265,6 +342,29 @@
             <div>
               <label class="field-label">Descripción</label>
               <textarea v-model="modalForm.description" rows="3" class="field-input" placeholder="Ej. 3 amarillas acumuladas = 1 partido de suspensión"></textarea>
+            </div>
+          </template>
+
+          <!-- STAGE (Fase) -->
+          <template v-else-if="modalType === 'stage'">
+            <div>
+              <label class="field-label">Nombre de la Fase *</label>
+              <input v-model="modalForm.name" type="text" required class="field-input" placeholder="Ej. Fase Regular" />
+            </div>
+            <div>
+              <label class="field-label">Modo de Juego *</label>
+              <select v-model="modalForm.type" required class="field-input">
+                <option value="LEAGUE">Liga (Todos contra Todos)</option>
+                <option value="GROUP_STAGE">Fase de Grupos</option>
+                <option value="KNOCKOUT">Eliminatoria (Playoffs / Liguilla)</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">Formato</label>
+              <select v-model="modalForm.isTwoLegged" required class="field-input">
+                <option :value="false">Partido Único</option>
+                <option :value="true">Ida y Vuelta</option>
+              </select>
             </div>
           </template>
 
@@ -352,6 +452,7 @@
 const authStore = useAuthStore()
 const leagueRulesStore = useLeagueRulesStore()
 const leagueRuleItemStore = useLeagueRuleItemStore()
+const stageStore = useStageStore()
 const notification = ref(null)
 const showModal = ref(false)
 const modalType = ref('')
@@ -365,18 +466,25 @@ const referees = ref([])
 const users = ref([])
 const loading = reactive({ categories: false, referees: false, users: false })
 const ruleItemsLoading = computed(() => leagueRuleItemStore.loading && !leagueRuleItemStore.items.length)
+const stagesLoading = computed(() => stageStore.loading && !stageStore.items.length)
 
 // ── Helpers ──────────────────────────────────────────────────
 const modalTitle = computed(() => {
   if (modalType.value === 'rules') return 'Editar Reglas del Campeonato'
-  const map = { ruleItem: 'Regla', category: 'Categoría', referee: 'Árbitro', user: 'Usuario' }
+  const map = { ruleItem: 'Regla', category: 'Categoría', referee: 'Árbitro', user: 'Usuario', stage: 'Fase' }
   return `${isEditing.value ? 'Editar' : 'Nueva'} ${map[modalType.value] ?? ''}`
+})
+
+const activeTournament = computed(() => {
+  const tournamentStore = useTournamentStore()
+  return tournamentStore.tournaments.find(t => t.active) || null
 })
 
 const modalAccent = computed(() => {
   const map = {
     rules: 'via-cyan-500',
     ruleItem: 'via-cyan-500',
+    stage: 'via-indigo-500',
     category: 'via-purple-500',
     referee: 'via-orange-500',
     user: 'via-emerald-500',
@@ -390,6 +498,7 @@ const loadingKeyMap = { category: 'categories', referee: 'referees', user: 'user
 
 const defaultForms = {
   ruleItem: () => ({ title: '', description: '' }),
+  stage: () => ({ name: '', type: 'LEAGUE', isTwoLegged: false }),
   category: () => ({ name: '', minAge: null, maxAge: null }),
   referee: () => ({ name: '', license: '', phone: '', email: '' }),
   user: () => ({ email: '', password: '', role: 'DIRIGENTE' }),
@@ -416,12 +525,17 @@ async function loadSection(endpoint, storeRef, key) {
 }
 
 async function fetchAll() {
+  const tournamentStore = useTournamentStore()
+  await tournamentStore.fetchTournaments() // Ensure tournaments are loaded for activeTournament
+  
   const tasks = [
     loadSection('/categories', categories, 'categories'),
     loadSection('/referees', referees, 'referees'),
-    leagueRulesStore.fetchRules(),
-    leagueRuleItemStore.fetchItems(),
   ]
+  if (activeTournament.value) {
+    leagueRuleItemStore.fetchItems(activeTournament.value.id)
+    stageStore.fetchItems(activeTournament.value.id)
+  }
   if (authStore.isSuperAdmin) tasks.push(loadSection('/users', users, 'users'))
   await Promise.all(tasks)
 }
@@ -430,8 +544,8 @@ async function fetchAll() {
 function openRulesModal() {
   modalType.value = 'rules'
   isEditing.value = true
-  editingId.value = null
-  modalForm.value = { ...leagueRulesStore.rules }
+  editingId.value = activeTournament.value?.id
+  modalForm.value = { ...activeTournament.value }
   showModal.value = true
 }
 
@@ -459,10 +573,12 @@ async function handleModalSubmit() {
   if (modalType.value === 'rules') {
     const payload = {
       maxForeignPlayersOnField: Number(modalForm.value.maxForeignPlayersOnField),
-      suspensionRules: modalForm.value.suspensionRules || null,
-      format: modalForm.value.format || null,
+      maxPlayersOnField: Number(modalForm.value.maxPlayersOnField),
+      minPlayersToStartMatch: Number(modalForm.value.minPlayersToStartMatch),
+      matchHalfDurationMinutes: Number(modalForm.value.matchHalfDurationMinutes),
     }
-    const res = await leagueRulesStore.updateRules(payload)
+    const tournamentStore = useTournamentStore()
+    const res = await tournamentStore.updateTournament(editingId.value, payload)
     if (res.success) {
       notify(res.message)
       closeModal()
@@ -477,10 +593,31 @@ async function handleModalSubmit() {
     const payload = {
       title: modalForm.value.title,
       description: modalForm.value.description || null,
+      tournamentId: activeTournament.value?.id
     }
     const res = isEditing.value
       ? await leagueRuleItemStore.updateItem(editingId.value, payload)
       : await leagueRuleItemStore.createItem(payload)
+    if (res.success) {
+      notify(res.message)
+      closeModal()
+    } else {
+      notify(res.message, 'error')
+    }
+    formLoading.value = false
+    return
+  }
+
+  if (modalType.value === 'stage') {
+    const payload = {
+      name: modalForm.value.name,
+      type: modalForm.value.type,
+      isTwoLegged: modalForm.value.isTwoLegged,
+      tournamentId: activeTournament.value?.id
+    }
+    const res = isEditing.value
+      ? await stageStore.updateItem(editingId.value, payload)
+      : await stageStore.createItem(payload)
     if (res.success) {
       notify(res.message)
       closeModal()
@@ -522,6 +659,12 @@ async function handleDelete(type, item) {
 
   if (type === 'ruleItem') {
     const res = await leagueRuleItemStore.deleteItem(item.id)
+    notify(res.message, res.success ? 'success' : 'error')
+    return
+  }
+  
+  if (type === 'stage') {
+    const res = await stageStore.deleteItem(item.id)
     notify(res.message, res.success ? 'success' : 'error')
     return
   }

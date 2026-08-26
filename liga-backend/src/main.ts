@@ -15,7 +15,8 @@ import { RefereeHandlers } from "./infrastructure/handlers/Referee/src";
 import { UserHandlers } from "./infrastructure/handlers/User/src";
 import { ModuleAccessHandlers } from "./infrastructure/handlers/ModuleAccess/src";
 import { LeagueRulesHandlers } from "./infrastructure/handlers/LeagueRules/src";
-import { LeagueRuleItemHandlers } from "./infrastructure/handlers/LeagueRuleItem/src";
+import { RuleItemHandlers } from "./infrastructure/handlers/RuleItem/src";
+import { StageHandlers } from "./infrastructure/handlers/Stage/src";
 import { verifyToken, hasRole, optionalAuth } from "./infrastructure/middlewares/auth.middleware";
 import { globalErrorHandler } from "./infrastructure/middlewares/error.middleware";
 import { validateRequest } from "./infrastructure/middlewares/validate.middleware";
@@ -71,10 +72,16 @@ router.get("/league-rules", LeagueRulesHandlers.getLeagueRules);
 router.put("/league-rules", ...adminOnly, LeagueRulesHandlers.updateLeagueRules);
 
 // League Rule Items (lista libre de reglas: GET público, CRUD solo Admin)
-router.get("/league-rule-items", LeagueRuleItemHandlers.getAllLeagueRuleItems);
-router.post("/league-rule-items", ...adminOnly, LeagueRuleItemHandlers.createLeagueRuleItem);
-router.put("/league-rule-items/:id", ...adminOnly, LeagueRuleItemHandlers.updateLeagueRuleItem);
-router.delete("/league-rule-items/:id", ...adminOnly, LeagueRuleItemHandlers.deleteLeagueRuleItem);
+router.get("/league-rule-items/tournament/:tournamentId", RuleItemHandlers.getTournamentRuleItems);
+router.post("/league-rule-items", ...adminOnly, RuleItemHandlers.createRuleItem);
+router.put("/league-rule-items/:id", ...adminOnly, RuleItemHandlers.updateRuleItem);
+router.delete("/league-rule-items/:id", ...adminOnly, RuleItemHandlers.deleteRuleItem);
+
+// Stage Routes
+router.get("/stages/tournament/:tournamentId", StageHandlers.getTournamentStages);
+router.post("/stages", ...adminOnly, StageHandlers.createStage);
+router.put("/stages/:id", ...adminOnly, StageHandlers.updateStage);
+router.delete("/stages/:id", ...adminOnly, StageHandlers.deleteStage);
 
 // Module Access Routes (qué módulos ve cada rol en el menú)
 router.get("/module-access/me", verifyToken, ModuleAccessHandlers.getMyModules);

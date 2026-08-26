@@ -174,6 +174,11 @@
               <p class="text-xs text-content-muted">
                 {{ side.lineup.filter(l => l.checkedIn).length }} confirmados &middot; {{ side.lineup.length }} en nómina
               </p>
+              <div v-if="side.players.filter(p => v.suspendedPlayerIds.value.includes(p.id)).length > 0" class="mt-1 flex flex-col gap-0.5">
+                <p v-for="sp in side.players.filter(p => v.suspendedPlayerIds.value.includes(p.id))" :key="sp.id" class="text-[10px] text-rose-500 font-medium">
+                  🚫 #{{ sp.number || 'S/N' }} - {{ v.suspensionForPlayer(sp.id)?.reason }} (Faltan {{ (v.suspensionForPlayer(sp.id)?.matchesSuspended || 0) - (v.suspensionForPlayer(sp.id)?.servedMatches || 0) }} partidos)
+                </p>
+              </div>
             </div>
           </div>
 
@@ -221,7 +226,7 @@
                     : v.lineupForPlayer(p.id)?.checkedIn ? 'text-emerald-400'
                     : v.lineupForPlayer(p.id) ? 'text-content-muted'
                     : 'text-content-muted'">
-                  {{ v.suspendedPlayerIds.value.includes(p.id) ? '🚫 Suspendido'
+                  {{ v.suspendedPlayerIds.value.includes(p.id) ? `🚫 Suspendido: ${v.suspensionForPlayer(p.id)?.reason} (Faltan ${ (v.suspensionForPlayer(p.id)?.matchesSuspended || 0) - (v.suspensionForPlayer(p.id)?.servedMatches || 0) } partidos)`
                     : v.lineupForPlayer(p.id)?.checkedIn ? '✅ Confirmado'
                     : v.lineupForPlayer(p.id) ? '⏳ Pendiente de ingreso'
                     : 'No en nómina' }}
@@ -899,6 +904,25 @@ function doStartVerification(player, teamId) {
 }
 
 async function handleMakeStarter(item) {
+  if (v.isPlayerBlockedByFines(item.player.id)) {
+    notify(`El jugador tiene multas pendientes y no puede jugar.`, 'error')
+    return
+  }
+
+  const isHome = item.teamId === homeTeam.value?.id
+  const teamLineup = isHome ? v.homeActiveLineup.value : v.awayActiveLineup.value
+  const teamForeignCount = isHome ? v.homeForeignCount.value : v.awayForeignCount.value
+
+  if (teamLineup.length >= v.MAX_PLAYERS.value) {
+    notify(`No se pueden tener más de ${v.MAX_PLAYERS.value} titulares.`, 'error')
+    return
+  }
+  
+  if (!item.player.isLocal && teamForeignCount >= v.MAX_FOREIGN_PLAYERS.value) {
+    notify(`No se pueden tener más de ${v.MAX_FOREIGN_PLAYERS.value} foráneos en cancha.`, 'error')
+    return
+  }
+
   if (item.isVerified) {
     await v.setLineupStatus(item.id, 'STARTER')
   } else {
@@ -915,9 +939,26 @@ async function doConfirmEntry() {
   showVerifyModal.value = false
   
   try {
+    if (v.isPlayerBlockedByFines(player.id)) {
+      notify(`El jugador tiene multas pendientes y no puede jugar.`, 'error')
+      return
+    }
+
     // If we are in Live phase, they MUST be added as SUBSTITUTE, not STARTER
     // The formal substitution event will then move them to the field.
-    const targetStatus = v.phase.value === 'live' ? 'SUBSTITUTE' : 'STARTER'
+    let targetStatus = v.phase.value === 'live' ? 'SUBSTITUTE' : 'STARTER'
+
+    if (targetStatus === 'STARTER') {
+      const isHome = teamId === homeTeam.value?.id
+      const teamLineup = isHome ? v.homeActiveLineup.value : v.awayActiveLineup.value
+      const teamForeignCount = isHome ? v.homeForeignCount.value : v.awayForeignCount.value
+      
+      if (teamLineup.length >= v.MAX_PLAYERS.value || (!player.isLocal && teamForeignCount >= v.MAX_FOREIGN_PLAYERS.value)) {
+        // Fallback to substitute if field is full or max foreigners reached
+        targetStatus = 'SUBSTITUTE'
+        notify(`Límite en cancha alcanzado. Agregado como suplente.`, 'error')
+      }
+    }
     
     await v.addToLineup(player.id, teamId, true, targetStatus)
     notify(`Ingreso confirmado: ${player.firstName} ${player.lastName} (${targetStatus})`)
@@ -929,7 +970,8 @@ async function doConfirmEntry() {
     }
   } catch (err) {
     console.error('Entry confirmation failed:', err)
-    notify('Error al confirmar ingreso', 'error')
+    const backendMessage = err?.response?._data?.message || err?.message
+    notify(backendMessage || 'Error al confirmar ingreso', 'error')
   } finally {
     addingPlayerId.value = null
     verifyingData.value = null
@@ -946,6 +988,8 @@ async function doAddToLineup(playerId, teamId) {
     await v.addToLineup(playerId, teamId)
   } catch (err) {
     console.error('Add to lineup failed:', err)
+    const backendMessage = err?.response?._data?.message || err?.message
+    notify(backendMessage || 'Error al agregar a nómina', 'error')
   } finally {
     addingPlayerId.value = null
   }
@@ -978,10 +1022,15 @@ function eventBorderColor(type) {
 
 async function doStartMatch() {
   if (!v.matchCanStart.value) {
-    const msg = !v.homeReady.value && !v.awayReady.value 
-      ? `Ambos equipos necesitan al menos ${v.MIN_PLAYERS} jugadores.`
-      : !v.homeReady.value ? `Faltan titulares en ${homeTeam.value?.name} (Min. ${v.MIN_PLAYERS})`
-      : `Faltan titulares en ${awayTeam.value?.name} (Min. ${v.MIN_PLAYERS})`
+    let msg = 'No se puede iniciar el partido. Revisa las alineaciones:\n'
+    if (!v.homeReady.value) msg += `- Faltan titulares en ${homeTeam.value?.name} (Mín. ${v.MIN_PLAYERS.value})\n`
+    if (v.homeActiveLineup.value.length > v.MAX_PLAYERS.value) msg += `- Demasiados titulares en ${homeTeam.value?.name} (Máx. ${v.MAX_PLAYERS.value})\n`
+    if (v.homeForeignCount.value > v.MAX_FOREIGN_PLAYERS.value) msg += `- Demasiados foráneos en ${homeTeam.value?.name} (Máx. ${v.MAX_FOREIGN_PLAYERS.value})\n`
+    
+    if (!v.awayReady.value) msg += `- Faltan titulares en ${awayTeam.value?.name} (Mín. ${v.MIN_PLAYERS.value})\n`
+    if (v.awayActiveLineup.value.length > v.MAX_PLAYERS.value) msg += `- Demasiados titulares en ${awayTeam.value?.name} (Máx. ${v.MAX_PLAYERS.value})\n`
+    if (v.awayForeignCount.value > v.MAX_FOREIGN_PLAYERS.value) msg += `- Demasiados foráneos en ${awayTeam.value?.name} (Máx. ${v.MAX_FOREIGN_PLAYERS.value})\n`
+    
     notify(msg, 'error')
     return
   }

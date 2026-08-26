@@ -15,11 +15,16 @@ export class PrismaTournamentRepository implements TournamentRepository {
         new Tournament(
           t.id,
           t.name,
-          t.headquartersId ?? undefined,
           t.maxYellowCardsForSuspension,
           t.active,
+          t.blockPlayerWithPendingFines,
+          t.maxForeignPlayersOnField,
+          t.maxPlayersOnField,
+          t.minPlayersToStartMatch,
+          t.matchHalfDurationMinutes,
           t.createdAt,
           t.updatedAt,
+          t.headquartersId ?? undefined
         ),
     );
   }
@@ -30,11 +35,16 @@ export class PrismaTournamentRepository implements TournamentRepository {
     return new Tournament(
       t.id,
       t.name,
-      t.headquartersId ?? undefined,
       t.maxYellowCardsForSuspension,
       t.active,
+      t.blockPlayerWithPendingFines,
+      t.maxForeignPlayersOnField,
+      t.maxPlayersOnField,
+      t.minPlayersToStartMatch,
+      t.matchHalfDurationMinutes,
       t.createdAt,
       t.updatedAt,
+      t.headquartersId ?? undefined
     );
   }
 
@@ -46,6 +56,11 @@ export class PrismaTournamentRepository implements TournamentRepository {
         headquartersId: tournament.headquartersId,
         maxYellowCardsForSuspension: tournament.maxYellowCardsForSuspension,
         active: tournament.active,
+        blockPlayerWithPendingFines: tournament.blockPlayerWithPendingFines,
+        maxForeignPlayersOnField: tournament.maxForeignPlayersOnField,
+        maxPlayersOnField: tournament.maxPlayersOnField,
+        minPlayersToStartMatch: tournament.minPlayersToStartMatch,
+        matchHalfDurationMinutes: tournament.matchHalfDurationMinutes,
       },
       create: {
         id: tournament.id,
@@ -53,16 +68,26 @@ export class PrismaTournamentRepository implements TournamentRepository {
         headquartersId: tournament.headquartersId,
         maxYellowCardsForSuspension: tournament.maxYellowCardsForSuspension,
         active: tournament.active,
+        blockPlayerWithPendingFines: tournament.blockPlayerWithPendingFines,
+        maxForeignPlayersOnField: tournament.maxForeignPlayersOnField,
+        maxPlayersOnField: tournament.maxPlayersOnField,
+        minPlayersToStartMatch: tournament.minPlayersToStartMatch,
+        matchHalfDurationMinutes: tournament.matchHalfDurationMinutes,
       },
     });
     return new Tournament(
       t.id,
       t.name,
-      t.headquartersId ?? undefined,
       t.maxYellowCardsForSuspension,
       t.active,
+      t.blockPlayerWithPendingFines,
+      t.maxForeignPlayersOnField,
+      t.maxPlayersOnField,
+      t.minPlayersToStartMatch,
+      t.matchHalfDurationMinutes,
       t.createdAt,
       t.updatedAt,
+      t.headquartersId ?? undefined
     );
   }
 
@@ -74,16 +99,26 @@ export class PrismaTournamentRepository implements TournamentRepository {
         headquartersId: tournament.headquartersId,
         maxYellowCardsForSuspension: tournament.maxYellowCardsForSuspension,
         active: tournament.active,
+        blockPlayerWithPendingFines: tournament.blockPlayerWithPendingFines,
+        maxForeignPlayersOnField: tournament.maxForeignPlayersOnField,
+        maxPlayersOnField: tournament.maxPlayersOnField,
+        minPlayersToStartMatch: tournament.minPlayersToStartMatch,
+        matchHalfDurationMinutes: tournament.matchHalfDurationMinutes,
       },
     });
     return new Tournament(
       t.id,
       t.name,
-      t.headquartersId ?? undefined,
       t.maxYellowCardsForSuspension,
       t.active,
+      t.blockPlayerWithPendingFines,
+      t.maxForeignPlayersOnField,
+      t.maxPlayersOnField,
+      t.minPlayersToStartMatch,
+      t.matchHalfDurationMinutes,
       t.createdAt,
       t.updatedAt,
+      t.headquartersId ?? undefined
     );
   }
 
@@ -99,11 +134,16 @@ export class PrismaTournamentRepository implements TournamentRepository {
     return new Tournament(
       t.id,
       t.name,
-      t.headquartersId ?? undefined,
       t.maxYellowCardsForSuspension,
       t.active,
+      t.blockPlayerWithPendingFines,
+      t.maxForeignPlayersOnField,
+      t.maxPlayersOnField,
+      t.minPlayersToStartMatch,
+      t.matchHalfDurationMinutes,
       t.createdAt,
       t.updatedAt,
+      t.headquartersId ?? undefined
     );
   }
 }

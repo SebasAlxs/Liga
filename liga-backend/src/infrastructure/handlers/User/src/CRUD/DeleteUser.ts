@@ -8,7 +8,7 @@ export const handler = async (req: Request, res: Response) => {
         const { id } = req.params;
         const repo = new PrismaUserRepository();
         const useCase = new DeleteUserUseCase(repo);
-        await useCase.execute(id as string, req.user?.id);
+        await useCase.execute(id as string, (req as any).user?.id);
         return successResponse(res, null, 200, "Usuario eliminado con éxito.");
     } catch (error: any) {
         return handleErrorResponse(res, error);

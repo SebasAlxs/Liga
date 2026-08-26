@@ -15,6 +15,11 @@ export class UpdateTournamentUseCase {
         if (request.headquartersId !== undefined) existingTournament.headquartersId = request.headquartersId;
         if (request.maxYellowCardsForSuspension !== undefined) existingTournament.maxYellowCardsForSuspension = request.maxYellowCardsForSuspension;
         if (request.active !== undefined) existingTournament.active = request.active;
+        if (request.blockPlayerWithPendingFines !== undefined) existingTournament.blockPlayerWithPendingFines = request.blockPlayerWithPendingFines;
+        if (request.maxForeignPlayersOnField !== undefined) existingTournament.maxForeignPlayersOnField = request.maxForeignPlayersOnField;
+        if (request.maxPlayersOnField !== undefined) existingTournament.maxPlayersOnField = request.maxPlayersOnField;
+        if (request.minPlayersToStartMatch !== undefined) existingTournament.minPlayersToStartMatch = request.minPlayersToStartMatch;
+        if (request.matchHalfDurationMinutes !== undefined) existingTournament.matchHalfDurationMinutes = request.matchHalfDurationMinutes;
 
         const updated = await this.tournamentRepository.update(existingTournament);
 
@@ -24,6 +29,11 @@ export class UpdateTournamentUseCase {
             headquartersId: updated.headquartersId,
             maxYellowCardsForSuspension: updated.maxYellowCardsForSuspension,
             active: updated.active,
+            blockPlayerWithPendingFines: updated.blockPlayerWithPendingFines,
+            maxForeignPlayersOnField: updated.maxForeignPlayersOnField,
+            maxPlayersOnField: updated.maxPlayersOnField,
+            minPlayersToStartMatch: updated.minPlayersToStartMatch,
+            matchHalfDurationMinutes: updated.matchHalfDurationMinutes,
             createdAt: updated.createdAt?.toISOString() || new Date().toISOString(),
             updatedAt: updated.updatedAt?.toISOString() || new Date().toISOString(),
         };

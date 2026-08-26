@@ -1,0 +1,10 @@
+model RuleItem {
+  id           String   @id @default(uuid())
+  tournamentId String
+  title        String
+  description  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+}

@@ -15,6 +15,11 @@ export class GetTournamentUseCase {
       active: tournament.active,
       maxYellowCardsForSuspension: tournament.maxYellowCardsForSuspension,
       headquartersId: tournament.headquartersId,
+      blockPlayerWithPendingFines: tournament.blockPlayerWithPendingFines,
+      maxForeignPlayersOnField: tournament.maxForeignPlayersOnField,
+      maxPlayersOnField: tournament.maxPlayersOnField,
+      minPlayersToStartMatch: tournament.minPlayersToStartMatch,
+      matchHalfDurationMinutes: tournament.matchHalfDurationMinutes,
       createdAt: tournament.createdAt?.toISOString() || new Date().toISOString(),
       updatedAt: tournament.updatedAt?.toISOString() || new Date().toISOString(),
     };

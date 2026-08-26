@@ -9,6 +9,11 @@
             "date": 1787521089840,
             "name": "/Users/alexis/Documents/Magdata/Liga/liga-backend/logs/error-2026-08-23.log",
             "hash": "ff95755f94ae37d9b3167bb7feb3e583612d7f958dcfd429ec0f5c8dc4ac6984"
+        },
+        {
+            "date": 1787707223658,
+            "name": "/Users/alexis/Documents/Magdata/Liga/liga-backend/logs/error-2026-08-25.log",
+            "hash": "a35a0c0f9b9ea47d742d4eb372f376a601d400b4b6bb275d82c332e94a2f3a9c"
         }
     ],
     "hashType": "sha256"

@@ -6,9 +6,16 @@ model Tournament {
   updatedAt                   DateTime      @updatedAt
   headquartersId              String?
   maxYellowCardsForSuspension Int           @default(3)
+  blockPlayerWithPendingFines Boolean       @default(false)
+  maxForeignPlayersOnField    Int           @default(4)
+  maxPlayersOnField           Int           @default(11)
+  minPlayersToStartMatch      Int           @default(7)
+  matchHalfDurationMinutes    Int           @default(45)
   matches                     Match[]
   suspensions                 Suspension[]
   teams                       Team[]
+  stages                      Stage[]
+  ruleItems                   RuleItem[]
   headquarters                Headquarters? @relation(fields: [headquartersId], references: [id])
 
   @@index([name])

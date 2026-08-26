@@ -19,7 +19,7 @@ export const handler = async (req: Request, res: Response) => {
         
         const payload = {
             ...req.body,
-            managerId: req.user?.role === 'DIRIGENTE' ? req.user.id : undefined
+            managerId: (req as any).user?.role === 'DIRIGENTE' ? (req as any).user.id : undefined
         };
         const team = await useCase.execute(payload);
         return successResponse(res, team, 201, "Equipo creado con éxito.");

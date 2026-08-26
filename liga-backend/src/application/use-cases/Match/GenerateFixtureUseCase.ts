@@ -3,12 +3,14 @@ import { Match, MatchStatus } from "../../../domain/entities/Match";
 import { Team } from "../../../domain/entities/Team";
 import { MatchRepository } from "../../../domain/repositories/MatchRepository";
 import { TeamRepository } from "../../../domain/repositories/TeamRepository";
+import { StageRepository } from "../../../domain/repositories/StageRepository";
 import { DomainError } from "../../../domain/exceptions/DomainError";
+import { StageType } from "../../../domain/entities/Stage";
 
 export interface GenerateFixtureRequest {
     tournamentId: string;
     categoryId: string;
-    doubleRound: boolean;
+    stageId: string;
 }
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -16,23 +18,39 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 export class GenerateFixtureUseCase {
     constructor(
         private matchRepository: MatchRepository,
-        private teamRepository: TeamRepository
+        private teamRepository: TeamRepository,
+        private stageRepository: StageRepository
     ) { }
 
     async execute(request: GenerateFixtureRequest): Promise<Match[]> {
-        const { tournamentId, categoryId, doubleRound } = request;
+        const { tournamentId, categoryId, stageId } = request;
+
+        const stage = await this.stageRepository.findById(stageId);
+        if (!stage) {
+            throw new DomainError("Stage no encontrada.");
+        }
 
         const { items: teams } = await this.teamRepository.findAll(undefined, { tournamentId, categoryId });
         if (teams.length < 2) {
             throw new DomainError("Se necesitan al menos 2 equipos en el torneo y categoría para generar el fixture.");
         }
 
+        // Si es una liga todos contra todos, validamos si ya hay un fixture generado para este stage y categoria
+        // Por simplificar, si ya hay partidos en este stage y categoria, abortar
         const existing = await this.matchRepository.findByTournamentAndCategory(tournamentId, categoryId);
-        if (existing.length > 0) {
-            throw new DomainError("Ya existe un fixture generado para este torneo y categoría.");
+        if (existing.some(m => m.stageId === stageId)) {
+            throw new DomainError("Ya existe un fixture generado para esta fase y categoría.");
         }
 
-        const pairings = this.generateRoundRobinPairings(teams, doubleRound);
+        let pairings: { round: number; home: Team; away: Team }[] = [];
+
+        if (stage.type === StageType.LEAGUE || stage.type === StageType.GROUP_STAGE) {
+            pairings = this.generateRoundRobinPairings(teams, stage.isTwoLegged);
+        } else if (stage.type === StageType.KNOCKOUT) {
+            // Un generador simple para Knockout (Empareja el 1 vs N, 2 vs N-1) o aleatorio.
+            // Para mantener compatibilidad con lo anterior, lo emparejaremos de forma simple
+            pairings = this.generateKnockoutPairings(teams, stage.isTwoLegged);
+        }
 
         const baseDate = new Date();
         const matches = pairings.map(({ round, home, away }) => {
@@ -51,11 +69,33 @@ export class GenerateFixtureUseCase {
                 undefined, undefined, undefined, undefined,
                 undefined, undefined, undefined,
                 undefined, undefined,
-                round
+                round,
+                stage.id
             );
         });
 
         return this.matchRepository.createMany(matches);
+    }
+
+    private generateKnockoutPairings(teams: Team[], doubleRound: boolean): { round: number; home: Team; away: Team }[] {
+        const pairings: { round: number; home: Team; away: Team }[] = [];
+        const n = teams.length;
+        const half = Math.floor(n / 2);
+        
+        for (let i = 0; i < half; i++) {
+            const home = teams[i];
+            const away = teams[n - 1 - i];
+            pairings.push({ round: 1, home, away });
+        }
+
+        if (doubleRound) {
+            const currentPairings = [...pairings];
+            for (const p of currentPairings) {
+                pairings.push({ round: 2, home: p.away, away: p.home });
+            }
+        }
+
+        return pairings;
     }
 
     private generateRoundRobinPairings(teams: Team[], doubleRound: boolean): { round: number; home: Team; away: Team }[] {

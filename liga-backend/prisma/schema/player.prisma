@@ -1,18 +1,18 @@
 model Player {
-  id          String        @id @default(uuid())
+  id          String              @id @default(uuid())
   firstName   String
   lastName    String
   number      Int
   picture     String?
   teamId      String
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
   birthDate   DateTime?
-  dni         String?       @unique
-  isLocal     Boolean       @default(true)
+  dni         String?             @unique
+  isLocal     Boolean             @default(true)
   events      MatchEvent[]
   lineup      MatchLineup[]
-  team        Team          @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  team        Team                @relation(fields: [teamId], references: [id], onDelete: Cascade)
   suspensions Suspension[]
   fines       Fine[]
   teamHistory PlayerTeamHistory[]

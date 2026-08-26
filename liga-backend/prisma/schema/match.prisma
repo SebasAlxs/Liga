@@ -23,6 +23,9 @@ model Match {
   suspensions         Suspension[]
   fines               Fine[]
 
+  stageId String?
+  stage   Stage?  @relation(fields: [stageId], references: [id])
+
   // Referees
   refereeId       String?
   assistant1Id    String?

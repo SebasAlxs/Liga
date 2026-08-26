@@ -11,6 +11,7 @@ export interface SuspensionResponse {
     matchId?: string;
     reason: string;
     matchesSuspended: number;
+    servedMatches: number;
     status: SuspensionStatus;
     createdAt?: string;
     updatedAt?: string;

@@ -12,6 +12,11 @@ export class GetAllTournamentsUseCase {
             headquartersId: t.headquartersId,
             maxYellowCardsForSuspension: t.maxYellowCardsForSuspension,
             active: t.active,
+            blockPlayerWithPendingFines: t.blockPlayerWithPendingFines,
+            maxForeignPlayersOnField: t.maxForeignPlayersOnField,
+            maxPlayersOnField: t.maxPlayersOnField,
+            minPlayersToStartMatch: t.minPlayersToStartMatch,
+            matchHalfDurationMinutes: t.matchHalfDurationMinutes,
             createdAt: t.createdAt?.toISOString() || new Date().toISOString(),
             updatedAt: t.updatedAt?.toISOString() || new Date().toISOString(),
         }));

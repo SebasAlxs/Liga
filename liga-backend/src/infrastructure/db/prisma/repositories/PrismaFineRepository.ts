@@ -33,6 +33,18 @@ export class PrismaFineRepository implements FineRepository {
     }) as unknown as Fine | null;
   }
 
+  async findByPlayer(playerId: string): Promise<Fine[]> {
+    return prisma.fine.findMany({
+      where: { playerId },
+      include: {
+        player: true,
+        match: true,
+        team: true
+      },
+      orderBy: { createdAt: 'desc' }
+    }) as unknown as Fine[];
+  }
+
   async create(data: Omit<Fine, 'id' | 'createdAt' | 'updatedAt'>): Promise<Fine> {
     return prisma.fine.create({ 
       data,

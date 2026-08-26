@@ -29,7 +29,8 @@ export class Match {
         public secondHalfStartedAt?: Date | null,
         public createdAt?: Date,
         public updatedAt?: Date,
-        public round?: number | null) {
+        public round?: number | null,
+        public stageId?: string | null) {
         this.validate();
     }
 

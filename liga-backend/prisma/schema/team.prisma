@@ -1,32 +1,32 @@
 model Team {
-  id               String        @id @default(uuid())
+  id               String              @id @default(uuid())
   name             String
-  logo             String        @default("")
+  logo             String              @default("")
   foundedYear      Int
   championshipsWon Int?
   categoryId       String?
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  goalDifference   Int           @default(0)
-  goalsAgainst     Int           @default(0)
-  goalsFor         Int           @default(0)
-  matchesDrawn     Int           @default(0)
-  matchesLost      Int           @default(0)
-  matchesPlayed    Int           @default(0)
-  matchesWon       Int           @default(0)
-  points           Int           @default(0)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  goalDifference   Int                 @default(0)
+  goalsAgainst     Int                 @default(0)
+  goalsFor         Int                 @default(0)
+  matchesDrawn     Int                 @default(0)
+  matchesLost      Int                 @default(0)
+  matchesPlayed    Int                 @default(0)
+  matchesWon       Int                 @default(0)
+  points           Int                 @default(0)
   tournamentId     String?
   managerId        String?
-  awayMatches      Match[]       @relation("AwayMatches")
-  homeMatches      Match[]       @relation("HomeMatches")
+  awayMatches      Match[]             @relation("AwayMatches")
+  homeMatches      Match[]             @relation("HomeMatches")
   events           MatchEvent[]
   lineup           MatchLineup[]
   players          Player[]
-  fines            Fine[]        @relation("TeamFines")
+  fines            Fine[]              @relation("TeamFines")
   playerHistory    PlayerTeamHistory[]
-  category         Category?     @relation(fields: [categoryId], references: [id])
-  tournament       Tournament?   @relation(fields: [tournamentId], references: [id])
-  manager          User?         @relation(fields: [managerId], references: [id])
+  category         Category?           @relation(fields: [categoryId], references: [id])
+  tournament       Tournament?         @relation(fields: [tournamentId], references: [id])
+  manager          User?               @relation(fields: [managerId], references: [id])
 
   @@index([name])
   @@index([tournamentId])

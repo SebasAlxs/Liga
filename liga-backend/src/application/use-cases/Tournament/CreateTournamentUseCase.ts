@@ -10,9 +10,16 @@ export class CreateTournamentUseCase {
         const tournament = new Tournament(
             crypto.randomUUID(),
             request.name,
-            request.headquartersId,
             request.maxYellowCardsForSuspension ?? 3,
-            request.active ?? true
+            request.active ?? true,
+            request.blockPlayerWithPendingFines ?? false,
+            request.maxForeignPlayersOnField ?? 4,
+            request.maxPlayersOnField ?? 11,
+            request.minPlayersToStartMatch ?? 7,
+            request.matchHalfDurationMinutes ?? 45,
+            undefined,
+            undefined,
+            request.headquartersId
         );
 
         const created = await this.tournamentRepository.save(tournament);
@@ -23,6 +30,11 @@ export class CreateTournamentUseCase {
             headquartersId: created.headquartersId,
             maxYellowCardsForSuspension: created.maxYellowCardsForSuspension,
             active: created.active,
+            blockPlayerWithPendingFines: created.blockPlayerWithPendingFines,
+            maxForeignPlayersOnField: created.maxForeignPlayersOnField,
+            maxPlayersOnField: created.maxPlayersOnField,
+            minPlayersToStartMatch: created.minPlayersToStartMatch,
+            matchHalfDurationMinutes: created.matchHalfDurationMinutes,
             createdAt: created.createdAt?.toISOString() || new Date().toISOString(),
             updatedAt: created.updatedAt?.toISOString() || new Date().toISOString(),
         };

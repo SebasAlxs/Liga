@@ -13,7 +13,8 @@ export class Suspension {
         public readonly createdAt?: Date,
         public readonly updatedAt?: Date,
         public teamId?: string,
-        public fineId?: string
+        public fineId?: string,
+        public servedMatches: number = 0
     ) {
         this.validate();
     }
@@ -23,6 +24,7 @@ export class Suspension {
         if (!this.tournamentId || this.tournamentId.trim() === "") throw new DomainError("La suspensión requiere un tournamentId válido.");
         if (!this.reason || this.reason.trim() === "") throw new DomainError("La razón de la suspensión es obligatoria.");
         if (this.matchesSuspended < 1) throw new DomainError("El número de partidos de suspensión debe ser al menos 1.");
+        if (this.servedMatches < 0) throw new DomainError("Los partidos cumplidos no pueden ser negativos.");
 
         const validStatuses = ["ACTIVE", "SERVED", "APPEALED"];
         if (!validStatuses.includes(this.status)) {

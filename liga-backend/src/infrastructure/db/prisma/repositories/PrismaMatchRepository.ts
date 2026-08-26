@@ -31,7 +31,8 @@ export class PrismaMatchRepository implements MatchRepository {
             created.secondHalfStartedAt,
             created.createdAt,
             created.updatedAt,
-            created.round
+            created.round,
+            created.stageId
         );
     }
 
@@ -55,6 +56,7 @@ export class PrismaMatchRepository implements MatchRepository {
                 assistant1Id: match.assistant1Id,
                 assistant2Id: match.assistant2Id,
                 fourthRefereeId: match.fourthRefereeId,
+                stageId: match.stageId ?? undefined,
             },
             include: {
                 primaryReferee: true,
@@ -82,6 +84,7 @@ export class PrismaMatchRepository implements MatchRepository {
                         tournamentId: match.tournamentId,
                         categoryId: match.categoryId,
                         status: match.status as PrismaMatchStatus,
+                        stageId: match.stageId ?? undefined,
                     }
                 })
             )
@@ -156,6 +159,7 @@ export class PrismaMatchRepository implements MatchRepository {
                 tournamentId: true,
                 categoryId: true,
                 status: true,
+                stageId: true,
                 createdAt: true,
                 updatedAt: true,
             },
@@ -182,6 +186,7 @@ export class PrismaMatchRepository implements MatchRepository {
                 assistant1Id: match.assistant1Id,
                 assistant2Id: match.assistant2Id,
                 fourthRefereeId: match.fourthRefereeId,
+                stageId: match.stageId ?? undefined,
             },
             include: {
                 primaryReferee: true,

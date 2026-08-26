@@ -7,6 +7,11 @@ export interface TournamentEntry {
   name: string
   active: boolean
   maxYellowCardsForSuspension: number
+  blockPlayerWithPendingFines: boolean
+  maxForeignPlayersOnField: number
+  maxPlayersOnField: number
+  minPlayersToStartMatch: number
+  matchHalfDurationMinutes: number
   headquartersId?: string
 }
 
