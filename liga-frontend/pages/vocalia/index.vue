@@ -159,6 +159,25 @@
         </div>
       </div>
 
+      <!-- Player search -->
+      <div class="mb-6 relative flex items-center">
+        <Icon name="lucide:search" class="absolute left-4 w-4 h-4 text-content-muted pointer-events-none z-10" />
+        <input
+          v-model="playerSearch"
+          type="text"
+          placeholder="Buscar jugador por nombre o número..."
+          class="field-input text-sm w-full"
+          style="padding-left: 2.75rem;"
+        />
+        <button
+          v-if="playerSearch"
+          @click="playerSearch = ''"
+          class="absolute right-4 text-content-muted hover:text-content"
+        >
+          <Icon name="lucide:x" class="w-4 h-4" />
+        </button>
+      </div>
+
       <!-- Two columns: home | away -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div v-for="side in checkinSides" :key="side.id" class="glass rounded-3xl border border-border overflow-hidden">
@@ -198,9 +217,12 @@
             <p v-if="!side.players.length" class="text-center text-sm text-content-muted py-8">
               Sin jugadores registrados en este equipo.
             </p>
+            <p v-else-if="!filteredPlayers(side).length" class="text-center text-sm text-content-muted py-8">
+              Sin resultados para "{{ playerSearch }}".
+            </p>
 
             <div
-              v-for="p in side.players"
+              v-for="p in filteredPlayers(side)"
               :key="p.id"
               :class="[
                 'flex items-center gap-3 p-3 rounded-xl border transition-all',
@@ -832,6 +854,7 @@ const eventForm = ref({ type: 'GOAL', minute: null, relatedPlayerId: '' })
 const addingPlayerId = ref(null)    // shows spinner while adding
 const checkingInId = ref(null)      // shows spinner while toggling check-in
 const isVerifyingForSubstitution = ref(false)
+const playerSearch = ref('')        // check-in phase player search
 
 // Verification modal state
 const showVerifyModal = ref(false)
@@ -918,6 +941,16 @@ function emoji(type) { return { GOAL: '⚽', ASSIST: '🎯', YELLOW_CARD: '🟨'
 function subsByTeam(teamId) { return v[teamId === v.activeMatch.value?.homeTeamId ? 'homeSubstitutes' : 'awaySubstitutes'].value }
 // helper for template: find lineup row for a player
 function lineupFor(lineup, playerId) { return lineup.find(l => l.playerId === playerId) }
+
+function filteredPlayers(side) {
+  const q = playerSearch.value.trim().toLowerCase()
+  if (!q) return side.players
+  return side.players.filter(p => {
+    const fullName = `${p.firstName ?? ''} ${p.lastName ?? ''}`.toLowerCase()
+    const number = String(p.number ?? '')
+    return fullName.includes(q) || number.includes(q)
+  })
+}
 
 function getAge(birthDate) {
   if (!birthDate) return null
