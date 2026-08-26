@@ -31,7 +31,9 @@ export class GetMatchByIdUseCase {
             primaryReferee: match.primaryReferee,
             assistant1: match.assistant1,
             assistant2: match.assistant2,
-            fourthReferee: match.fourthReferee
+            fourthReferee: match.fourthReferee,
+            stageId: match.stageId,
+            stage: match.stage
         };
     }
 }

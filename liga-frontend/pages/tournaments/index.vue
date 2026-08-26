@@ -116,13 +116,6 @@
               <td class="px-6 py-4 text-right">
                 <div v-if="authStore.isAdmin" class="flex items-center justify-end gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
                   <button
-                    @click="openFixtureModal(item)"
-                    class="p-2 hover:bg-primary/20 rounded-lg text-content-muted hover:text-emerald-400 transition-colors"
-                    title="Generar Fixture"
-                  >
-                    <Icon name="lucide:calendar-cog" class="w-4 h-4" />
-                  </button>
-                  <button
                     @click="openEditModal(item)"
                     class="p-2 hover:bg-primary/20 rounded-lg text-content-muted hover:text-emerald-400 transition-colors"
                     title="Editar"
@@ -241,87 +234,6 @@
         </form>
       </div>
     </div>
-
-    <!-- Fixture Modal -->
-    <div v-if="showFixtureModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-background backdrop-blur-md" @click="closeFixtureModal"></div>
-
-      <div class="glass-card w-full max-w-lg rounded-3xl border border-border/10 p-8 shadow-2xl relative animate-in fade-in zoom-in duration-300 overflow-hidden overflow-y-auto max-h-[90vh]">
-        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent"></div>
-
-        <header class="flex justify-between items-start mb-8">
-          <div>
-            <h2 class="text-2xl font-bold text-content">Generar Fixture</h2>
-            <p class="text-sm text-content-muted mt-1">{{ fixtureTournament?.name }}</p>
-          </div>
-          <button @click="closeFixtureModal" class="p-2 hover:bg-surface/5 rounded-xl text-content-muted hover:text-content transition-colors">
-            <Icon name="lucide:x" class="w-6 h-6" />
-          </button>
-        </header>
-
-        <div class="space-y-5">
-          <div>
-            <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-2">Categoría</label>
-            <select
-              v-model="fixtureForm.categoryId"
-              class="w-full bg-surface border border-border/10 rounded-xl px-4 py-3 text-content focus:outline-none focus:border-primary transition-all"
-            >
-              <option value="" disabled>Selecciona una categoría</option>
-              <option v-for="c in matchStore.categories" :key="c.id" :value="c.id">{{ c.name }}</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-content-muted uppercase tracking-widest mb-3">Modalidad</label>
-            <div class="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                @click="fixtureForm.doubleRound = false"
-                :class="`px-4 py-3 rounded-xl border text-sm font-bold transition-all ${!fixtureForm.doubleRound ? 'bg-primary/20 border-primary text-emerald-400' : 'bg-surface border-border/10 text-content-muted hover:border-border/20'}`"
-              >
-                Solo ida
-              </button>
-              <button
-                type="button"
-                @click="fixtureForm.doubleRound = true"
-                :class="`px-4 py-3 rounded-xl border text-sm font-bold transition-all ${fixtureForm.doubleRound ? 'bg-primary/20 border-primary text-emerald-400' : 'bg-surface border-border/10 text-content-muted hover:border-border/20'}`"
-              >
-                Ida y vuelta
-              </button>
-            </div>
-          </div>
-
-          <!-- Buttons -->
-          <div class="pt-4 flex gap-3">
-            <button
-              type="button"
-              @click="closeFixtureModal"
-              class="flex-1 px-4 py-4 rounded-2xl border border-border/10 text-content hover:bg-surface/5 transition-all font-bold text-sm"
-            >
-              Cerrar
-            </button>
-            <button
-              type="button"
-              :disabled="fixtureLoading || !fixtureForm.categoryId"
-              @click="handleDownloadFixturePdf"
-              class="px-4 py-4 rounded-2xl border border-border/10 text-content hover:bg-surface/5 transition-all font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              <Icon name="lucide:download" class="w-4 h-4" />
-              PDF
-            </button>
-            <button
-              type="button"
-              :disabled="fixtureLoading || !fixtureForm.categoryId"
-              @click="handleGenerateFixture"
-              class="flex-1 px-4 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-obsidian-950 hover:from-emerald-400 hover:to-teal-400 transition-all font-bold text-sm shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              <Icon v-if="fixtureLoading" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
-              Generar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -329,7 +241,6 @@
 const authStore = useAuthStore()
 const tournamentStore = useTournamentStore()
 const headquartersStore = useHeadquartersStore()
-const matchStore = useMatchStore()
 
 const searchQuery = ref('')
 const showModal = ref(false)
@@ -337,11 +248,6 @@ const isEditing = ref(false)
 const loading = ref(false)
 const notification = ref(null)
 const editingId = ref(null)
-
-const showFixtureModal = ref(false)
-const fixtureTournament = ref(null)
-const fixtureLoading = ref(false)
-const fixtureForm = ref({ categoryId: '', doubleRound: false })
 
 const filteredTournaments = computed(() => {
   let list = tournamentStore.tournaments
@@ -432,44 +338,9 @@ async function handleDeleteTournament(item) {
   loading.value = false
 }
 
-function openFixtureModal(item) {
-  fixtureTournament.value = item
-  fixtureForm.value = { categoryId: '', doubleRound: false }
-  showFixtureModal.value = true
-}
-
-function closeFixtureModal() {
-  showFixtureModal.value = false
-  fixtureTournament.value = null
-}
-
-async function handleGenerateFixture() {
-  if (!fixtureTournament.value || !fixtureForm.value.categoryId) return
-  fixtureLoading.value = true
-  const res = await matchStore.generateFixture(fixtureTournament.value.id, fixtureForm.value.categoryId, fixtureForm.value.doubleRound)
-  fixtureLoading.value = false
-  if (res.success) {
-    notify(res.message)
-    closeFixtureModal()
-  } else {
-    notify(res.message, 'error')
-  }
-}
-
-async function handleDownloadFixturePdf() {
-  if (!fixtureTournament.value || !fixtureForm.value.categoryId) return
-  fixtureLoading.value = true
-  const res = await matchStore.downloadFixturePdf(fixtureTournament.value.id, fixtureForm.value.categoryId)
-  fixtureLoading.value = false
-  if (!res.success) {
-    notify(res.message, 'error')
-  }
-}
-
 onMounted(() => {
   tournamentStore.fetchTournaments()
   headquartersStore.fetchHeadquarters()
-  matchStore.fetchCategories()
 })
 </script>
 

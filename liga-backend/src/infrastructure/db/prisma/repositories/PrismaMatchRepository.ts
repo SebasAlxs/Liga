@@ -32,7 +32,8 @@ export class PrismaMatchRepository implements MatchRepository {
             created.createdAt,
             created.updatedAt,
             created.round,
-            created.stageId
+            created.stageId,
+            created.stage || undefined
         );
     }
 
@@ -62,7 +63,8 @@ export class PrismaMatchRepository implements MatchRepository {
                 primaryReferee: true,
                 assistant1: true,
                 assistant2: true,
-                fourthReferee: true
+                fourthReferee: true,
+                stage: true
             }
         });
 
@@ -93,9 +95,9 @@ export class PrismaMatchRepository implements MatchRepository {
         return created.map((m) => this.mapToEntity(m));
     }
 
-    async findByTournamentAndCategory(tournamentId: string, categoryId: string): Promise<Match[]> {
+    async findByTournamentAndCategory(tournamentId: string, categoryId: string, stageId?: string): Promise<Match[]> {
         const matches = await this.prisma.match.findMany({
-            where: { tournamentId, categoryId },
+            where: { tournamentId, categoryId, ...(stageId ? { stageId } : {}) },
             orderBy: [{ round: "asc" }, { matchDate: "asc" }]
         });
         return matches.map((m) => this.mapToEntity(m));
@@ -108,7 +110,8 @@ export class PrismaMatchRepository implements MatchRepository {
                 primaryReferee: true,
                 assistant1: true,
                 assistant2: true,
-                fourthReferee: true
+                fourthReferee: true,
+                stage: true
             }
         });
         if (!match) return null;
@@ -132,7 +135,8 @@ export class PrismaMatchRepository implements MatchRepository {
                     primaryReferee: true,
                     assistant1: true,
                     assistant2: true,
-                    fourthReferee: true
+                    fourthReferee: true,
+                    stage: true
                 }
             }),
             this.prisma.match.count({ where }),
@@ -192,7 +196,8 @@ export class PrismaMatchRepository implements MatchRepository {
                 primaryReferee: true,
                 assistant1: true,
                 assistant2: true,
-                fourthReferee: true
+                fourthReferee: true,
+                stage: true
             }
         });
         return this.mapToEntity(updated);

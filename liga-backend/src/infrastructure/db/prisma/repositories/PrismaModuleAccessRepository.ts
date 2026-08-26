@@ -17,6 +17,7 @@ const MODULE_KEYS = [
     "venues",
     "fines",
     "sanctions",
+    "fixture",
 ];
 const ROLES = ["SUPERADMIN", "ADMIN", "VOCAL", "DIRIGENTE"];
 
@@ -24,9 +25,6 @@ export class PrismaModuleAccessRepository implements ModuleAccessRepository {
     private prisma = prisma;
 
     private async ensureSeeded() {
-        const count = await this.prisma.moduleAccess.count();
-        if (count > 0) return;
-
         const data = ROLES.flatMap((role) =>
             MODULE_KEYS.map((module) => ({ role: role as any, module, visible: true }))
         );

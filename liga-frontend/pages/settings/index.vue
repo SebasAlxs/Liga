@@ -29,55 +29,76 @@
             <p class="text-xs text-content-muted">Reglas generales, aplican a toda la liga</p>
           </div>
         </div>
-        <button v-if="authStore.isAdmin" @click="openModal('ruleItem')" class="add-btn">
-          <Icon name="lucide:plus" class="w-4 h-4" /> Nueva Regla
-        </button>
       </div>
 
-      <div class="section-body max-h-none space-y-4">
-        <div class="item-row !cursor-default">
-          <div class="flex-1 min-w-0">
-            <p class="font-semibold text-content text-sm">Foráneos en cancha</p>
-            <p class="text-xs text-content-muted">Máximo {{ activeTournament?.maxForeignPlayersOnField ?? 4 }}, el resto locales</p>
-          </div>
-          <button v-if="authStore.isAdmin" @click="openRulesModal" class="action-btn hover:text-emerald-400 hover:bg-primary/10" title="Editar">
-            <Icon name="lucide:edit-2" class="w-3.5 h-3.5" />
-          </button>
-        </div>
-        <div class="item-row !cursor-default">
-          <div class="flex-1 min-w-0">
-            <p class="font-semibold text-content text-sm">Jugadores en Cancha</p>
-            <p class="text-xs text-content-muted">{{ activeTournament?.maxPlayersOnField ?? 11 }} jugadores (Mínimo para iniciar: {{ activeTournament?.minPlayersToStartMatch ?? 7 }})</p>
-          </div>
-        </div>
-        <div class="item-row !cursor-default">
-          <div class="flex-1 min-w-0">
-            <p class="font-semibold text-content text-sm">Duración por Tiempo</p>
-            <p class="text-xs text-content-muted">{{ activeTournament?.matchHalfDurationMinutes ?? 45 }} minutos base</p>
-          </div>
-        </div>
-
-        <!-- Lista libre de reglas -->
-        <div v-if="ruleItemsLoading" class="py-8 flex justify-center">
-          <div class="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-cyan-500"></div>
-        </div>
-        <div v-else-if="!leagueRuleItemStore.items.length" class="py-8 text-center">
-          <Icon name="lucide:scroll-text" class="w-8 h-8 text-content-muted mx-auto mb-2" />
-          <p class="text-sm text-content-muted">Sin reglas adicionales registradas</p>
-        </div>
-        <div v-else class="space-y-2">
-          <div v-for="item in leagueRuleItemStore.items" :key="item.id" class="item-row group items-start">
-            <div class="flex-1 min-w-0">
-              <p class="font-semibold text-content text-sm">{{ item.title }}</p>
-              <p class="text-xs text-content-muted whitespace-pre-line">{{ item.description || 'Sin descripción' }}</p>
+      <div class="section-body max-h-none space-y-6">
+        
+        <!-- Reglas del Sistema -->
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-content flex items-center gap-2">
+                <Icon name="lucide:settings-2" class="w-4 h-4 text-cyan-400" />
+                Reglas del Sistema
+              </h3>
+              <p class="text-[10px] text-content-muted">Parámetros que controlan los límites y bloqueos automáticos en la liga.</p>
             </div>
-            <div v-if="authStore.isAdmin" class="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex-shrink-0">
-              <button @click="openEditModal('ruleItem', item)" class="action-btn hover:text-emerald-400 hover:bg-primary/10" title="Editar">
-                <Icon name="lucide:edit-2" class="w-3.5 h-3.5" />
-              </button>
-              <button @click="handleDelete('ruleItem', item)" class="action-btn hover:text-rose-400 hover:bg-rose-500/10" title="Eliminar">
-                <Icon name="lucide:trash-2" class="w-3.5 h-3.5" />
-              </button>
+            <button v-if="authStore.isAdmin" @click="openRulesModal" class="add-btn !bg-surface-hover !border-border/50 !text-content-muted hover:!text-cyan-400">
+              <Icon name="lucide:edit-2" class="w-3.5 h-3.5" /> Editar Sistema
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="flex items-start gap-3 p-3 rounded-xl bg-surface-hover/30 border border-border/30">
+              <div class="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center flex-shrink-0">
+                <Icon name="lucide:globe" class="w-4 h-4" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-content text-sm">Foráneos en cancha</p>
+                <p class="text-xs text-content-muted">Máximo {{ activeTournament?.maxForeignPlayersOnField ?? 4 }} en el campo</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3 p-3 rounded-xl bg-surface-hover/30 border border-border/30">
+              <div class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center flex-shrink-0">
+                <Icon name="lucide:users" class="w-4 h-4" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-content text-sm">Jugadores en Cancha</p>
+                <p class="text-xs text-content-muted">Max: {{ activeTournament?.maxPlayersOnField ?? 11 }} · Min: {{ activeTournament?.minPlayersToStartMatch ?? 7 }}</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3 p-3 rounded-xl bg-surface-hover/30 border border-border/30">
+              <div class="w-8 h-8 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center flex-shrink-0">
+                <Icon name="lucide:clock" class="w-4 h-4" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-content text-sm">Tiempo de Juego</p>
+                <p class="text-xs text-content-muted">{{ activeTournament?.matchHalfDurationMinutes ?? 45 }} minutos por tiempo</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3 p-3 rounded-xl bg-surface-hover/30 border border-border/30">
+              <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center flex-shrink-0">
+                <Icon name="lucide:square" class="w-4 h-4" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-content text-sm">Tarjetas Amarillas</p>
+                <p class="text-xs text-content-muted">{{ activeTournament?.maxYellowCardsForSuspension ?? 3 }} amarillas = Suspensión</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3 p-3 rounded-xl bg-surface-hover/30 border border-border/30 md:col-span-2">
+              <div :class="`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${activeTournament?.blockPlayerWithPendingFines ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'}`">
+                <Icon :name="activeTournament?.blockPlayerWithPendingFines ? 'lucide:shield-alert' : 'lucide:shield-check'" class="w-4 h-4" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-content text-sm">Bloqueo por Multas</p>
+                <p class="text-xs text-content-muted">
+                  {{ activeTournament?.blockPlayerWithPendingFines ? 'Activado: Los jugadores con multas pendientes no pueden jugar.' : 'Desactivado: Las multas no impiden que un jugador sea alineado.' }}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -330,7 +351,22 @@
                 <input v-model.number="modalForm.minPlayersToStartMatch" type="number" min="1" max="11" required class="field-input" placeholder="7" />
               </div>
             </div>
-            <p class="text-xs text-content-muted mt-1.5">Estas configuraciones se aplican a toda la liga.</p>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="field-label">Amarillas para Suspensión *</label>
+                <input v-model.number="modalForm.maxYellowCardsForSuspension" type="number" min="1" max="10" required class="field-input" placeholder="3" />
+              </div>
+              <div>
+                <label class="field-label flex items-center gap-2">Bloqueo por Multas</label>
+                <button type="button" @click="modalForm.blockPlayerWithPendingFines = !modalForm.blockPlayerWithPendingFines" :class="['w-full h-[46px] rounded-xl border text-sm font-bold transition-all flex items-center justify-center gap-2', modalForm.blockPlayerWithPendingFines ? 'bg-rose-500/10 border-rose-500/30 text-rose-400' : 'bg-surface border-border/50 text-content-muted']">
+                  <Icon :name="modalForm.blockPlayerWithPendingFines ? 'lucide:shield-alert' : 'lucide:shield-check'" class="w-4 h-4" />
+                  {{ modalForm.blockPlayerWithPendingFines ? 'Bloquear deudores' : 'Permitir jugar' }}
+                </button>
+              </div>
+            </div>
+            <p class="text-xs text-content-muted mt-2 text-center bg-cyan-500/10 p-2 rounded-lg text-cyan-400 border border-cyan-500/20">
+              <Icon name="lucide:info" class="w-3.5 h-3.5 inline-block mr-1" /> Estas configuraciones afectan el comportamiento automático del torneo.
+            </p>
           </template>
 
           <!-- RULE ITEM (lista libre de reglas) -->
@@ -576,6 +612,8 @@ async function handleModalSubmit() {
       maxPlayersOnField: Number(modalForm.value.maxPlayersOnField),
       minPlayersToStartMatch: Number(modalForm.value.minPlayersToStartMatch),
       matchHalfDurationMinutes: Number(modalForm.value.matchHalfDurationMinutes),
+      maxYellowCardsForSuspension: Number(modalForm.value.maxYellowCardsForSuspension),
+      blockPlayerWithPendingFines: Boolean(modalForm.value.blockPlayerWithPendingFines)
     }
     const tournamentStore = useTournamentStore()
     const res = await tournamentStore.updateTournament(editingId.value, payload)

@@ -25,6 +25,8 @@ export interface Match {
   fourthReferee?: any
   createdAt?: string
   updatedAt?: string
+  stageId?: string
+  stage?: any
 }
 
 export interface Tournament {
@@ -101,9 +103,9 @@ export const useMatchStore = defineStore('match', () => {
     }
   }
 
-  async function generateFixture(tournamentId: string, categoryId: string, doubleRound: boolean) {
+  async function generateFixture(tournamentId: string, categoryId: string, stageId: string) {
     try {
-      await $api('/matches/fixture/generate', { method: 'POST', body: { tournamentId, categoryId, doubleRound } })
+      await $api('/matches/fixture/generate', { method: 'POST', body: { tournamentId, categoryId, stageId } })
       await fetchMatches()
       return { success: true, message: 'Fixture generado correctamente' }
     } catch (err: any) {
@@ -111,9 +113,10 @@ export const useMatchStore = defineStore('match', () => {
     }
   }
 
-  async function downloadFixturePdf(tournamentId: string, categoryId: string) {
+  async function downloadFixturePdf(tournamentId: string, categoryId: string, stageId?: string) {
     try {
-      const blob: any = await $api(`/matches/fixture/pdf?tournamentId=${tournamentId}&categoryId=${categoryId}`, { responseType: 'blob' })
+      const urlParam = stageId ? `&stageId=${stageId}` : '';
+      const blob: any = await $api(`/matches/fixture/pdf?tournamentId=${tournamentId}&categoryId=${categoryId}${urlParam}`, { responseType: 'blob' })
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url

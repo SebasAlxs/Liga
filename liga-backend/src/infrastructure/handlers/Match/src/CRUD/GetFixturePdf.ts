@@ -12,6 +12,7 @@ export const handler = async (req: Request, res: Response) => {
     try {
         const tournamentId = req.query.tournamentId as string;
         const categoryId = req.query.categoryId as string;
+        const stageId = req.query.stageId as string | undefined;
 
         const useCase = new GetFixturePdfDataUseCase(
             new PrismaMatchRepository(),
@@ -20,7 +21,7 @@ export const handler = async (req: Request, res: Response) => {
             new PrismaCategoryRepository()
         );
 
-        const fixtureData = await useCase.execute(tournamentId, categoryId);
+        const fixtureData = await useCase.execute(tournamentId, categoryId, stageId);
         const html = renderFixtureHtml(fixtureData);
         const pdf = await new PdfGeneratorService().generateFromHtml(html);
 

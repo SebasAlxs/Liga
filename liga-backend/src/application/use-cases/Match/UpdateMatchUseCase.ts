@@ -25,6 +25,7 @@ export class UpdateMatchUseCase {
         if (request.tournamentId) existingMatch.tournamentId = request.tournamentId;
         if (request.categoryId) existingMatch.categoryId = request.categoryId;
         if (request.status) existingMatch.status = request.status;
+        if (request.stageId) existingMatch.stageId = request.stageId;
         
         if (request.firstHalfStartedAt !== undefined) existingMatch.firstHalfStartedAt = request.firstHalfStartedAt ? new Date(request.firstHalfStartedAt) : null;
         if (request.firstHalfEndedAt !== undefined) existingMatch.firstHalfEndedAt = request.firstHalfEndedAt ? new Date(request.firstHalfEndedAt) : null;
@@ -74,7 +75,9 @@ export class UpdateMatchUseCase {
             primaryReferee: updated.primaryReferee,
             assistant1: updated.assistant1,
             assistant2: updated.assistant2,
-            fourthReferee: updated.fourthReferee
+            fourthReferee: updated.fourthReferee,
+            stageId: updated.stageId,
+            stage: updated.stage
         };
     }
 }

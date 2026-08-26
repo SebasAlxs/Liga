@@ -13,6 +13,7 @@ export interface CreateMatchRequest {
     assistant1Id?: string | null;
     assistant2Id?: string | null;
     fourthRefereeId?: string | null;
+    stageId?: string | null;
 }
 
 export interface UpdateMatchRequest {
@@ -31,6 +32,7 @@ export interface UpdateMatchRequest {
     assistant1Id?: string | null;
     assistant2Id?: string | null;
     fourthRefereeId?: string | null;
+    stageId?: string | null;
 }
 
 export interface MatchResponse {
@@ -57,4 +59,7 @@ export interface MatchResponse {
     assistant1?: any;
     assistant2?: any;
     fourthReferee?: any;
+    stageId?: string | null;
+    stage?: any;
 }
+// trigger recompile

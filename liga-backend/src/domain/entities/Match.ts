@@ -30,7 +30,8 @@ export class Match {
         public createdAt?: Date,
         public updatedAt?: Date,
         public round?: number | null,
-        public stageId?: string | null) {
+        public stageId?: string | null,
+        public stage?: any) {
         this.validate();
     }
 

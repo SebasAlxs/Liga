@@ -31,7 +31,9 @@ export class GetAllMatchesUseCase {
                 primaryReferee: m.primaryReferee,
                 assistant1: m.assistant1,
                 assistant2: m.assistant2,
-                fourthReferee: m.fourthReferee
+                fourthReferee: m.fourthReferee,
+                stageId: m.stageId,
+                stage: m.stage
             };
         });
         return { items, total };

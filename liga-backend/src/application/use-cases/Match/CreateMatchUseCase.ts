@@ -20,7 +20,9 @@ export class CreateMatchUseCase {
             request.refereeId,
             request.assistant1Id,
             request.assistant2Id,
-            request.fourthRefereeId
+            request.fourthRefereeId,
+            undefined, // round
+            request.stageId // stageId
         );
 
         const created = await this.matchRepository.create(match);
@@ -45,7 +47,9 @@ export class CreateMatchUseCase {
             primaryReferee: created.primaryReferee,
             assistant1: created.assistant1,
             assistant2: created.assistant2,
-            fourthReferee: created.fourthReferee
+            fourthReferee: created.fourthReferee,
+            stageId: created.stageId,
+            stage: created.stage
         };
     }
 }

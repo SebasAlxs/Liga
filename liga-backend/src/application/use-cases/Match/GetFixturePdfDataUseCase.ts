@@ -13,11 +13,11 @@ export class GetFixturePdfDataUseCase {
         private categoryRepository: CategoryRepository
     ) { }
 
-    async execute(tournamentId: string, categoryId: string): Promise<FixturePdfResponse> {
+    async execute(tournamentId: string, categoryId: string, stageId?: string): Promise<FixturePdfResponse> {
         const [tournament, category, matches, { items: teams }] = await Promise.all([
             this.tournamentRepository.findById(tournamentId),
             this.categoryRepository.findById(categoryId),
-            this.matchRepository.findByTournamentAndCategory(tournamentId, categoryId),
+            this.matchRepository.findByTournamentAndCategory(tournamentId, categoryId, stageId),
             this.teamRepository.findAll(undefined, { tournamentId, categoryId })
         ]);
 

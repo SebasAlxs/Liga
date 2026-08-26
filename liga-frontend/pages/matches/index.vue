@@ -69,11 +69,14 @@
             <div class="p-3 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 relative">
               <!-- Top Row (Mobile) / Left Side (Desktop) -->
               <div class="flex items-center justify-between sm:justify-start w-full sm:w-auto">
-                <!-- Status Badge -->
-                <div class="flex-shrink-0 w-auto sm:w-24">
+                <!-- Status & Stage Badge -->
+                <div class="flex-shrink-0 flex items-center gap-2 w-auto sm:w-24">
                   <span :class="`inline-flex items-center gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold border ${statusColor(match.status).badge}`">
                     <span :class="`w-1.5 h-1.5 rounded-full ${statusColor(match.status).dot} ${match.status === 'IN_PROGRESS' ? 'animate-pulse' : ''}`"></span>
                     {{ statusLabel(match.status) }}
+                  </span>
+                  <span v-if="match.stage" class="sm:hidden text-[10px] uppercase font-bold tracking-widest px-2 py-1 bg-surface-hover border border-border/50 text-content rounded-lg">
+                    {{ match.stage.name }}
                   </span>
                 </div>
                 <!-- Actions on mobile -->
@@ -128,6 +131,9 @@
 
               <!-- Desktop Torneo + Acciones -->
               <div class="flex-shrink-0 hidden sm:flex items-center gap-2 ml-2">
+                <span v-if="match.stage" class="text-[10px] uppercase font-bold tracking-widest px-2 py-1 bg-surface-hover border border-border/50 text-content rounded-lg">
+                  {{ match.stage.name }}
+                </span>
                 <span class="text-xs text-content-muted hidden xl:block truncate max-w-[120px]">{{ getTournamentName(match.tournamentId) }}</span>
                 <div v-if="authStore.isLoggedIn" class="flex gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
                   <button @click="openScoreModal(match)" class="p-2 hover:bg-emerald-100 rounded-lg text-content-muted hover:text-primary transition-colors" title="Actualizar marcador">
